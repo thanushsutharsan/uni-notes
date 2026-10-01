@@ -87,3 +87,145 @@ The personal revision system extends the project beyond being only a digital sho
 Ownership checks are used when accessing, editing or deleting these revision notes so that one user cannot simply access another user's private notes through the normal application routes.
 
 The project therefore demonstrates how a database-driven Django application can be applied to a genuine educational use case. It combines user authentication, database relationships, searching and filtering, CRUD functionality, file handling, payment processing and personalised content to produce an application that could be developed further into a larger university revision service.
+
+
+# User Experience Design (UX)
+
+The User Experience (UX) of **UniNotes** has been designed around making university revision resources easy to find, purchase, access and organise. The application aims to reduce unnecessary steps for users and provide a clear journey from first visiting the website to accessing purchased study materials or managing personal revision notes.
+
+The design focuses on simple navigation, clear page layouts, accessible forms, responsive behaviour and personalised functionality for registered users. Important actions such as browsing notes, searching for resources, registering, logging in, accessing purchases and creating revision notes are available through clearly identified areas of the website.
+
+The UX has also been designed around different user states. Visitors who are not logged in can still browse available study notes and explore subjects, while registered users gain access to personalised features including **Revision** and **My Purchases**. This allows users to understand the value of the website before creating an account while protecting account-specific content.
+
+
+## UX Goals
+
+The main UX goal of UniNotes is to create a clear and efficient revision platform that university students can use without needing extensive instructions.
+
+The key UX goals are:
+
+- **Simple navigation** – users should be able to move between the Home, Browse, Revision and My Purchases areas without becoming confused about where features are located.
+- **Efficient resource discovery** – users should be able to search for study notes using keywords and filter available resources by subject rather than manually looking through every note.
+- **Clear information hierarchy** – headings, sections, cards and page titles are used to make content easier to scan and understand.
+- **Minimal steps to important actions** – important functions such as searching, viewing a note, purchasing a note and accessing purchased resources should require as few unnecessary steps as possible.
+- **Personalised user experience** – authenticated users should have clear access to their own purchases and private revision notes.
+- **Consistent interface design** – buttons, forms, navigation elements and content cards should behave and appear consistently throughout the application.
+- **Responsive usability** – the website should remain usable across different screen sizes, with navigation that can adapt to smaller displays.
+- **Accessible interaction** – form fields use labels, images include alternative text where appropriate and the website provides features such as a skip-to-content link and accessible navigation labels.
+- **Clear user feedback** – users should receive confirmation when important actions such as creating an account, saving a revision note, updating a note or deleting a note have been completed.
+- **Useful empty states** – when no content matches a search or no content is available, the interface should explain this clearly rather than leaving the user with an unexplained blank area.
+
+These goals support the overall purpose of UniNotes by reducing friction and allowing students to spend more time using revision resources rather than learning how to use the website.
+
+
+## Target Audience
+
+The target audience was considered when deciding which features should be prioritised within UniNotes. The application is primarily aimed at university students who need a convenient way to locate revision material and organise their studies.
+
+The design therefore focuses on speed, simplicity and organisation rather than providing unnecessary features that could make the application more complicated.
+
+
+### Primary Users
+
+The primary users of UniNotes are **university students looking for revision and study resources**.
+
+These users may:
+
+- Be studying one or more university subjects
+- Need additional resources to support their revision
+- Want to search for notes relating to a particular subject or topic
+- Prefer having digital study resources available through one account
+- Want to keep track of study materials they have already purchased
+- Create their own revision notes while studying
+- Update revision material as their understanding develops
+- Upload supporting files alongside their personal revision notes
+- Access study resources from different devices
+
+For these users, the most important parts of the user experience are being able to quickly locate relevant material, understand what a study note contains and access purchased resources without unnecessary difficulty.
+
+The keyword search and subject filter support this audience by reducing the amount of irrelevant content users need to look through. The **My Purchases** area gives returning users a clear location for accessing resources they have already obtained.
+
+The private revision-note functionality also supports students who want to use UniNotes as more than a marketplace. They can create, view, update and delete their own revision notes, giving them a personalised study area within the same application.
+
+
+### Secondary Users
+
+The secondary users are **students who are exploring the platform before deciding whether to register or purchase a resource**.
+
+These users may arrive at UniNotes looking for a particular study subject without already having an account.
+
+For this reason, important parts of the website such as the homepage, subject selection, study-note library, search functionality and individual study-note information can be explored before the user accesses account-specific functionality.
+
+This allows potential users to understand what UniNotes offers before being required to create an account.
+
+Unauthenticated users are also clearly shown that the Revision area is available to registered users. This provides information about additional functionality without allowing private account features to be accessed by users who are not logged in.
+
+The experience is therefore designed to provide useful information to new visitors while giving registered users additional personalised functionality.
+
+
+## User Needs
+
+The needs of the target users influenced the functionality and structure of UniNotes.
+
+A major user need is the ability to **find relevant study resources quickly**. University students may be looking for material relating to a specific course or topic and should not need to search manually through unrelated notes. UniNotes addresses this by providing keyword searching and subject-based filtering.
+
+Users also need enough information to decide whether a resource is relevant before purchasing it. Individual study-note pages therefore provide information about the selected resource, including its title, subject, description and price.
+
+Registered users need a reliable way to keep track of resources they have already purchased. The **My Purchases** section provides a personalised area where previous purchases are displayed and purchased resources can be accessed again.
+
+Another important user need is organisation. Students often create their own revision material in addition to using external resources. UniNotes therefore allows authenticated users to maintain their own private revision notes. Users can:
+
+- Create new revision notes
+- View their saved revision notes
+- Edit existing revision notes
+- Delete revision notes they no longer require
+- Organise notes using a subject
+- Add written revision content
+- Optionally attach supporting files
+
+Privacy is also an important user need. Personal revision notes are associated with the account that created them. When revision notes are viewed, edited or deleted, the application checks that the authenticated user owns the requested note.
+
+Users also need reassurance that their actions have been completed successfully. UniNotes provides feedback messages following important actions such as registration and revision-note management.
+
+Overall, the main user needs identified for the project are:
+
+- Quick access to relevant revision resources
+- Clear navigation
+- Search and filtering functionality
+- Clear information before making a purchase
+- Secure online payment
+- Access to previously purchased resources
+- A personalised revision area
+- Control over personal revision content
+- Clear feedback after completing actions
+- An interface that remains usable on different screen sizes
+- Accessible and understandable forms and navigation
+
+
+## Business Goals
+
+Although UniNotes is primarily designed around the needs of students, the application also has business goals that support its potential use as a real digital study-resource platform.
+
+One business goal is to provide a structured way of **selling digital study resources online**. Study notes include pricing information and can be purchased using Stripe Checkout. This creates a realistic commercial process where users can discover a resource, view its details, complete a payment and then access the purchased material through their account.
+
+Another goal is to encourage users to create accounts and return to the platform. UniNotes supports this by providing functionality that continues to provide value after the initial purchase. Users can revisit their purchased resources through **My Purchases** and maintain their own revision material through the Revision area.
+
+Providing useful account functionality can encourage repeat use because the platform becomes a place where users can both access external study material and manage their own revision.
+
+
+The key business goals are:
+
+- Provide a platform for distributing paid digital revision resources
+- Make it easy for users to discover relevant resources
+- Reduce barriers between discovering a note and purchasing it
+- Provide secure payment processing through Stripe Checkout
+- Encourage account registration by providing personalised functionality
+- Encourage users to return through persistent access to previous purchases
+- Increase the usefulness of the platform through personal revision-note functionality
+- Build user trust through clear navigation, secure account-based access and predictable interactions
+- Maintain an organised structure that can support additional subjects and study resources
+- Create a foundation that could be developed into a larger educational resource platform
+
+The business goals and user needs work together rather than being treated separately. For example, effective searching benefits students by helping them locate relevant material while also supporting the business goal of making resources easier to discover. Similarly, the My Purchases area benefits users by keeping their resources organised while encouraging them to return to the platform.
+
+This balance between **user requirements and business objectives** is an important part of the UX strategy for UniNotes and ensures that features have a clear purpose within the overall application.
