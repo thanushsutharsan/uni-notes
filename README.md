@@ -118,7 +118,7 @@ The project therefore demonstrates how a database-driven Django application can 
 | Development Tool | **Django Migrations** | Used to keep the database structure synchronised with changes made to the Django models using commands such as `python manage.py migrate`. |
 | Deployment Tool | **Heroku** | The deployment platform prepared for the project. Production configuration can be supplied using environment variables such as `DATABASE_URL` and `ALLOWED_HOSTS`. |
 
-
+# Planning Phase
 # User Experience Design (UX)
 
 The User Experience (UX) of **UniNotes** has been designed around making university revision resources easy to find, purchase, access and organise. The application aims to reduce unnecessary steps for users and provide a clear journey from first visiting the website to accessing purchased study materials or managing personal revision notes.
@@ -853,3 +853,205 @@ These sources were used to identify common approaches within existing educationa
 Including the original research sources also provides evidence of where the findings came from and allows the research to be independently checked.
 
 This research-driven approach helps demonstrate that the features within UniNotes were selected based on **target-user requirements, competitor analysis and evidence from existing educational platforms**.
+
+## I. Strategy
+
+The strategy for **UniNotes** focuses on creating a clear and useful university revision platform that combines access to digital study resources with personal revision management.
+
+The project strategy was developed from the identified user needs, business goals, user stories and research findings. The aim is to ensure that each feature included within the application has a clear purpose and solves a genuine problem for the target audience.
+
+The strategy prioritises the most important functionality first, including resource discovery, user authentication, purchasing, access to purchased material and personal revision-note management.
+
+Rather than trying to include too many features in the first version of the application, development focuses on a realistic **Minimum Viable Product (MVP)** that provides the core functionality required for UniNotes to operate successfully.
+
+
+### Project Goals
+
+The main goal of UniNotes is to create a reliable and easy-to-use platform where university students can find revision resources, purchase study notes and organise their own revision material.
+
+The project goals are:
+
+| Project Goal | Purpose |
+|---|---|
+| **Provide easy access to study resources** | Allow students to browse a centralised collection of university revision notes without needing to search across several different websites or folders. |
+| **Improve resource discovery** | Use keyword searching and subject filtering to help students find relevant revision material more efficiently. |
+| **Provide clear resource information** | Give users enough information about each study note before they decide whether it is relevant or worth purchasing. |
+| **Support secure online purchasing** | Allow authenticated users to purchase digital study resources using Stripe Checkout. |
+| **Provide persistent access to purchases** | Allow users to return to resources they have already purchased through My Purchases. |
+| **Support personal revision** | Give registered users a private area where they can create and manage their own revision notes. |
+| **Provide meaningful CRUD functionality** | Allow users to create, read, update and delete their personal revision notes. |
+| **Protect user-specific content** | Ensure personal revision notes and purchases remain associated with the correct authenticated user. |
+| **Provide responsive usability** | Make the application usable across different screen sizes and devices. |
+| **Provide clear user feedback** | Inform users when important actions such as registration, saving, editing or deleting content have been completed. |
+| **Maintain a scalable structure** | Organise study notes by subject so additional resources can be introduced without changing the overall structure of the website. |
+| **Create a realistic full-stack application** | Combine a database, authentication, CRUD functionality, external payment processing, file handling and responsive front-end design within one project. |
+
+These goals support both the needs of the users and the potential business purpose of UniNotes as a digital study-resource platform.
+
+
+### User Problems and Solutions
+
+The development strategy is based around solving specific problems experienced by the target users.
+
+| User Problem | UniNotes Solution |
+|---|---|
+| Students may store revision resources across several different locations | UniNotes provides a centralised platform for accessing study resources and personal revision material. |
+| Students may find it difficult to locate resources relevant to a specific topic | Keyword searching allows users to search the study-note library. |
+| Users may only want resources relating to a particular subject | Subject filtering allows the available notes to be narrowed down. |
+| Users need to understand a resource before purchasing it | Individual study-note pages provide details including the title, subject, description and price. |
+| New visitors may not want to register immediately | Visitors can explore public areas of the platform before using account-specific features. |
+| Students need a secure way of purchasing digital resources | Stripe Checkout is used to handle the payment process. |
+| Students may need purchased resources more than once | Completed purchases are stored against the user's account and made available through My Purchases. |
+| Users may accidentally attempt to purchase the same resource again | The application checks existing purchase records within the normal purchase journey. |
+| Students create their own revision material as well as using prepared resources | Registered users are provided with a private Revision area. |
+| Revision notes may need to be changed as the student learns more | Users can edit previously created revision notes. |
+| Old revision material may no longer be useful | Users can delete their own revision notes. |
+| Students may need to store supporting documents with their notes | Revision notes support optional file attachments. |
+| Personal revision material should not be accessible to other users | Authentication and ownership checks are used when accessing account-specific revision-note functionality. |
+| Users may not know whether an action has completed successfully | Feedback messages are provided following important actions. |
+| Students may access the platform from different screen sizes | Responsive layouts and navigation are used within the interface. |
+
+By linking development decisions directly to user problems, the features within UniNotes have a clear reason for being included rather than being added only to increase the size of the project.
+
+
+### Minimum Viable Product (MVP)
+
+The **Minimum Viable Product (MVP)** represents the minimum set of features required for UniNotes to fulfil its main purpose.
+
+The MVP focuses on the complete user journey rather than including advanced functionality that is not essential to the first working version of the platform.
+
+The core MVP requirements are:
+
+| MVP Requirement | Reason Required |
+|---|---|
+| **Homepage and navigation** | Users need a clear entry point and a way of moving between the main areas of the application. |
+| **User registration** | Users need accounts before personalised features can be associated with them. |
+| **User login and logout** | Users need a secure way to access and leave their personal account. |
+| **Study-note library** | The application requires a central area where available digital resources can be browsed. |
+| **Subject organisation** | Study resources need to be grouped logically so users can locate relevant content. |
+| **Keyword search** | Users need a faster method of finding relevant study notes. |
+| **Subject filtering** | Users need to narrow the available study notes by subject. |
+| **Individual study-note pages** | Users need information about a resource before purchasing it. |
+| **Stripe Checkout integration** | The application needs a realistic way for registered users to purchase digital study resources. |
+| **Purchase recording** | Successful purchases need to be stored against the correct authenticated user. |
+| **My Purchases** | Users need a way to return to resources they have already purchased. |
+| **Purchased-file access** | Users need to be able to access and download resources they own. |
+| **Personal revision area** | Registered users need a location for managing their own revision material. |
+| **Create revision note** | Users need to add new revision material. |
+| **Read revision note** | Users need to view saved revision content. |
+| **Update revision note** | Users need to modify revision material as their knowledge develops. |
+| **Delete revision note** | Users need control over removing content they no longer require. |
+| **Optional revision attachment** | Users may need to keep supporting files alongside their revision notes. |
+| **Authentication and ownership protection** | Private and account-specific functionality needs to remain associated with the correct user. |
+| **Responsive design** | The application needs to remain usable across different screen sizes. |
+| **User feedback messages** | Users need confirmation after completing important actions. |
+
+The MVP therefore provides a complete basic journey where a user can:
+
+1. Visit UniNotes.
+2. Browse available study notes.
+3. Search or filter resources.
+4. View the details of a study note.
+5. Register or log into an account.
+6. Purchase a resource through Stripe Checkout.
+7. Access the purchased resource through My Purchases.
+8. Create their own personal revision notes.
+9. Edit or delete their personal revision material.
+10. Return later and continue using their saved content.
+
+This ensures that the first working version of UniNotes already provides meaningful functionality before additional features are considered.
+
+
+### Features
+
+The features implemented within UniNotes support the goals of the MVP and the requirements identified during UX planning and research.
+
+| Feature | Description | User Benefit |
+|---|---|---|
+| **User Registration** | Allows new users to create an account. | Provides access to personalised features. |
+| **Login and Logout** | Allows registered users to securely access and leave their account. | Protects user-specific functionality. |
+| **Study-Note Library** | Displays the available revision resources. | Gives students a central location for finding study material. |
+| **Keyword Search** | Allows users to search for study notes using text. | Reduces the time required to find relevant resources. |
+| **Subject Filtering** | Allows the study-note library to be filtered by subject. | Helps users focus on resources relevant to their studies. |
+| **Study-Note Detail Pages** | Displays information about an individual study note. | Helps users decide whether the resource is suitable before purchasing. |
+| **Stripe Checkout** | Provides the hosted payment process for study-note purchases. | Allows users to purchase resources without UniNotes directly handling payment-card information. |
+| **Purchase Verification** | Checks completed Stripe Checkout information before storing the purchase. | Helps ensure purchases are only recorded after successful payment. |
+| **My Purchases** | Displays resources previously purchased by the authenticated user. | Gives users a convenient location for returning to purchased material. |
+| **Purchased Resource Download** | Allows eligible users to access the file associated with a completed purchase. | Provides continued access to purchased digital resources. |
+| **Personal Revision Area** | Provides authenticated users with their own revision-note section. | Gives students a private space for managing revision material. |
+| **Create Revision Note** | Allows users to create a new revision note. | Enables users to add their own study content. |
+| **View Revision Note** | Allows users to access previously created revision notes. | Makes personal revision material reusable. |
+| **Edit Revision Note** | Allows users to update revision-note content. | Supports ongoing learning and corrections. |
+| **Delete Revision Note** | Allows users to remove revision notes they no longer need. | Helps keep the revision area organised. |
+| **Revision Attachments** | Allows an optional supporting file to be added to a revision note. | Helps users keep related revision resources together. |
+| **Ownership Checks** | Ensures users can only modify personal revision notes belonging to their own account. | Protects private user content. |
+| **Responsive Navigation** | Adjusts navigation behaviour for smaller screens. | Improves usability across different devices. |
+| **Accessibility Features** | Includes features such as labels, alternative text, skip links and accessible navigation attributes. | Makes the interface easier to understand and interact with. |
+| **Feedback Messages** | Provides confirmation following important actions. | Reassures users that their action has been completed. |
+| **Empty-State Messages** | Explains when no content or matching search result is available. | Prevents users from being confused by an empty page. |
+
+
+### Future Features
+
+The first version of UniNotes focuses on the functionality required for the MVP. Additional features could be introduced in future development if the platform were expanded.
+
+Future features would only be added where they provide clear value to users and do not unnecessarily complicate the existing experience.
+
+| Future Feature | Description | Potential Benefit |
+|---|---|---|
+| **Ratings and Reviews** | Allow users who have purchased a study note to leave a rating or written review. | Could help other students decide whether a resource is useful. |
+| **Wish List / Saved Resources** | Allow users to save study notes they are interested in purchasing later. | Would make it easier for users to return to resources they have discovered. |
+| **Advanced Search** | Add additional filters such as price range, topic or recently added resources. | Would improve resource discovery if the study-note library becomes larger. |
+| **Recently Viewed Resources** | Show study notes that a logged-in user has recently viewed. | Would make it easier to return to previously explored resources. |
+| **Revision Categories or Tags** | Allow users to add additional categories or tags to personal revision notes. | Would make larger collections of personal notes easier to organise. |
+| **Revision Search** | Allow users to search within their own personal revision notes. | Would help users find specific revision content as their collection grows. |
+| **Favourites** | Allow users to mark important revision notes or purchased resources as favourites. | Would provide faster access to frequently used material. |
+| **Study Progress Tracking** | Allow users to mark topics or revision notes as complete or still requiring revision. | Could help students manage their revision progress. |
+| **Resource Preview** | Provide a limited preview of a study resource before purchase where appropriate. | Could give users additional information before deciding to purchase. |
+| **Email Purchase Confirmation** | Send users an email confirming a successful purchase. | Would provide an additional record of completed transactions. |
+| **Password Reset by Email** | Allow users to securely recover access to their account through an email-based password reset. | Would improve account recovery and usability. |
+| **User Profile Settings** | Allow users to manage additional account preferences. | Would provide greater personalisation. |
+| **Improved Resource Recommendations** | Suggest resources based on subjects previously viewed or purchased. | Could help users discover relevant study material more quickly. |
+| **Additional Accessibility Improvements** | Continue testing and improving keyboard navigation, contrast and screen-reader support. | Would make UniNotes more accessible to a wider range of users. |
+| **Expanded Automated Testing** | Add further automated tests covering edge cases and additional user journeys. | Would help improve reliability as the application grows. |
+
+These features are considered **future developments rather than MVP requirements** because the existing application can fulfil its main purpose without them.
+
+Prioritising the MVP first helps keep development manageable and ensures that the most important user journeys are completed and tested before more advanced functionality is introduced.
+
+
+### User Problems and Solutions
+
+The development of **UniNotes** is based on solving clear problems faced by the target audience. Each feature within the application has been designed to address a specific user need identified during the UX and research stages.
+
+The table below shows the main problems identified and how UniNotes provides a practical solution.
+
+| User Problem | UniNotes Solution | Benefit to the User |
+|---|---|---|
+| Students may store revision resources across different websites, folders and devices | UniNotes provides one central platform for accessing study resources and personal revision notes | Makes revision material easier to organise and reduces the need to search across multiple locations |
+| Students may struggle to find resources related to a specific topic | Keyword search allows users to search the study-note library | Helps users locate relevant resources more quickly |
+| Users may only want revision material for a particular subject | Subject filtering allows users to narrow the available resources | Reduces irrelevant results and improves resource discovery |
+| A large study-note library could become difficult to navigate | Resources are organised by subject and displayed in a structured format | Makes the library easier to browse as more resources are added |
+| Students need to understand a resource before purchasing it | Individual study-note pages display information such as the title, subject, description and price | Allows users to make a more informed decision before purchasing |
+| First-time visitors may not want to create an account immediately | Visitors can browse study resources and explore the platform before using account-specific features | Reduces barriers for new users and allows them to understand the value of the platform first |
+| Students need a secure way to purchase digital revision resources | Stripe Checkout is used to handle the payment process | Provides a recognised external payment process without UniNotes directly handling card details |
+| Users may accidentally attempt to purchase the same resource again | Existing purchases are checked during the normal purchasing process | Reduces unnecessary repeat purchases |
+| Students need continued access to resources after buying them | Purchased resources are stored against the user's account and displayed in **My Purchases** | Allows users to return to purchased material during future revision sessions |
+| Students may forget where they downloaded purchased resources | My Purchases provides a central location for previously purchased study notes | Keeps purchased materials organised and easy to access |
+| Students create their own revision material as well as using prepared resources | Registered users have access to a private Revision area | Allows students to manage personal study material within the same application |
+| Students need to create new revision content | Users can create their own revision notes | Allows revision material to be tailored to the student's own studies |
+| Revision material may need to change as the student learns more | Existing revision notes can be edited | Allows users to correct, expand or update their notes without creating a new note |
+| Old revision material may become unnecessary | Users can delete revision notes they no longer require | Helps keep the personal revision area organised |
+| Students may have supporting documents linked to their revision | Revision notes support optional file attachments | Allows related revision materials to be stored together |
+| Personal revision notes should remain private | Revision notes are associated with the authenticated user and ownership checks are applied | Helps prevent users from editing or deleting another user's private content |
+| Users need to know whether actions have been completed successfully | Feedback messages are displayed after important actions | Gives users confirmation and reduces uncertainty |
+| Users may become confused when a search returns no results | Clear empty-state messages explain when no matching content is available | Prevents users from assuming the website has failed |
+| Students may use UniNotes on different screen sizes | Responsive layouts and navigation are used throughout the interface | Improves usability across desktop, tablet and mobile-sized screens |
+| First-time users may not understand how to move around the website | Clear and consistent navigation is used across the main pages | Makes the application easier to learn and reduces confusion |
+| Users need personalised areas to be clearly separated from public content | Features such as **Revision** and **My Purchases** are linked to authenticated users | Makes it clear which features belong to the user's account |
+| Users may try to access protected features without being logged in | Authentication is required for account-specific functionality | Protects private data and ensures personalised actions are linked to the correct account |
+
+These solutions demonstrate that the functionality within UniNotes has been developed around identified user needs rather than being added without purpose.
+
+By connecting each problem to a specific solution, the project can demonstrate a clear relationship between **research, user requirements, UX planning and technical implementation**.
+
