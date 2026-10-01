@@ -2660,3 +2660,887 @@ After checkout, UniNotes retrieves the Checkout Session directly from Stripe and
 Only after these checks can the appropriate purchase record be created.
 
 This keeps important payment verification within the Django back end and reduces reliance on client-side information.
+
+
+
+# Purpose
+
+The purpose of **UniNotes** is to provide university students with a simple and organised platform for accessing revision resources and managing their own study material. The application brings together two main areas of revision in one place: students can browse and purchase prepared study notes, while also creating and managing their own private revision notes through their account.
+
+Users can search the available study-note library using keywords or filter resources by subject, allowing them to find relevant material more efficiently. Each study note has its own page containing information such as the subject, title, description and price. Registered users can purchase notes through Stripe Checkout, and completed purchases are stored within their account so that the resources can be accessed and downloaded again from the **My Purchases** section.
+
+UniNotes also provides a personal revision area. Logged-in users can create revision notes containing a title, subject and written content, with the option to upload a supporting file. These notes can later be viewed, edited or deleted. This gives students a private space to organise their own revision alongside the resources they have purchased.
+
+Overall, the purpose of the project is to create a useful study platform that makes revision resources easier to find, access and organise.
+
+
+## IV. Skeleton
+
+The **Skeleton Plane** focuses on how the interface of **UniNotes** is arranged and how users interact with the functionality defined during the Strategy, Scope and Structure stages.
+
+At this stage, the location of navigation, forms, buttons, study-note cards, revision content and purchasing controls was considered before final styling decisions were applied.
+
+The main aim was to create an interface that is:
+
+- Easy to understand
+- Consistent between pages
+- Responsive across different screen sizes
+- Accessible using keyboard and assistive technologies
+- Clear about which actions are available
+- Suitable for both first-time and returning users
+- Structured around the main user journeys identified during UX planning
+
+The skeleton design considers three main screen sizes:
+
+- Mobile
+- Tablet
+- Desktop
+
+The same core functionality remains available across these screen sizes, but the layout changes to use the available space more effectively.
+
+
+### Wireframes
+
+Wireframes were created before finalising the visual design of UniNotes.
+
+The wireframes provide a low-fidelity representation of:
+
+- Navigation
+- Page structure
+- Search controls
+- Study-note cards
+- Study-note details
+- Purchase information
+- Personal revision notes
+- Forms
+- Buttons
+- Content hierarchy
+- Responsive behaviour
+
+Wireframes were produced for the main pages at mobile, tablet and desktop sizes.
+
+The pages represented include:
+
+1. Home Page
+2. Browse Notes
+3. Study Note Detail
+4. My Purchases
+5. Revision Notes
+6. Add / Edit Revision Note
+
+Creating wireframes at multiple sizes helped identify how the same functionality could be reorganised without changing the purpose of the page.
+
+
+#### Mobile Wireframes
+
+The mobile wireframes use a primarily single-column structure.
+
+Navigation is simplified into a compact menu, while study-note cards and account content are stacked vertically to prevent horizontal scrolling.
+
+![UniNotes Mobile Wireframes](assets/wireframes/mobile-wireframes.png)
+
+The mobile designs prioritise:
+
+- A compact navigation menu
+- Full-width search controls
+- Stacked study-note cards
+- Large touch-friendly buttons
+- Clearly separated content sections
+- Single-column forms
+- Simple purchase and download actions
+- Easy access to revision functionality
+
+On smaller screens, content is displayed vertically so that users can scroll naturally through the application without losing important functionality.
+
+
+#### Tablet Wireframes
+
+The tablet wireframes use the additional horizontal space to introduce multi-column layouts where appropriate.
+
+![UniNotes Tablet Wireframes](assets/wireframes/tablet-wireframes.png)
+
+The tablet designs include:
+
+- Horizontal navigation
+- Wider search and filter controls
+- Two or three-column study-note layouts where space allows
+- Wider form fields
+- Side-by-side content within study-note details
+- More compact purchase lists
+- Revision cards displayed in a grid
+
+The tablet layout acts as a transition between the single-column mobile design and the wider desktop layout.
+
+
+#### Desktop Wireframes
+
+The desktop wireframes make greater use of horizontal space while maintaining the same content hierarchy used on smaller devices.
+
+![UniNotes Desktop Wireframes](assets/wireframes/desktop-wireframes.png)
+
+The desktop designs include:
+
+- Full horizontal navigation
+- Larger hero sections
+- Search and filtering controls displayed together
+- Multi-column study-note cards
+- Wider study-note detail layouts
+- Horizontal purchase records
+- Wider revision management areas
+- Larger forms with clearer spacing
+
+The desktop interface avoids unnecessarily stretching individual pieces of content across the entire screen. Instead, related information is grouped into clearly defined sections.
+
+
+### Navigation Design
+
+Navigation was designed to remain simple because UniNotes only requires a small number of primary destinations.
+
+The main navigation focuses on:
+
+- Home
+- Browse
+- Revision
+- My Purchases
+- Register
+- Login
+- Logout
+
+The options displayed depend on the user's authentication state.
+
+| User State | Navigation Options |
+|---|---|
+| **Anonymous User** | Home, Browse, Register, Login |
+| **Authenticated User** | Home, Browse, Revision, My Purchases, Logout |
+
+This prevents anonymous users from being presented with account-specific functionality that they cannot use.
+
+On desktop and larger tablet screens, navigation links can be displayed horizontally.
+
+On smaller screens, the navigation collapses into a menu to prevent links from becoming crowded.
+
+The responsive menu can be:
+
+- Opened using the menu button
+- Closed using the menu button
+- Closed after selecting a navigation link
+- Closed by clicking outside the menu
+- Closed using the `Escape` key
+
+The menu state is also communicated through accessibility attributes such as `aria-expanded`.
+
+
+### Page Layout
+
+The page layout uses a consistent structure throughout UniNotes.
+
+A typical page follows the structure:
+
+```text
+Header
+↓
+Navigation
+↓
+Page Heading / Hero
+↓
+Primary Page Content
+↓
+Secondary Content / Actions
+↓
+Footer
+```
+
+Consistency helps users understand where information and controls are likely to appear when moving between pages.
+
+
+#### Home Page Layout
+
+The homepage introduces UniNotes and provides fast access to the main study-resource functionality.
+
+The planned hierarchy is:
+
+```text
+Navigation
+↓
+Hero / Introduction
+↓
+Search
+↓
+Subject Selection
+↓
+Featured Study Notes
+↓
+Revision Promotion
+↓
+Footer
+```
+
+
+#### Browse Page Layout
+
+The Browse page focuses on resource discovery.
+
+```text
+Navigation
+↓
+Page Heading
+↓
+Keyword Search
+↓
+Subject Filter
+↓
+Study Note Results
+↓
+Footer
+```
+
+Study-note cards are displayed according to the available screen width.
+
+
+#### Study Note Detail Layout
+
+The Study Note Detail page focuses the user's attention on one resource.
+
+```text
+Navigation
+↓
+Study Note Information
+↓
+Subject
+↓
+Description
+↓
+Price
+↓
+Purchase Action
+↓
+Additional / Related Information
+↓
+Footer
+```
+
+
+#### My Purchases Layout
+
+The My Purchases page provides a simple account-specific list.
+
+```text
+Navigation
+↓
+My Purchases Heading
+↓
+Purchased Resource
+↓
+Purchased Resource
+↓
+Purchased Resource
+↓
+Download / Access Actions
+↓
+Footer
+```
+
+
+#### Revision Layout
+
+The Revision area gives users control over their personal notes.
+
+```text
+Navigation
+↓
+My Revision Notes
+↓
+Add Revision Note
+↓
+Revision Note List
+↓
+View / Edit / Delete Actions
+↓
+Footer
+```
+
+
+### Interface Design
+
+The interface was planned around simplicity and consistency.
+
+Common interface components include:
+
+| Component | Purpose |
+|---|---|
+| **Navigation Links** | Move between the main areas of UniNotes |
+| **Search Field** | Search available study notes |
+| **Subject Filter** | Narrow study resources by subject |
+| **Study-Note Cards** | Present resource information consistently |
+| **Buttons** | Clearly identify available actions |
+| **Forms** | Collect registration and revision-note information |
+| **Feedback Messages** | Confirm successful or unsuccessful actions |
+| **Empty States** | Explain when content is unavailable |
+| **Purchase Controls** | Begin Stripe Checkout |
+| **Download Actions** | Provide access to owned resources |
+
+Buttons should use clear action-based wording such as:
+
+- View Note
+- Buy Note
+- Add Revision Note
+- Save Note
+- Edit
+- Delete
+- Download
+- Login
+- Register
+
+This reduces ambiguity and makes the result of each action easier to predict.
+
+
+### Form Design
+
+Forms within UniNotes are kept simple and focused on the information required to complete the task.
+
+Forms are used for:
+
+- Registration
+- Login
+- Creating revision notes
+- Editing revision notes
+
+Form design principles include:
+
+- Visible labels
+- Logical field ordering
+- Adequate spacing
+- Clear validation feedback
+- Appropriate field types
+- Full-width fields on smaller screens
+- Clear submit buttons
+- Optional fields identified appropriately
+
+The revision-note form contains fields for:
+
+- Title
+- Subject
+- Content
+- Optional attachment
+
+A simplified layout is:
+
+```text
+Title
+[________________________]
+
+Subject
+[________________________]
+
+Content
+[                        ]
+[                        ]
+[                        ]
+
+Attachment
+[ Choose File ]
+
+[ Save Note ]
+```
+
+The form does not ask for information that is unnecessary for creating a revision note.
+
+
+### CRUD Interface Design
+
+The main CRUD interface within UniNotes is the personal Revision area.
+
+CRUD stands for:
+
+- Create
+- Read
+- Update
+- Delete
+
+Each action is presented through a clear user interface.
+
+
+#### Create
+
+Users can select an **Add Revision Note** action.
+
+```text
+Revision List
+↓
+Add Revision Note
+↓
+Revision Form
+↓
+Save
+↓
+Revision Note Created
+```
+
+The create form allows the user to enter revision content and optionally attach a file.
+
+
+#### Read
+
+Existing revision notes are displayed within the user's Revision area.
+
+The user can select a note to view its content.
+
+
+#### Update
+
+An Edit action allows the authenticated owner to open an existing revision note within the same form structure used for creation.
+
+Existing values are displayed so they can be modified rather than entered again.
+
+
+#### Delete
+
+A Delete action allows the owner to remove a revision note.
+
+Deletion is treated differently from ordinary navigation because it permanently removes stored content.
+
+A confirmation step is therefore used before the record is deleted.
+
+
+### Authentication Interface
+
+Authentication pages are designed to remain simple and focused.
+
+Account functionality is separated from the main study-resource interface so users understand when they are entering account information.
+
+
+#### Registration
+
+The registration interface allows a new user to create an account.
+
+The registration form should:
+
+- Clearly identify that a new account is being created
+- Display appropriate field labels
+- Explain validation errors
+- Use a clear registration button
+- Avoid collecting unnecessary personal information
+
+The registration journey is:
+
+```text
+Register
+↓
+Complete Form
+↓
+Validation
+↓
+Account Created
+↓
+Feedback / Next Action
+```
+
+
+#### Login
+
+The login interface allows existing users to authenticate.
+
+The page contains only the information necessary to complete login.
+
+```text
+Username
+[________________]
+
+Password
+[________________]
+
+[ Login ]
+```
+
+If authentication fails, an appropriate message should explain that the submitted information could not be accepted without exposing sensitive account information.
+
+
+#### Logout
+
+Logout should be clear and predictable.
+
+When the user logs out:
+
+- Their authenticated session ends
+- Account-specific areas are no longer available
+- Navigation returns to the anonymous-user state
+
+Logout should not remove the user's database information, revision notes or purchases.
+
+
+### Checkout Interface
+
+UniNotes uses **Stripe Checkout** rather than creating a custom payment-card interface.
+
+The UniNotes interface is responsible for allowing the user to select the study resource they want to purchase.
+
+The checkout interface flow is:
+
+```text
+Study Note Detail
+↓
+Price Displayed
+↓
+Buy Button
+↓
+Stripe Checkout
+↓
+Payment
+↓
+Success or Cancellation
+↓
+Return to UniNotes
+```
+
+The Study Note Detail page clearly displays:
+
+- Resource title
+- Subject
+- Description
+- Price
+- Purchase action
+
+Once the user selects the purchase action, the payment interface is provided by Stripe.
+
+This avoids designing a custom form that would directly collect card information inside UniNotes.
+
+
+### User Feedback Design
+
+Feedback is required so that users understand the result of their actions.
+
+The interface should not rely on the user guessing whether an operation has succeeded.
+
+
+#### Success Messages
+
+Success messages are used following actions such as:
+
+- Registration
+- Creating a revision note
+- Updating a revision note
+- Deleting a revision note
+- Completing appropriate account actions
+
+Messages should be:
+
+- Short
+- Clear
+- Specific to the completed action
+
+Example:
+
+```text
+Your revision note has been saved successfully.
+```
+
+
+#### Error Messages
+
+Error messages should explain what went wrong without displaying unnecessary technical information.
+
+Errors may occur because of:
+
+- Invalid form data
+- Missing required information
+- Invalid file types
+- Unauthorised access
+- Unsuccessful payment verification
+- Missing resources
+
+Messages should focus on what the user can do next rather than exposing internal Django errors.
+
+
+#### Confirmation Messages
+
+Confirmation is particularly important for destructive actions.
+
+Deleting a revision note should require the user to confirm the action before the record is permanently removed.
+
+Example layout:
+
+```text
+Delete Revision Note
+
+Are you sure you want to delete this revision note?
+
+[ Cancel ]    [ Delete ]
+```
+
+The destructive action should be clearly distinguishable from the safe action.
+
+
+#### Form Validation Feedback
+
+Validation feedback should appear close to the field that caused the problem where possible.
+
+Examples include:
+
+```text
+Title
+[________________]
+This field is required.
+```
+
+or:
+
+```text
+Attachment
+[ Choose File ]
+
+Only supported file types can be uploaded.
+```
+
+Users should not have to search the page to understand why a form submission failed.
+
+
+### Error Prevention
+
+The interface is designed to prevent errors rather than relying only on error messages after something has gone wrong.
+
+Error-prevention techniques include:
+
+| Potential Error | Prevention |
+|---|---|
+| Purchasing the same resource again | Existing purchases are checked during the normal purchasing flow |
+| Editing another user's note | Ownership is checked on the server |
+| Deleting another user's note | Ownership is checked before deletion |
+| Accidentally deleting personal content | A confirmation page is used |
+| Submitting incomplete forms | Required fields are validated |
+| Uploading inappropriate revision attachments | File validation is applied |
+| Accessing private functionality while logged out | Authentication checks protect the route |
+| Incorrect resource price | Price is obtained from server-side data |
+| Assuming payment succeeded from the redirect alone | Stripe payment information is verified server-side |
+| Becoming lost on smaller screens | Responsive navigation remains available |
+
+Combining interface-level prevention with server-side validation provides stronger protection than relying on either approach alone.
+
+
+### Accessibility Planning
+
+Accessibility was considered during the skeleton stage because it affects the structure of the interface as well as its final visual appearance.
+
+Planning accessibility before final styling makes it easier to create an interface that can be used through different input methods and assistive technologies.
+
+
+#### Semantic HTML
+
+Semantic HTML should be used where appropriate to communicate the purpose of page content.
+
+Examples include:
+
+```html
+<header>
+<nav>
+<main>
+<section>
+<form>
+<footer>
+```
+
+Heading elements should also follow a logical hierarchy rather than being selected only because of their default size.
+
+
+#### Keyboard Accessibility
+
+Interactive elements should remain usable without requiring a mouse.
+
+Keyboard accessibility requirements include:
+
+- Links reachable with the keyboard
+- Buttons reachable with the keyboard
+- Forms usable using keyboard controls
+- Visible focus states
+- Responsive navigation operable with the keyboard
+- Navigation menu closable using the `Escape` key
+
+Interactive functionality should use appropriate HTML elements rather than making non-interactive elements behave like buttons unnecessarily.
+
+
+#### Form Accessibility
+
+Forms should provide a clear relationship between each label and input.
+
+Good form structure includes:
+
+```html
+<label for="title">Title</label>
+<input id="title" name="title">
+```
+
+Form accessibility planning includes:
+
+- Visible field labels
+- Appropriate input types
+- Clear required fields
+- Understandable error messages
+- Logical tab order
+- Accessible submit buttons
+
+
+#### Alternative Text
+
+Meaningful images should include alternative text.
+
+Alternative text should describe the purpose of the image rather than simply repeating the filename.
+
+Decorative images that provide no meaningful information should not create unnecessary screen-reader content.
+
+
+#### ARIA Labels
+
+ARIA attributes are used where standard HTML alone does not communicate enough information.
+
+Within the responsive navigation, attributes such as:
+
+```html
+aria-expanded
+aria-label
+```
+
+can communicate:
+
+- Whether the navigation is currently open
+- What the menu button does
+
+ARIA should supplement semantic HTML rather than replace it.
+
+
+#### Responsive Accessibility
+
+Accessibility must remain consistent when the layout changes.
+
+On smaller screens:
+
+- Navigation should remain keyboard accessible
+- Buttons should remain large enough to interact with
+- Text should remain readable
+- Forms should not require horizontal scrolling
+- Content should maintain a logical order
+- Important functionality should not disappear
+- Focus states should remain visible
+
+Responsive design therefore considers more than visual appearance.
+
+
+### Responsive Design Planning
+
+UniNotes was planned using a responsive approach so that the same application can be used across mobile, tablet and desktop-sized screens.
+
+The layout changes depending on available space while keeping the functionality consistent.
+
+| Element | Mobile | Tablet | Desktop |
+|---|---|---|---|
+| **Navigation** | Collapsed menu | Horizontal or adapted navigation | Full horizontal navigation |
+| **Hero Content** | Stacked | Wider layout | Side-by-side content possible |
+| **Search** | Full width | Wider search row | Search and filters displayed together |
+| **Study Notes** | Primarily one column | Two or more columns | Multiple columns |
+| **Purchases** | Stacked rows | Wider rows | Horizontal resource rows |
+| **Revision Notes** | Stacked | Grid / wider list | Wider list or grid |
+| **Forms** | Single column | Wider single column | Centred wide form |
+| **Buttons** | Larger/full width where useful | Standard controls | Standard controls |
+| **Footer** | Stacked | Adapted horizontal layout | Full horizontal layout |
+
+The design follows the principle that responsive layouts should **reorganise content rather than remove important functionality**.
+
+
+### Information Hierarchy
+
+Information hierarchy determines what users notice first on each page.
+
+The hierarchy uses:
+
+- Page headings
+- Subheadings
+- Grouped sections
+- Buttons
+- Cards
+- Spacing
+- Content order
+
+For example, the Study Note Detail page prioritises:
+
+1. Study-note title
+2. Subject
+3. Description
+4. Price
+5. Purchase action
+6. Supporting information
+
+The My Purchases page prioritises:
+
+1. Page title
+2. Purchased resource title
+3. Resource information
+4. Access or download action
+
+The Revision page prioritises:
+
+1. My Revision Notes
+2. Add Revision Note
+3. Existing revision notes
+4. Individual management actions
+
+This ensures that the most important action or information is visually and structurally easier to identify.
+
+
+### User Control
+
+Users should maintain control over their own actions and content.
+
+UniNotes provides user control by allowing authenticated users to:
+
+- Create revision notes
+- View revision notes
+- Edit revision notes
+- Delete revision notes
+- Decide whether to include an attachment
+- Access previous purchases
+- Choose which resources to purchase
+- Log in and log out when required
+- Cancel destructive actions before confirmation
+
+Users are not automatically forced into purchases or destructive actions.
+
+
+### Confirmation
+
+Confirmation is used where the result of an action is important or potentially irreversible.
+
+The most important example is revision-note deletion.
+
+Before deletion:
+
+```text
+User Selects Delete
+↓
+Confirmation Page
+↓
+Cancel or Confirm
+↓
+Delete Only if Confirmed
+```
+
+Purchase confirmation is handled differently.
+
+A purchase is not considered valid simply because the user reaches the success page.
+
+Instead:
+
+```text
+Stripe Checkout Completed
+↓
+Stripe Session Retrieved
+↓
+Payment Status Verified
+↓
+User Verified
+↓
+Study Note Verified
+↓
+Purchase Recorded
+↓
+Success Displayed
+```
+
+This combination of **visual confirmation, server-side validation and clear feedback** helps ensure that users understand the result of important actions and reduces accidental or unauthorised changes.
