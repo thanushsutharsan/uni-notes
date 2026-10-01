@@ -1590,3 +1590,1073 @@ The application must include appropriate protection for each area.
 Security requirements are considered alongside functionality rather than being added only after development.
 
 This is particularly important for UniNotes because the application combines **user accounts, private user-generated content, database records, downloadable files and external payment processing**. Protecting these areas helps maintain user trust and ensures that account-specific functionality behaves as intended.
+
+
+## III. Structure
+
+The **Structure Plane** defines how the information, pages, database records and application functionality within **UniNotes** are organised.
+
+The structure of UniNotes was designed to provide clear navigation for users while keeping the Django code organised into logical areas of responsibility.
+
+The application is divided into two main Django apps:
+
+- **Notes** – manages study resources, searching, filtering, purchases, downloads, registration and personal revision notes.
+- **Checkout** – manages Stripe Checkout sessions and payment confirmation.
+
+The project follows Django's **Model-View-Template (MVT)** architecture, which separates database structure, application logic and presentation. This makes the codebase easier to understand, test and maintain.
+
+
+### Information Architecture
+
+The information architecture of UniNotes determines how content is organised and how users move between different areas of the platform.
+
+The application has been structured around the main tasks users are expected to complete:
+
+| Area | Purpose |
+|---|---|
+| **Home** | Introduces UniNotes and provides access to featured study notes and subjects |
+| **Browse Notes** | Allows users to browse, search and filter available study resources |
+| **Study Note Detail** | Provides detailed information about an individual study resource |
+| **Authentication** | Allows users to register, log in and log out |
+| **Checkout** | Handles the purchasing journey through Stripe |
+| **My Purchases** | Provides authenticated users with access to previously purchased resources |
+| **Revision** | Provides authenticated users with their private revision notes |
+| **Revision Detail** | Displays an individual personal revision note |
+| **Revision Create** | Allows users to create new revision content |
+| **Revision Edit** | Allows users to update existing revision material |
+| **Revision Delete** | Allows users to remove revision notes they no longer require |
+
+The structure separates **public functionality** from **account-specific functionality**.
+
+Public users can browse and investigate study resources, while authenticated users gain access to purchasing, downloads and personal revision functionality.
+
+
+### Site Structure
+
+The overall site structure follows a relatively shallow hierarchy so that important pages can be reached without unnecessary navigation.
+
+```text
+UniNotes
+│
+├── Home
+│
+├── Browse Notes
+│   ├── Search Results
+│   ├── Subject Filter
+│   └── Study Note Detail
+│       └── Buy Study Note
+│           ├── Stripe Checkout
+│           ├── Payment Success
+│           └── Payment Cancelled
+│
+├── Account
+│   ├── Register
+│   ├── Login
+│   └── Logout
+│
+├── My Purchases
+│   └── Download Purchased Note
+│
+└── Revision
+    ├── Revision List
+    ├── Add Revision Note
+    └── Revision Note Detail
+        ├── Edit Revision Note
+        └── Delete Revision Note
+```
+
+This structure keeps the main user journeys separate while still allowing them to connect naturally.
+
+For example, a user can move from browsing a study note to purchasing it and then later access it through **My Purchases**.
+
+
+### Page Hierarchy
+
+The page hierarchy prioritises the areas users are most likely to need.
+
+| Hierarchy Level | Pages | Purpose |
+|---|---|---|
+| **Primary Level** | Home, Browse, Revision, My Purchases | Main areas of the application |
+| **Secondary Level** | Study Note Detail, Revision Detail | Provides detailed information about selected content |
+| **Action Level** | Add Revision Note, Edit Revision Note, Delete Revision Note | Allows users to perform CRUD actions |
+| **Authentication Level** | Register, Login, Logout | Controls user-account access |
+| **Transaction Level** | Checkout, Success, Cancel | Handles the study-note purchasing process |
+| **Resource Level** | Purchased Note Download | Provides controlled access to purchased files |
+
+
+### User Flow
+
+The structure of UniNotes supports several important user journeys.
+
+#### First-Time Visitor Flow
+
+```text
+Home
+↓
+Browse Study Notes
+↓
+Search / Filter by Subject
+↓
+View Study Note
+↓
+Register
+↓
+Login / Authenticated Session
+↓
+Purchase or Use Revision Features
+```
+
+#### Study Resource Purchase Flow
+
+```text
+Browse
+↓
+Study Note Detail
+↓
+Buy
+↓
+Stripe Checkout
+↓
+Payment Verification
+↓
+Purchase Recorded
+↓
+My Purchases
+↓
+Download Resource
+```
+
+#### Revision Note Flow
+
+```text
+Login
+↓
+Revision
+↓
+Create Revision Note
+↓
+View Revision Note
+↓
+Edit Revision Note
+↓
+Save Changes
+```
+
+Users can also choose to delete revision material they no longer require.
+
+#### Returning User Flow
+
+```text
+Login
+↓
+My Purchases or Revision
+↓
+Access Existing Content
+↓
+Continue Revision
+```
+
+
+### Navigation Structure
+
+The navigation system provides access to the main areas of UniNotes.
+
+The navigation changes depending on whether the user is authenticated.
+
+Public users can access areas such as:
+
+- Home
+- Browse
+- Register
+- Login
+
+Authenticated users can additionally access:
+
+- Revision
+- My Purchases
+- Logout
+
+This prevents users from being presented with private account functionality that they cannot use.
+
+The project also contains responsive JavaScript navigation behaviour for smaller screen sizes.
+
+The responsive navigation allows users to:
+
+- Open the menu
+- Close the menu
+- Close it after selecting a navigation option
+- Close it by clicking outside the menu
+- Close it using the Escape key
+
+Accessibility attributes such as `aria-expanded` are updated to reflect the navigation state.
+
+
+### URL Structure
+
+Django URL routing is used to connect browser URLs to the correct views.
+
+UniNotes uses named URLs so that templates and Python code can refer to routes by name rather than repeatedly hard-coding URL strings.
+
+
+#### URL Naming Conventions
+
+The project follows predictable URL naming conventions.
+
+| Type | Example | Purpose |
+|---|---|---|
+| Collection | `/notes/` | Displays multiple study notes |
+| Detail | `/notes/<id>/` | Displays one study note |
+| Collection | `/revision/` | Displays the user's revision notes |
+| Create | `/revision/add/` | Creates a new revision note |
+| Detail | `/revision/<id>/` | Displays one revision note |
+| Update | `/revision/<id>/edit/` | Edits an existing revision note |
+| Delete | `/revision/<id>/delete/` | Deletes an existing revision note |
+| User Area | `/purchases/` | Displays the current user's purchases |
+| File Action | `/download/<id>/` | Downloads an authorised purchased resource |
+| Checkout | `/checkout/buy/<id>/` | Starts a purchase |
+| Authentication | `/accounts/login/` | Logs a user into the application |
+
+
+#### App URLs
+
+The main URL routes within UniNotes are:
+
+| URL | View / Action | Named URL |
+|---|---|---|
+| `/` | Homepage | `notes:home` |
+| `/notes/` | Browse study notes | `notes:browse` |
+| `/notes/<int:pk>/` | Study-note details | `notes:detail` |
+| `/revision/` | Revision-note list | `notes:revision_list` |
+| `/revision/add/` | Create revision note | `notes:revision_create` |
+| `/revision/<int:pk>/` | View revision note | `notes:revision_detail` |
+| `/revision/<int:pk>/edit/` | Edit revision note | `notes:revision_edit` |
+| `/revision/<int:pk>/delete/` | Delete revision note | `notes:revision_delete` |
+| `/purchases/` | My Purchases | `notes:purchases` |
+| `/download/<int:pk>/` | Download purchased note | `notes:download` |
+| `/checkout/buy/<int:pk>/` | Create Stripe Checkout Session | `checkout:buy` |
+| `/checkout/success/` | Verify successful checkout | `checkout:success` |
+| `/checkout/cancel/<int:pk>/` | Handle cancelled checkout | `checkout:cancel` |
+| `/accounts/register/` | User registration | `register` |
+| `/accounts/login/` | User login | `login` |
+| `/accounts/logout/` | User logout | `logout` |
+
+
+#### Dynamic URLs
+
+Dynamic URLs are used when the application needs to identify a particular database record.
+
+Examples include:
+
+```text
+/notes/<int:pk>/
+/revision/<int:pk>/
+/revision/<int:pk>/edit/
+/revision/<int:pk>/delete/
+/download/<int:pk>/
+/checkout/buy/<int:pk>/
+```
+
+The `<int:pk>` section represents the integer primary key of the required object.
+
+For example:
+
+```text
+/notes/3/
+```
+
+requests the study note with a primary key of `3`.
+
+When working with private content, the application does not rely on the primary key alone. It also checks ownership.
+
+For example:
+
+```python
+pk=pk
+owner=request.user
+```
+
+This prevents a logged-in user from simply changing an ID in the URL to access another user's revision note.
+
+
+### Django Application Structure
+
+The project is organised into the main Django project configuration and two custom Django applications.
+
+```text
+uninotes/
+│
+├── uninotes/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── notes/
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── forms.py
+│   ├── decorators.py
+│   ├── tests.py
+│   ├── migrations/
+│   └── management/
+│
+├── checkout/
+│   ├── views.py
+│   ├── urls.py
+│   ├── tests.py
+│   └── migrations/
+│
+├── templates/
+│   ├── notes/
+│   ├── checkout/
+│   └── registration/
+│
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── images/
+│
+├── media/
+│   └── study_notes/
+│
+├── manage.py
+├── requirements.txt
+└── Procfile
+```
+
+
+### Django Apps
+
+UniNotes contains two custom Django apps.
+
+Each app has a defined responsibility within the wider project.
+
+
+#### App 1
+
+The **`notes`** application contains most of the core UniNotes functionality.
+
+It is responsible for:
+
+- Homepage content
+- Subjects
+- Study notes
+- Study-note browsing
+- Keyword searching
+- Subject filtering
+- Study-note detail pages
+- User registration
+- Personal revision notes
+- Revision-note CRUD functionality
+- Purchase history
+- Purchased-resource downloads
+- Ownership checks
+
+The main models located within this application are:
+
+- `Subject`
+- `StudyNote`
+- `RevisionNote`
+- `Purchase`
+
+
+#### App 2
+
+The **`checkout`** application is responsible specifically for the payment process.
+
+It manages:
+
+- Starting Stripe Checkout
+- Creating Stripe Checkout Sessions
+- Redirecting users to Stripe
+- Handling successful checkout returns
+- Retrieving Stripe Checkout Session information
+- Verifying payment status
+- Checking Stripe metadata
+- Recording completed purchases
+- Handling cancelled payments
+
+
+#### Why the Project Was Split Into Multiple Apps
+
+The project was separated into multiple Django apps to provide a clearer **separation of concerns**.
+
+The `notes` application focuses on educational content and user study functionality, while the `checkout` application focuses on external payment processing.
+
+| Benefit | Explanation |
+|---|---|
+| **Maintainability** | Relevant functionality can be located more easily |
+| **Separation of Concerns** | Study functionality and payment processing remain logically separated |
+| **Testing** | Notes and checkout functionality can be tested separately |
+| **Readability** | Views and URL files remain easier to understand |
+| **Scalability** | Additional specialised apps could be introduced later if required |
+| **Security Review** | Payment-specific functionality can be reviewed separately from normal content functionality |
+
+
+### Django MVT Architecture
+
+UniNotes follows Django's **Model-View-Template (MVT)** architectural pattern.
+
+```text
+User
+↓
+URL
+↓
+View
+↓
+Model / Database
+↓
+View
+↓
+Template
+↓
+Rendered Response
+```
+
+
+#### Models
+
+Models define the structure of information stored within the database.
+
+The main custom models are:
+
+- `Subject`
+- `StudyNote`
+- `RevisionNote`
+- `Purchase`
+
+Django's built-in `User` model is used for account information.
+
+Models define:
+
+- Database fields
+- Data types
+- Relationships
+- Validation rules
+- Ordering
+- Database constraints
+
+
+#### Views
+
+Views contain the server-side application logic.
+
+Views are responsible for:
+
+- Receiving HTTP requests
+- Retrieving database objects
+- Processing forms
+- Applying authentication checks
+- Applying ownership checks
+- Searching and filtering data
+- Creating Stripe Checkout Sessions
+- Verifying payments
+- Redirecting users
+- Providing context to templates
+
+Examples include:
+
+```python
+browse_notes
+note_detail
+revision_create
+revision_edit
+revision_delete
+create_checkout_session
+payment_success
+```
+
+
+#### Templates
+
+Templates control how information is presented to the user.
+
+The project uses Django templates combined with HTML.
+
+```text
+templates/
+│
+├── base.html
+│
+├── notes/
+│   ├── home.html
+│   ├── browse.html
+│   ├── detail.html
+│   ├── my_purchases.html
+│   ├── revision_list.html
+│   ├── revision_detail.html
+│   ├── revision_form.html
+│   ├── revision_confirm_delete.html
+│   └── partials_note_card.html
+│
+├── checkout/
+│   ├── success.html
+│   └── cancel.html
+│
+└── registration/
+    ├── login.html
+    └── register.html
+```
+
+`base.html` provides shared page structure so repeated elements such as navigation do not need to be recreated in every template.
+
+
+#### URLs
+
+URL configuration connects each browser request with the correct Django view.
+
+The project-level `uninotes/urls.py` handles:
+
+- Registration
+- Login
+- Logout
+- Checkout app inclusion
+- Notes app inclusion
+
+The routing process is:
+
+```text
+Browser Request
+↓
+Project URL Configuration
+↓
+Application URL Configuration
+↓
+View
+↓
+Response
+```
+
+
+### Database Structure
+
+UniNotes uses a relational database structure through Django's ORM.
+
+The core data structure consists of:
+
+- Django `User`
+- `Subject`
+- `StudyNote`
+- `RevisionNote`
+- `Purchase`
+
+| Model | Purpose |
+|---|---|
+| **User** | Stores account and authentication information using Django's built-in user model |
+| **Subject** | Stores study subject categories |
+| **StudyNote** | Stores purchasable study-resource information |
+| **RevisionNote** | Stores private revision content created by users |
+| **Purchase** | Records which user has successfully purchased which study note |
+
+
+### Entity Relationship Diagram (ERD)
+
+The ERD below represents the database relationships used by UniNotes.
+
+```mermaid
+erDiagram
+
+    USER ||--o{ REVISION_NOTE : creates
+    USER ||--o{ PURCHASE : makes
+    SUBJECT ||--o{ STUDY_NOTE : contains
+    STUDY_NOTE ||--o{ PURCHASE : purchased_in
+
+    USER {
+        int id PK
+        string username
+        string email
+        string password
+    }
+
+    SUBJECT {
+        int id PK
+        string name
+        string slug
+    }
+
+    STUDY_NOTE {
+        int id PK
+        int subject_id FK
+        string title
+        text description
+        decimal price
+        string cover_url
+        file note_file
+        string download_url
+        boolean is_active
+        datetime created_at
+    }
+
+    REVISION_NOTE {
+        int id PK
+        int owner_id FK
+        string title
+        string subject
+        text content
+        file attachment
+        datetime created_at
+        datetime updated_at
+    }
+
+    PURCHASE {
+        int id PK
+        int user_id FK
+        int note_id FK
+        string stripe_session_id
+        decimal amount_paid
+        datetime purchased_at
+    }
+```
+
+
+### Data Schema
+
+The main database fields are shown below.
+
+| Model | Field | Type | Purpose |
+|---|---|---|---|
+| **Subject** | `name` | CharField | Stores the subject name |
+| **Subject** | `slug` | SlugField | Stores a URL-friendly unique subject identifier |
+| **StudyNote** | `subject` | ForeignKey | Connects the note to a Subject |
+| **StudyNote** | `title` | CharField | Stores the study-note title |
+| **StudyNote** | `description` | TextField | Stores information about the resource |
+| **StudyNote** | `price` | DecimalField | Stores the study-note price |
+| **StudyNote** | `cover_url` | URLField | Stores an optional cover image URL |
+| **StudyNote** | `note_file` | FileField | Stores an optional study-note file |
+| **StudyNote** | `download_url` | URLField | Stores an optional external download URL |
+| **StudyNote** | `is_active` | BooleanField | Controls whether the resource is available |
+| **StudyNote** | `created_at` | DateTimeField | Records when the resource was created |
+| **RevisionNote** | `owner` | ForeignKey | Associates the note with a user |
+| **RevisionNote** | `title` | CharField | Stores the revision-note title |
+| **RevisionNote** | `subject` | CharField | Stores the revision subject |
+| **RevisionNote** | `content` | TextField | Stores personal revision content |
+| **RevisionNote** | `attachment` | FileField | Stores an optional attachment |
+| **RevisionNote** | `created_at` | DateTimeField | Records creation time |
+| **RevisionNote** | `updated_at` | DateTimeField | Records the most recent update |
+| **Purchase** | `user` | ForeignKey | Identifies the purchaser |
+| **Purchase** | `note` | ForeignKey | Identifies the purchased study note |
+| **Purchase** | `stripe_session_id` | CharField | Stores the Stripe Checkout Session ID |
+| **Purchase** | `amount_paid` | DecimalField | Records the amount paid |
+| **Purchase** | `purchased_at` | DateTimeField | Records the purchase date |
+
+
+### Planned Database Models
+
+The database models were planned around the information required to support the main user journeys.
+
+
+#### Model 1
+
+The `StudyNote` model represents a digital study resource available through UniNotes.
+
+It stores:
+
+- Subject
+- Title
+- Description
+- Price
+- Cover URL
+- Study-note file
+- Optional download URL
+- Active status
+- Creation date
+
+
+#### Model 2
+
+The `RevisionNote` model represents personal revision content created by an authenticated user.
+
+It stores:
+
+- Owner
+- Title
+- Subject
+- Revision content
+- Optional attachment
+- Creation date
+- Last updated date
+
+
+#### Additional Models
+
+Additional models required by UniNotes include:
+
+**Subject**
+
+The `Subject` model provides categories for study notes.
+
+It stores:
+
+- Subject name
+- Unique URL-friendly slug
+
+**Purchase**
+
+The `Purchase` model connects a user with a successfully purchased study note.
+
+It stores:
+
+- User
+- Study note
+- Stripe Checkout Session ID
+- Amount paid
+- Purchase date
+
+**User**
+
+UniNotes uses Django's built-in `User` model rather than creating a custom user model.
+
+It provides:
+
+- Username
+- Email
+- Password management
+- Authentication
+- Sessions
+
+
+### Database Relationships
+
+The database uses relationships to connect related information and reduce duplication.
+
+
+#### One-to-One Relationships
+
+The current version of UniNotes does **not require any one-to-one database relationships**.
+
+No custom model needs to have exactly one corresponding record in another model.
+
+
+#### One-to-Many Relationships
+
+UniNotes uses several one-to-many relationships.
+
+| One | Many | Relationship |
+|---|---|---|
+| **Subject** | StudyNote | One subject can contain many study notes |
+| **User** | RevisionNote | One user can create many revision notes |
+| **User** | Purchase | One user can make many purchases |
+| **StudyNote** | Purchase | One study note can appear in many purchase records |
+
+These relationships are implemented using Django `ForeignKey` fields.
+
+
+#### Many-to-Many Relationships
+
+There are no direct Django `ManyToManyField` relationships within the current database.
+
+Conceptually, users and study notes have a many-to-many relationship because:
+
+- One user can purchase many study notes.
+- One study note can be purchased by many users.
+
+However, this relationship is implemented through the `Purchase` model because additional transaction information must be stored.
+
+This includes:
+
+- Stripe Session ID
+- Amount paid
+- Purchase date
+
+Therefore, the `Purchase` model acts as the intermediary between users and study notes.
+
+
+### Relationship Rationale
+
+The database relationships were selected according to how the information behaves within the application.
+
+| Relationship | Rationale |
+|---|---|
+| **Subject → StudyNote** | A subject may contain several study resources while each study note belongs to one subject |
+| **User → RevisionNote** | A user may create many private revision notes while every note requires one owner |
+| **User → Purchase** | A user may purchase several resources over time |
+| **StudyNote → Purchase** | The same digital resource may be purchased by multiple users |
+| **User ↔ StudyNote through Purchase** | Purchase information requires additional transaction fields, so an intermediary model is appropriate |
+
+The relationships also support security.
+
+For example, querying a revision note using both its primary key and owner helps ensure that the authenticated user owns the requested content.
+
+
+### Data Flow
+
+The general UniNotes data flow is:
+
+```text
+User Interaction
+↓
+HTML Form / Link
+↓
+Django URL
+↓
+Django View
+↓
+Validation / Business Logic
+↓
+Django Model / ORM
+↓
+Database
+↓
+View
+↓
+Template
+↓
+User Response
+```
+
+
+#### Front-End to Back-End Data Flow
+
+When a user submits information, data travels from the browser to Django.
+
+For example, when creating a revision note:
+
+```text
+Revision Form
+↓
+POST Request
+↓
+revision_create View
+↓
+RevisionNoteForm
+↓
+Form Validation
+↓
+Current User Assigned as Owner
+↓
+RevisionNote Saved
+↓
+Redirect to Revision Detail
+```
+
+The owner is assigned on the server:
+
+```python
+note.owner = request.user
+```
+
+This means ownership is not trusted to information supplied by the browser.
+
+
+#### Database Query Flow
+
+When browsing study notes:
+
+```text
+Request /notes/
+↓
+browse_notes View
+↓
+StudyNote.objects.filter(is_active=True)
+↓
+Optional Keyword Search
+↓
+Optional Subject Filter
+↓
+Database Query
+↓
+Matching StudyNotes
+↓
+browse.html
+```
+
+Search terms can match information such as:
+
+- Study-note title
+- Study-note description
+- Subject name
+
+
+#### CRUD Data Flow
+
+The personal revision-note system provides the main CRUD workflow.
+
+**Create**
+
+```text
+User
+↓
+Revision Form
+↓
+POST Data + Optional File
+↓
+Form Validation
+↓
+Owner Assigned
+↓
+Database INSERT
+↓
+Success Message
+↓
+Revision Detail
+```
+
+**Read**
+
+```text
+User
+↓
+Revision URL
+↓
+Authentication Check
+↓
+Primary Key + Owner Check
+↓
+Database SELECT
+↓
+Revision Detail Template
+```
+
+**Update**
+
+```text
+User
+↓
+Edit Revision Note
+↓
+Existing Record Retrieved
+↓
+Ownership Verified
+↓
+Updated Form Submitted
+↓
+Validation
+↓
+Database UPDATE
+↓
+Success Message
+```
+
+**Delete**
+
+```text
+User
+↓
+Delete Revision Note
+↓
+Existing Record Retrieved
+↓
+Ownership Verified
+↓
+Confirmation
+↓
+POST Request
+↓
+Database DELETE
+↓
+Success Message
+↓
+Revision List
+```
+
+
+### Payment User Flow
+
+The payment structure connects UniNotes with Stripe Checkout.
+
+```text
+Authenticated User
+↓
+Study Note Detail
+↓
+Select Buy
+↓
+StudyNote Retrieved
+↓
+Existing Purchase Checked
+↓
+Stripe Checkout Session Created
+↓
+Redirect to Stripe
+↓
+User Completes Payment
+↓
+Stripe Redirects to Success URL
+↓
+UniNotes Retrieves Stripe Session
+↓
+Payment Status Checked
+↓
+User Metadata Checked
+↓
+Study Note Metadata Checked
+↓
+Purchase Record Created
+↓
+Success Page
+↓
+My Purchases
+↓
+Download Resource
+```
+
+The detailed payment flow is:
+
+1. The user must be authenticated.
+2. The selected study note is retrieved.
+3. UniNotes checks whether the user already owns the resource.
+4. The price is retrieved from the server-side `StudyNote` record.
+5. A Stripe Checkout Session is created.
+6. The user ID and study-note ID are included in Stripe metadata.
+7. Stripe hosts the payment interface.
+8. After payment, Stripe redirects the user back to UniNotes.
+9. UniNotes retrieves the Checkout Session directly from Stripe.
+10. The application verifies that Stripe reports the payment as successful.
+11. The user information is checked against the authenticated user.
+12. The study-note information is verified.
+13. The amount paid is retrieved.
+14. A `Purchase` record is created if an appropriate record does not already exist.
+15. The purchased resource becomes accessible through **My Purchases**.
+
+
+### API Data Flow
+
+The **Stripe API** is the main external API used by UniNotes.
+
+```text
+UniNotes Server
+↓
+Stripe Python Library
+↓
+Stripe API
+↓
+Checkout Session
+↓
+Stripe Hosted Payment Page
+↓
+Payment
+↓
+Stripe API
+↓
+Session Retrieval
+↓
+UniNotes Server Verification
+↓
+Purchase Database Record
+```
+
+When creating a Checkout Session, UniNotes sends Stripe information including:
+
+- Currency
+- Study-note title
+- Price
+- Quantity
+- User ID metadata
+- Study-note ID metadata
+- Success URL
+- Cancel URL
+
+The price is retrieved from the server-side database rather than being accepted from browser-submitted information.
+
+After checkout, UniNotes retrieves the Checkout Session directly from Stripe and verifies:
+
+- The session exists
+- Stripe reports the payment as paid
+- The metadata user ID matches the authenticated user
+- A study-note ID exists
+- The relevant StudyNote exists
+
+Only after these checks can the appropriate purchase record be created.
+
+This keeps important payment verification within the Django back end and reduces reliance on client-side information.
