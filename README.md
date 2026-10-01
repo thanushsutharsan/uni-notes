@@ -229,3 +229,407 @@ The key business goals are:
 The business goals and user needs work together rather than being treated separately. For example, effective searching benefits students by helping them locate relevant material while also supporting the business goal of making resources easier to discover. Similarly, the My Purchases area benefits users by keeping their resources organised while encouraging them to return to the platform.
 
 This balance between **user requirements and business objectives** is an important part of the UX strategy for UniNotes and ensures that features have a clear purpose within the overall application.
+
+
+## User Stories
+
+The user stories for UniNotes were created based on the needs of the two target audiences identified during the UX planning process.
+
+The **primary users** are university students who actively use UniNotes to find revision resources, purchase study notes and manage their own revision material.
+
+The **secondary users** are students who are exploring the platform before deciding whether to register or purchase a study resource.
+
+Creating user stories for both audiences helped ensure that the application considers the experience of new visitors as well as students who regularly use the personalised features of the platform.
+
+
+### First-Time Visitor Goals
+
+#### User Story 1 – Primary User
+
+**As a university student looking for revision resources, I want to browse the available study notes so that I can see whether UniNotes contains material that is relevant to my studies.**
+
+This user story relates to the **primary target audience** because university students need a quick way to identify resources that could support their revision.
+
+The Browse area allows users to view the available study notes without needing to search through unrelated areas of the website.
+
+
+#### User Story 2 – Secondary User
+
+**As a student visiting UniNotes for the first time, I want to explore the available subjects and study notes before creating an account so that I can decide whether the platform is useful to me.**
+
+This user story relates to the **secondary target audience** because these users may not yet be ready to register or make a purchase.
+
+Allowing visitors to explore the available resources first reduces unnecessary barriers and helps them understand what the application provides.
+
+
+#### User Story 3 – Primary User
+
+**As a university student looking for a specific revision topic, I want to search for study notes using keywords so that I can find relevant resources quickly.**
+
+This relates to the **primary target audience** because students may already know the particular subject or topic they need help with.
+
+The search functionality reduces the amount of unrelated content users need to manually browse.
+
+
+#### User Story 4 – Secondary User
+
+**As a student exploring the platform, I want to filter study notes by subject so that I can quickly see whether resources are available for an area I am studying.**
+
+This relates to the **secondary target audience** because a potential user may want to investigate the available content before deciding whether to use the platform regularly.
+
+Subject filtering provides a simple way of narrowing the available resources.
+
+
+#### User Story 5 – Primary User
+
+**As a university student, I want to view detailed information about a study note so that I can understand what the resource contains before deciding whether to purchase it.**
+
+This relates to the **primary target audience** because students need enough information to make an informed decision before purchasing a digital resource.
+
+
+#### User Story 6 – Secondary User
+
+**As a first-time visitor, I want the website navigation to be clear and understandable so that I can easily discover the main areas of the application without needing instructions.**
+
+This relates to the **secondary target audience** because new visitors will not already know how UniNotes is structured.
+
+Clear navigation helps these users move between areas such as the homepage and study-note library without becoming confused.
+
+
+### Registered User Goals
+
+#### User Story 7 – Primary User
+
+**As a registered university student, I want to purchase a study note securely so that I can access revision material that supports my studies.**
+
+This directly relates to the **primary target audience** because purchasing revision resources is one of the main functions provided by UniNotes.
+
+Stripe Checkout provides the payment process while the application records the completed purchase against the user's account.
+
+
+#### User Story 8 – Secondary User
+
+**As a student who has explored UniNotes and decided that it is useful, I want to register for an account so that I can access the personalised features of the website.**
+
+This represents the transition of a **secondary user** from exploring the application to becoming a registered user.
+
+Registration allows the student to move beyond browsing resources and access functionality such as purchases and private revision notes.
+
+
+#### User Story 9 – Primary User
+
+**As a registered student, I want to create my own revision notes so that I can organise personal study material within UniNotes.**
+
+This relates to the **primary target audience** because students may want to combine purchased revision resources with notes they create themselves.
+
+Users can create revision notes containing information such as a title, subject and written content.
+
+
+#### User Story 10 – Secondary User
+
+**As a student who has recently registered, I want the personalised areas of the website to be easy to identify so that I can understand the additional features available through my account.**
+
+This relates to users who originally belonged to the **secondary target audience** and have decided to register after exploring the platform.
+
+Areas such as **Revision** and **My Purchases** provide additional functionality once the user has an account.
+
+
+#### User Story 11 – Primary User
+
+**As a registered student, I want to upload a supporting file to a revision note so that I can keep related revision material together.**
+
+This relates to the **primary target audience** because students may have additional files that support the written revision information stored within their notes.
+
+
+#### User Story 12 – Primary User
+
+**As a registered student, I want my personal revision notes to remain private so that other users cannot view, edit or delete my study material.**
+
+This relates to the **primary target audience** because users need confidence that personalised content is linked to their own account.
+
+UniNotes uses authentication and ownership checks when users access or modify personal revision notes.
+
+
+### Returning User Goals
+
+#### User Story 13 – Primary User
+
+**As a returning student, I want to view the study notes I have previously purchased so that I can access my revision resources again without purchasing them a second time.**
+
+This directly relates to the **primary target audience** because students are likely to return to purchased material while revising.
+
+The **My Purchases** section provides a centralised location for previously purchased study notes.
+
+
+#### User Story 14 – Secondary User
+
+**As a returning visitor who previously explored the platform without registering, I want to search and browse the available resources again so that I can decide whether there is now a resource I want to use.**
+
+This relates to the **secondary target audience** because not every visitor will register during their first visit.
+
+Keeping browsing and searching accessible allows these users to continue evaluating the platform when they return.
+
+
+#### User Story 15 – Primary User
+
+**As a returning registered student, I want to edit an existing revision note so that I can update my revision material as my knowledge develops.**
+
+This relates to the **primary target audience** because revision material often changes as students continue studying a topic.
+
+The Update functionality allows existing revision notes to be modified rather than requiring the student to create a completely new note.
+
+
+#### User Story 16 – Primary User
+
+**As a returning registered student, I want to delete revision notes that I no longer need so that my personal revision area remains organised and relevant.**
+
+This relates to the **primary target audience** because students need control over the content stored within their personal revision area.
+
+
+#### User Story 17 – Secondary User
+
+**As a returning visitor, I want to continue exploring the website using clear and consistent navigation so that I can quickly return to the resources that interest me.**
+
+This relates to the **secondary target audience** because returning visitors who have not yet registered should still be able to use the main browsing functionality without difficulty.
+
+
+#### User Story 18 – Primary User
+
+**As a returning registered student, I want to access and download a resource I have already purchased so that I can continue using it during future revision sessions.**
+
+This relates to the **primary target audience** because purchased digital resources need to remain useful after the initial transaction.
+
+Providing access through **My Purchases** gives users a consistent location for returning to their purchased study material.
+
+
+## User Story Acceptance Criteria
+
+Acceptance criteria were created for the user stories to define what must happen for each requirement to be considered successfully implemented.
+
+Using acceptance criteria also provides measurable requirements that can later be compared against the finished application during testing.
+
+
+### US1 – Browse Study Notes
+
+**User Story:** As a university student looking for revision resources, I want to browse the available study notes so that I can see whether UniNotes contains material relevant to my studies.
+
+**Acceptance Criteria:**
+
+- The user can access the study-note browsing area.
+- Available study notes are displayed clearly.
+- Each available resource provides enough information for the user to identify the note.
+- The user can select a study note to view more information about it.
+
+
+### US2 – Explore Before Registering
+
+**User Story:** As a student visiting UniNotes for the first time, I want to explore the available subjects and study notes before creating an account.
+
+**Acceptance Criteria:**
+
+- A visitor can access the homepage without logging in.
+- A visitor can browse available study resources.
+- A visitor can explore available subjects.
+- Registration is not required simply to view the available study-note library.
+
+
+### US3 – Search for Study Notes
+
+**User Story:** As a university student looking for a specific revision topic, I want to search for study notes using keywords.
+
+**Acceptance Criteria:**
+
+- A search input is available within the study-note browsing functionality.
+- The user can enter a keyword or search term.
+- Relevant study notes are displayed based on the search.
+- When no matching resource is available, the user receives an appropriate empty-state message.
+
+
+### US4 – Filter by Subject
+
+**User Story:** As a student exploring the platform, I want to filter study notes by subject.
+
+**Acceptance Criteria:**
+
+- Available subjects can be selected by the user.
+- Selecting a subject reduces the displayed study notes to relevant resources.
+- The user can clearly identify which resources belong to the selected subject.
+- Filtering should help the user locate relevant material without manually reviewing every note.
+
+
+### US5 – View Study Note Information
+
+**User Story:** As a university student, I want to view detailed information about a study note before deciding whether to purchase it.
+
+**Acceptance Criteria:**
+
+- The user can select an individual study note.
+- The study-note page displays its title.
+- The subject of the resource is displayed.
+- A description of the resource is available.
+- The price is clearly shown before the user begins the purchasing process.
+
+
+### US6 – Clear Navigation
+
+**User Story:** As a first-time visitor, I want the website navigation to be clear and understandable.
+
+**Acceptance Criteria:**
+
+- The main navigation is clearly visible.
+- Navigation labels describe the destination of the link.
+- Users can move between the main areas of UniNotes.
+- Navigation remains usable across different screen sizes.
+
+
+### US7 – Purchase a Study Note
+
+**User Story:** As a registered university student, I want to purchase a study note securely.
+
+**Acceptance Criteria:**
+
+- The user must be authenticated before completing account-specific purchasing functionality.
+- The selected study note has a clearly displayed price.
+- The payment process uses Stripe Checkout.
+- A successful purchase is associated with the authenticated user.
+- The purchased resource becomes available through the user's purchases.
+
+
+### US8 – Register for an Account
+
+**User Story:** As a student who has explored UniNotes, I want to register for an account so that I can access personalised features.
+
+**Acceptance Criteria:**
+
+- A registration option is available to unauthenticated users.
+- The user can submit the required registration information.
+- Valid registration information creates a user account.
+- Invalid information should not create an account.
+- The user receives appropriate feedback following registration.
+
+
+### US9 – Create a Revision Note
+
+**User Story:** As a registered student, I want to create my own revision notes.
+
+**Acceptance Criteria:**
+
+- Only authenticated users can access personal revision-note functionality.
+- The user can create a new revision note.
+- The note can contain a title.
+- The note can be associated with a subject.
+- The user can add written revision content.
+- Successfully saved notes appear within the user's personal revision area.
+
+
+### US10 – Access Personalised Features
+
+**User Story:** As a student who has recently registered, I want personalised areas of the website to be easy to identify.
+
+**Acceptance Criteria:**
+
+- Authenticated users can access the Revision area.
+- Authenticated users can access My Purchases.
+- Account-specific areas are clearly labelled.
+- Private functionality is not made available to unauthenticated users in the same way as public browsing content.
+
+
+### US11 – Upload a Supporting File
+
+**User Story:** As a registered student, I want to upload a supporting file to a revision note.
+
+**Acceptance Criteria:**
+
+- The revision-note form provides an option for adding a supporting file.
+- The attachment is optional.
+- A revision note can still be created without an attachment.
+- When a valid attachment is supplied, it is associated with the relevant revision note.
+
+
+### US12 – Protect Private Revision Notes
+
+**User Story:** As a registered student, I want my personal revision notes to remain private.
+
+**Acceptance Criteria:**
+
+- Revision notes are associated with the user who created them.
+- Authentication is required to access private revision-note functionality.
+- Users can only edit revision notes that belong to their account.
+- Users can only delete revision notes that belong to their account.
+- Ownership is checked when accessing account-specific revision-note actions.
+
+
+### US13 – View Previous Purchases
+
+**User Story:** As a returning student, I want to view the study notes I have previously purchased.
+
+**Acceptance Criteria:**
+
+- Authenticated users can access My Purchases.
+- Completed purchases belonging to the user are displayed.
+- The purchases shown are associated with the currently authenticated account.
+- Previously purchased resources can be accessed from this area.
+
+
+### US14 – Return and Continue Browsing
+
+**User Story:** As a returning visitor who has not registered, I want to browse and search the available resources again.
+
+**Acceptance Criteria:**
+
+- Returning visitors can access the public study-note library.
+- Searching remains available without requiring the visitor to purchase a resource first.
+- Subject browsing remains accessible.
+- Visitors can continue viewing individual study-note information.
+
+
+### US15 – Edit a Revision Note
+
+**User Story:** As a returning registered student, I want to edit an existing revision note.
+
+**Acceptance Criteria:**
+
+- The user can select one of their existing revision notes.
+- An edit option is available for revision notes owned by the authenticated user.
+- Existing information is available to be updated.
+- Valid changes can be saved.
+- The updated information is displayed after the edit has been completed.
+- A user cannot use the normal application routes to edit another user's revision note.
+
+
+### US16 – Delete a Revision Note
+
+**User Story:** As a returning registered student, I want to delete revision notes I no longer need.
+
+**Acceptance Criteria:**
+
+- A delete option is available for revision notes owned by the authenticated user.
+- The selected note can be removed.
+- The deleted note no longer appears in the user's revision-note collection.
+- A user cannot use the normal application routes to delete another user's revision note.
+- The application provides appropriate feedback after deletion.
+
+
+### US17 – Consistent Experience for Returning Visitors
+
+**User Story:** As a returning visitor, I want clear and consistent navigation so that I can quickly return to resources that interest me.
+
+**Acceptance Criteria:**
+
+- Navigation remains consistent between the main pages.
+- Common navigation elements use understandable labels.
+- The user can return to the Browse area without unnecessary steps.
+- The interface remains usable on different screen sizes.
+
+
+### US18 – Access a Previously Purchased Resource
+
+**User Story:** As a returning registered student, I want to access and download a resource I have already purchased.
+
+**Acceptance Criteria:**
+
+- The user's completed purchase is visible within My Purchases.
+- The purchased resource can be accessed from the user's account.
+- The user can download the resource associated with their purchase.
+- Access to the purchased resource is linked to the authenticated user's recorded purchase.
+- A resource that has already been purchased does not need to be purchased again through the normal user journey.
