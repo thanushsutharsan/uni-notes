@@ -1055,3 +1055,538 @@ These solutions demonstrate that the functionality within UniNotes has been deve
 
 By connecting each problem to a specific solution, the project can demonstrate a clear relationship between **research, user requirements, UX planning and technical implementation**.
 
+
+## II. Scope
+
+The scope of **UniNotes** defines the functionality that will be included within the current version of the application and establishes clear boundaries around features that are not required for the initial release.
+
+The scope was determined using the project goals, user research, user stories and competitor research. Priority was given to functionality that directly supports the main purpose of the application: allowing university students to discover study resources, purchase digital notes and manage their own revision material.
+
+Defining the scope helps prevent unnecessary features from increasing the complexity of the project before the core user journeys have been successfully developed and tested.
+
+
+### Minimum Viable Product (MVP)
+
+The **Minimum Viable Product (MVP)** represents the smallest complete version of UniNotes that can successfully meet the main needs of the target users.
+
+The MVP must allow a user to move through the complete journey from discovering a resource to accessing purchased content, while also providing registered users with personal revision functionality.
+
+| MVP Requirement | Purpose |
+|---|---|
+| **Homepage** | Provides users with a clear introduction to UniNotes and access to the main areas of the website |
+| **Navigation** | Allows users to move easily between the important sections of the application |
+| **User Registration** | Allows new users to create an account |
+| **User Login and Logout** | Allows registered users to securely access account-specific functionality |
+| **Study-Note Library** | Provides a central location where available revision resources can be browsed |
+| **Subject Organisation** | Groups study resources into relevant subjects |
+| **Keyword Search** | Allows users to locate resources using search terms |
+| **Subject Filtering** | Allows users to narrow the study-note library by subject |
+| **Study-Note Detail Pages** | Provides information about individual resources before purchase |
+| **Stripe Checkout** | Allows authenticated users to complete a digital study-note purchase |
+| **Purchase Verification** | Ensures a purchase is only recorded following a successful Stripe payment |
+| **My Purchases** | Provides users with access to resources they have previously purchased |
+| **Purchased Resource Downloads** | Allows eligible users to access their purchased digital files |
+| **Personal Revision Area** | Provides registered users with a private area for their own revision material |
+| **Create Revision Notes** | Allows users to add personal revision content |
+| **Read Revision Notes** | Allows users to view previously created revision material |
+| **Update Revision Notes** | Allows revision material to be changed |
+| **Delete Revision Notes** | Gives users control over removing unnecessary revision content |
+| **Optional File Attachments** | Allows additional files to be stored alongside personal revision notes |
+| **Ownership Protection** | Prevents one user from modifying another user's private revision material |
+| **Responsive Design** | Keeps the application usable across different screen sizes |
+| **Accessibility Features** | Improves usability for users interacting with the application in different ways |
+| **Feedback Messages** | Confirms when important actions have been completed |
+
+
+### Features
+
+The features within UniNotes are divided into several main areas.
+
+| Feature Area | Purpose |
+|---|---|
+| **Resource Discovery** | Helps users find study resources through browsing, searching and filtering |
+| **Authentication** | Provides secure access to personalised functionality |
+| **Digital Purchases** | Allows study notes to be purchased through Stripe Checkout |
+| **Purchase Management** | Allows purchased resources to remain associated with the correct user |
+| **Personal Revision** | Allows users to create and manage their own revision content |
+| **File Handling** | Supports purchased study-note files and optional revision-note attachments |
+| **Responsive UX** | Ensures the application remains usable across different devices |
+| **Accessibility** | Provides clearer interaction through labels, alternative text and accessible navigation |
+| **Security and Permissions** | Protects private content and account-specific functionality |
+
+
+### Features Included
+
+The following features are included within the current scope of UniNotes.
+
+| Included Feature | Description |
+|---|---|
+| **Homepage** | Introduces users to the application and provides navigation to important functionality |
+| **User Registration** | Allows new users to create an account |
+| **Login** | Allows registered users to access their account |
+| **Logout** | Allows authenticated users to securely end their session |
+| **Study-Note Browsing** | Displays the available digital revision resources |
+| **Keyword Search** | Allows study notes to be searched using keywords |
+| **Subject Filtering** | Allows users to view notes associated with a selected subject |
+| **Study-Note Details** | Displays information about individual resources |
+| **Price Display** | Shows the price of a study note before checkout |
+| **Stripe Checkout** | Provides the payment process for digital resources |
+| **Purchase Verification** | Checks successful payment information before recording ownership |
+| **Duplicate Purchase Protection** | Checks whether the authenticated user already owns the selected resource |
+| **My Purchases** | Displays purchased study resources associated with the logged-in account |
+| **Purchased File Access** | Allows authorised users to download purchased digital resources |
+| **Revision Dashboard** | Provides users with access to their personal revision material |
+| **Create Revision Note** | Allows users to create new revision content |
+| **View Revision Note** | Allows users to read previously stored revision content |
+| **Edit Revision Note** | Allows users to update their personal revision material |
+| **Delete Revision Note** | Allows users to remove revision notes |
+| **Revision Attachments** | Allows an optional file to be associated with a revision note |
+| **Ownership Checks** | Prevents users from editing or deleting revision notes owned by another account |
+| **Responsive Navigation** | Provides navigation suitable for smaller screens |
+| **Feedback Messages** | Provides confirmation following important user actions |
+| **Empty States** | Provides information when no relevant content is available |
+
+
+### Features Outside the Current Scope
+
+Some potentially useful features are intentionally excluded from the current scope because they are not required for the MVP.
+
+| Feature Outside Scope | Reason |
+|---|---|
+| **Public User Upload Marketplace** | The current platform does not allow users to upload and sell their own commercial study notes |
+| **Seller Accounts** | Separate seller functionality is not required for the current user journey |
+| **Admin / Staff Dashboard** | The current application is focused on student-facing functionality and does not require a custom staff dashboard |
+| **Ratings and Reviews** | Useful for a larger marketplace but not necessary for the core purchasing journey |
+| **Subscriptions** | UniNotes currently uses individual study-note purchases rather than recurring payments |
+| **Shopping Basket** | Resources are purchased individually through the existing checkout process |
+| **Discount Codes** | Promotional pricing is not required for the MVP |
+| **User-to-User Messaging** | Communication between users is outside the purpose of the current application |
+| **Social Features** | Following users, commenting and public profiles are not required |
+| **Advanced Recommendations** | Personalised recommendation algorithms would add unnecessary complexity to the MVP |
+| **Email Notifications** | Automated purchase and account emails are not part of the current core functionality |
+| **Mobile Application** | UniNotes is currently developed as a responsive web application rather than a native mobile app |
+
+
+### Future Features
+
+Once the MVP has been successfully completed, tested and deployed, UniNotes could be expanded with additional functionality.
+
+| Future Feature | Potential Benefit |
+|---|---|
+| **Ratings and Reviews** | Could help students evaluate study resources before purchasing |
+| **Saved Resources / Wishlist** | Would allow users to return to resources they are considering purchasing |
+| **Advanced Search Filters** | Could allow filtering by additional criteria such as price or topic |
+| **Revision Search** | Would help users search within larger collections of personal revision notes |
+| **Revision Tags** | Could provide additional organisation for personal revision material |
+| **Favourites** | Would provide faster access to frequently used resources |
+| **Recently Viewed Notes** | Would help users return to resources they recently explored |
+| **Study Progress Tracking** | Could allow students to track completed and incomplete revision topics |
+| **Resource Previews** | Could allow users to preview part of a resource before purchasing |
+| **Email Purchase Confirmations** | Could provide users with an additional record of completed purchases |
+| **Password Reset by Email** | Would improve account recovery |
+| **User Profile Settings** | Could provide additional account personalisation |
+| **Resource Recommendations** | Could suggest relevant resources based on subjects viewed or purchased |
+| **Expanded Accessibility Testing** | Could further improve keyboard, screen-reader and visual accessibility |
+| **Expanded Automated Tests** | Could provide greater protection against regressions as the platform grows |
+
+
+### Functional Requirements
+
+Functional requirements define what the UniNotes application must allow users to do.
+
+| Functional Requirement |
+|---|
+| Users must be able to browse available study notes |
+| Users must be able to search the study-note library |
+| Users must be able to filter resources by subject |
+| Users must be able to view information about an individual study note |
+| New users must be able to register for an account |
+| Registered users must be able to log in |
+| Authenticated users must be able to log out |
+| Authenticated users must be able to purchase eligible study notes |
+| Stripe Checkout must be used for the payment process |
+| Successful purchases must be associated with the authenticated user |
+| Users must be able to view their previous purchases |
+| Purchased resources must only be available where the appropriate purchase exists |
+| Authenticated users must be able to create personal revision notes |
+| Users must be able to view their revision notes |
+| Users must be able to update their revision notes |
+| Users must be able to delete their revision notes |
+| Users must be able to optionally add a file attachment to a revision note |
+| Users must not be able to edit or delete another user's revision notes |
+| Appropriate feedback must be shown after important actions |
+| The interface must provide understandable navigation between key areas |
+
+
+### Non-Functional Requirements
+
+Non-functional requirements describe how UniNotes should perform rather than defining individual user actions.
+
+| Requirement | Description |
+|---|---|
+| **Usability** | Navigation and page layouts should be clear and understandable without specialist instructions |
+| **Performance** | Normal pages and database queries should load within a reasonable time |
+| **Reliability** | Core functionality should behave consistently and handle invalid requests appropriately |
+| **Security** | Authentication, permissions and ownership checks should protect private functionality |
+| **Maintainability** | Code should be organised logically across Django applications, models, views, forms and templates |
+| **Scalability** | The database structure should allow additional subjects and study resources to be introduced |
+| **Accessibility** | Interfaces should include appropriate labels, alternative text and keyboard-friendly functionality |
+| **Responsiveness** | Pages should adapt appropriately to desktop, tablet and mobile-sized screens |
+| **Consistency** | Navigation, forms, buttons and content presentation should remain visually and functionally consistent |
+| **Data Integrity** | Purchases, revision notes and resources should remain associated with the correct database records |
+| **Error Handling** | Invalid requests and unavailable content should be handled without exposing sensitive application information |
+
+
+### Content Requirements
+
+UniNotes requires appropriate content to allow users to understand and interact with the application.
+
+| Content | Requirement |
+|---|---|
+| **Study-Note Title** | Each resource requires a clear title |
+| **Subject** | Study notes should be associated with an appropriate subject |
+| **Description** | Resources should include enough information for users to understand what they contain |
+| **Price** | Paid resources must display a clear price |
+| **Study-Note File** | Purchasable digital resources require an associated file where appropriate |
+| **Revision Note Title** | Personal notes require a title so users can identify them |
+| **Revision Subject** | Users should be able to identify the subject of their personal revision note |
+| **Revision Content** | Users require an area for entering their own revision material |
+| **Revision Attachment** | Supporting files may optionally be added |
+| **Navigation Labels** | Navigation text must clearly explain where links lead |
+| **Form Labels** | Form fields must provide understandable labels |
+| **Feedback Messages** | Appropriate confirmation and error messages must be available |
+| **Empty-State Content** | Users must receive clear information when no relevant data is available |
+
+
+### User Requirements
+
+The application must support the requirements of both primary and secondary target users.
+
+| User Requirement | How UniNotes Addresses It |
+|---|---|
+| Find revision material quickly | Keyword search |
+| Browse by subject | Subject filtering |
+| Explore before registering | Public browsing functionality |
+| Understand a resource before purchasing | Study-note detail pages |
+| Create an account | Registration functionality |
+| Securely access personalised features | Login and authentication |
+| Purchase digital resources | Stripe Checkout |
+| Return to purchased resources | My Purchases |
+| Download owned resources | Purchase-based resource access |
+| Create personal revision content | Revision-note creation |
+| Update revision material | Revision-note editing |
+| Remove unwanted content | Revision-note deletion |
+| Add supporting material | Optional attachments |
+| Keep personal content private | User ownership checks |
+| Receive feedback | Confirmation and error messages |
+| Use the website on different devices | Responsive design |
+
+
+### Technical Requirements
+
+The application requires a suitable full-stack technical structure to support the planned functionality.
+
+| Technical Requirement | Implementation |
+|---|---|
+| **Back-End Language** | Python |
+| **Web Framework** | Django |
+| **Front-End Structure** | HTML and Django templates |
+| **Styling** | Custom CSS |
+| **Client-Side Interaction** | JavaScript |
+| **Database Interaction** | Django ORM |
+| **Local Database** | SQLite |
+| **Production Database Support** | PostgreSQL |
+| **Authentication** | Django authentication system |
+| **Payment Processing** | Stripe Python library and Stripe API |
+| **Static Files** | Django static files with WhiteNoise production support |
+| **Environment Configuration** | Environment variables and python-dotenv |
+| **Production Server** | Gunicorn |
+| **Deployment Configuration** | Heroku-compatible project configuration |
+| **Version Control** | Git and GitHub |
+| **Automated Testing** | Django testing framework |
+
+
+### CRUD Requirements
+
+CRUD functionality is provided through the personal revision-note system.
+
+CRUD stands for **Create, Read, Update and Delete** and gives users full control over revision content associated with their account.
+
+
+#### Create
+
+Authenticated users must be able to create new revision notes.
+
+The Create functionality must:
+
+- Require the user to be authenticated
+- Allow a title to be entered
+- Allow a subject to be selected or associated
+- Allow written revision content to be entered
+- Allow an optional supporting attachment
+- Associate the revision note with the currently authenticated user
+- Save valid information to the database
+- Provide feedback after successful creation
+
+
+#### Read
+
+Authenticated users must be able to view their saved revision notes.
+
+The Read functionality must:
+
+- Display revision notes belonging to the user
+- Allow an individual revision note to be viewed
+- Display the stored title
+- Display the associated subject
+- Display the revision content
+- Provide access to an attachment where one exists
+- Protect private content from inappropriate access
+
+
+#### Update
+
+Authenticated users must be able to modify revision notes they previously created.
+
+The Update functionality must:
+
+- Require authentication
+- Retrieve the existing revision note
+- Confirm that the revision note belongs to the authenticated user
+- Display existing information for editing
+- Allow valid information to be changed
+- Save updated information to the database
+- Display the updated content
+- Prevent another user from updating the note
+
+
+#### Delete
+
+Authenticated users must be able to remove revision notes they no longer require.
+
+The Delete functionality must:
+
+- Require authentication
+- Confirm that the revision note belongs to the authenticated user
+- Allow the selected revision note to be deleted
+- Remove the database record when deletion is completed
+- Prevent another user from deleting the note
+- Provide appropriate feedback after successful deletion
+
+
+### Authentication Requirements
+
+Authentication is required to separate public functionality from personalised user functionality.
+
+UniNotes uses Django's authentication system to identify users and control access to protected areas.
+
+
+#### Anonymous User Permissions
+
+Users who are not logged in should be able to:
+
+- Visit the homepage
+- Navigate public areas of the website
+- Browse the available study-note library
+- Search for study resources
+- Filter resources by subject
+- View individual study-note information
+- Access registration
+- Access login
+
+Anonymous users should not be able to:
+
+- Access private revision-note functionality
+- Create revision notes
+- Edit revision notes
+- Delete revision notes
+- Access another user's purchases
+- Download resources that require a valid purchase
+- Complete account-specific functionality without authentication
+
+
+#### Registered User Permissions
+
+Authenticated users should be able to:
+
+- Access public functionality
+- Browse study resources
+- Search and filter study notes
+- View resource details
+- Begin eligible purchases
+- Complete Stripe Checkout
+- Access their own My Purchases area
+- Access resources they have purchased
+- Create personal revision notes
+- View their revision notes
+- Edit their revision notes
+- Delete their revision notes
+- Add optional revision-note attachments
+- Log out of their account
+
+
+#### Ownership Requirements
+
+Ownership requirements are necessary to protect personalised information.
+
+The application must ensure that:
+
+- Revision notes are associated with the user who created them
+- Users can only modify revision notes belonging to their own account
+- Users cannot delete another user's revision notes
+- Purchase records are associated with the authenticated purchaser
+- Purchased-resource access depends on the appropriate purchase record
+- Account-specific database queries use the authenticated user when retrieving private information
+
+These checks help prevent insecure direct access to another user's private content.
+
+
+### E-Commerce Requirements
+
+The e-commerce functionality within UniNotes focuses on the sale and distribution of digital study resources.
+
+The application does not sell physical products and therefore does not require functionality such as delivery addresses, shipping calculations or physical stock management.
+
+
+#### Products / Services / Purchases
+
+Within UniNotes, the digital **study notes** act as the products available for purchase.
+
+Each purchasable study note requires information including:
+
+- A title
+- A subject
+- A description
+- A price
+- An associated digital resource
+
+Purchase records must:
+
+- Be associated with the authenticated user
+- Identify the purchased study note
+- Represent successful access to the resource
+- Allow previously purchased material to appear in My Purchases
+
+The application should also check for an existing purchase during the normal purchase journey to reduce unnecessary duplicate transactions.
+
+
+#### Checkout Requirements
+
+The checkout process must:
+
+1. Require an authenticated user.
+2. Identify the study note selected for purchase.
+3. Retrieve the correct price from server-controlled data.
+4. Create a Stripe Checkout Session.
+5. Direct the user to Stripe's hosted checkout.
+6. Return the user to the appropriate success or cancellation route.
+7. Retrieve the relevant Stripe Checkout Session following successful checkout.
+8. Verify the session information.
+9. Confirm that Stripe reports the payment as successfully completed.
+10. Confirm that the payment relates to the expected study note and user.
+11. Create or confirm the appropriate purchase record.
+12. Provide access to the resource through My Purchases.
+
+
+#### Payment Requirements
+
+The payment system must:
+
+- Use Stripe Checkout
+- Use server-side Stripe integration
+- Avoid storing payment-card information within the UniNotes database
+- Store Stripe API credentials securely using environment variables
+- Use test-mode credentials during development and assessment
+- Verify successful payment before granting resource ownership
+- Use the server-side price rather than trusting a value supplied by the browser
+- Prevent purchase access from being granted solely because a user reaches a success URL
+
+
+### API Requirements
+
+UniNotes uses the **Stripe API** as its main external API.
+
+The API integration must:
+
+- Use the official Stripe Python library
+- Authenticate using a Stripe secret key stored outside the source code
+- Create Checkout Sessions on the server
+- Pass the appropriate study-note and payment information
+- Retrieve completed Checkout Sessions
+- Check the Stripe payment status
+- Verify relevant session metadata or associated information
+- Handle unsuccessful or invalid checkout responses appropriately
+
+UniNotes should not rely on API responses supplied directly by the browser when determining whether a user owns a purchased resource.
+
+
+### Accessibility Requirements
+
+Accessibility is considered throughout the UniNotes interface so that the website is easier to use for a wider range of users.
+
+The application should:
+
+- Use semantic HTML where appropriate
+- Provide descriptive page headings
+- Maintain a logical heading hierarchy
+- Provide labels for form fields
+- Provide alternative text for meaningful images
+- Avoid relying entirely on colour to communicate information
+- Provide clear button and link text
+- Include keyboard-accessible navigation
+- Provide a skip-to-content option
+- Use appropriate `aria` attributes where required
+- Maintain suitable text/background contrast
+- Provide visible focus states for interactive elements
+- Keep form errors and feedback understandable
+- Ensure navigation can be operated on smaller screens
+- Use responsive layouts without making content unreadable
+
+Accessibility should continue to be reviewed during testing rather than being treated as a single development task.
+
+
+### Responsive Design Requirements
+
+UniNotes must remain usable across common screen sizes.
+
+Responsive design requirements include:
+
+- Content should adapt to desktop, tablet and mobile-sized screens
+- Navigation should remain usable when horizontal space is limited
+- The responsive navigation menu should be operable using keyboard and pointer interaction
+- Cards and content sections should resize appropriately
+- Forms should remain readable without unnecessary horizontal scrolling
+- Buttons and links should remain usable on smaller displays
+- Text should remain readable without requiring excessive zoom
+- Images and media should not overflow their containers
+- Important functionality should remain available regardless of screen size
+- Layout changes should preserve a clear visual hierarchy
+
+
+### Security Requirements
+
+Security is particularly important because UniNotes includes authentication, private revision material, file access and payment functionality.
+
+The application must include appropriate protection for each area.
+
+| Security Requirement | Purpose |
+|---|---|
+| **Authentication Protection** | Restricts personalised functionality to logged-in users |
+| **Ownership Validation** | Prevents users from modifying revision notes belonging to another account |
+| **Purchase Validation** | Ensures digital resources are only provided where an appropriate purchase exists |
+| **Stripe Payment Verification** | Prevents access being granted solely from a client-side redirect |
+| **Server-Side Pricing** | Prevents users from changing the resource price through browser-supplied data |
+| **Environment Variables** | Keeps secrets and API credentials outside the main source code |
+| **Django Password Handling** | Uses Django's authentication system rather than storing plain-text passwords |
+| **CSRF Protection** | Protects forms that modify application data from cross-site request forgery |
+| **Form Validation** | Prevents invalid information from being stored without appropriate checks |
+| **Secure Database Queries** | Django ORM reduces the need for manually constructed SQL queries |
+| **Protected File Access** | Purchased and private content should only be provided to authorised users |
+| **Production Debug Configuration** | Debug information should not be exposed in a production environment |
+| **Allowed Hosts Configuration** | Production hosts should be explicitly configured |
+| **Secret Key Protection** | Django's secret key must not be publicly committed |
+| **Error Handling** | Errors should not reveal sensitive server or configuration information |
+
+Security requirements are considered alongside functionality rather than being added only after development.
+
+This is particularly important for UniNotes because the application combines **user accounts, private user-generated content, database records, downloadable files and external payment processing**. Protecting these areas helps maintain user trust and ensures that account-specific functionality behaves as intended.
