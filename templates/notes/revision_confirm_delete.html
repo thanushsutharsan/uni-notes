@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Delete revision note | UniNotes{% endblock %}
+{% block content %}
+<section class="shell section form-shell">
+    <div class="form-card">
+        <span class="eyebrow">Revision</span>
+        <h1>Delete revision note?</h1>
+        <p>
+            You are about to permanently delete <strong>{{ revision_note.title }}</strong>.
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button class="button button-danger" type="submit">
+                    Yes, delete note
+                </button>
+                <a class="button button-secondary" href="{% url 'notes:revision_detail' revision_note.pk %}">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
