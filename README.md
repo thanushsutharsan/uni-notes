@@ -4150,3 +4150,59 @@ The final interface maintains the same underlying structure across the applicati
 This provides consistency without requiring every page to have exactly the same layout.
 
 Overall, the Surface design completes the UX process by transforming the functional wireframes into a **recognisable, responsive and accessible UniNotes interface** while ensuring that visual styling continues to support the main purpose of the application: helping university students find, purchase and organise revision resources.
+
+# Bug Fix During Development
+
+## Note Card Image Fallback
+
+During development, I found an issue with the fallback image used on the note cards. The original code used a complicated `onerror` attribute containing Django static template tags and several quotation marks.
+
+This caused warnings in VS Code and made the image fallback harder to manage.
+
+### Before the Fix
+
+The original implementation attempted to load the subject image first and then the default fallback image if that also failed.
+
+```html
+onerror="if (this.dataset.fallbackApplied) { this.onerror=null; this.src='{% static &quot;images/subjects/fallback.png&quot; %}'; } else { this.dataset.fallbackApplied='1'; this.src='{% static &quot;images/subjects/&quot; %}{{ note.subject.slug }}.png'; }"
+```
+
+The nested Django template tags and quotation marks made the code difficult to read and caused warnings in VS Code.
+
+### Screenshot of the Issue
+
+![Note card fallback error](static/images/in-dev-bugs/bug-0.1-dev-error.png)
+
+### Fix
+
+I simplified the fallback image handling by storing the fallback image URL inside a `data-fallback` attribute.
+
+```html
+{% if note.cover_url %}
+    <img
+        src="{{ note.cover_url }}"
+        alt="Cover for {{ note.title }}"
+        data-fallback="{% static 'images/subjects/fallback.png' %}"
+        onerror="this.onerror=null; this.src=this.dataset.fallback;"
+    >
+{% else %}
+    <img
+        src="{% static 'images/subjects/' %}{{ note.subject.slug }}.png"
+        alt="{{ note.subject.name }} study notes cover"
+        data-fallback="{% static 'images/subjects/fallback.png' %}"
+        onerror="this.onerror=null; this.src=this.dataset.fallback;"
+    >
+{% endif %}
+```
+
+If the original image fails to load, the `onerror` event now reads the fallback image path from the `data-fallback` attribute.
+
+This removed the complicated nested quotation marks and made the code easier to read and maintain.
+
+### After the Fix
+
+After making the change, the note cards displayed the fallback image correctly when an image could not be loaded.
+
+### Screenshot of the Working Fix
+
+![Note card fallback working](static/images/in-dev-bugs/bug-0.1-dev-fix.png)
