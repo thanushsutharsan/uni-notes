@@ -1,0 +1,239 @@
+
+/*global color variables */
+:root {
+    --ink: #171a35;
+    --muted: #666a7a;
+    --surface: #ffffff;
+    --surface-soft: #f5f6ff;
+    --line: #e2e4ef;
+    --primary: #5b3df5;
+    --primary-dark: #4430c7;
+    --danger: #c63d4f;
+    --success: #168a5b;
+    --shadow: 0 14px 35px rgba(30, 34, 90, 0.10);
+    --radius: 18px;
+}
+ /*basic page reset */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: #fbfbfe;
+    line-height: 1.6;
+}
+
+main {
+    flex: 1 0 auto;
+}
+/*links and images */
+a {
+    color: var(--primary-dark);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+/*forms elements defaults */
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+    outline-offset: 3px;
+}
+/*visable keyboard for accessibility */
+
+:focus-visible {
+    outline: 3px solid #ffbf47;
+}
+/* re-usable page containers */
+.shell {
+    width: min(1120px, calc(100% - 32px));
+    margin: 0 auto;
+}
+
+.narrow {
+    width: min(820px, calc(100% - 32px));
+}
+/* acessibility skip-link */
+.skip-link {
+    position: absolute;
+    top: -80px;
+    left: 16px;
+    z-index: 100;
+    padding: 10px 14px;
+    background: var(--ink);
+    color: #fff;
+}
+
+.skip-link:focus {
+    top: 12px;
+}
+/* site header */
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+/* main navigation */
+
+.nav {
+    position: relative;
+    min-height: 84px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 24px;
+}
+
+.brand {
+    position: absolute;
+    left: 50%;
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+    color: var(--ink);
+    transform: translateX(-50%);
+}
+
+.brand img {
+    display: block;
+    width: clamp(160px, 13.5vw, 198px);
+    height: 50px;
+    object-fit: contain;
+    object-position: left center;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+/* nav toggle button for mobile */
+
+.nav-toggle {
+    display: none;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 1px solid #dfe3f3;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(17, 22, 45, 0.08);
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.nav-toggle:hover {
+    border-color: #b9c0e7;
+    box-shadow: 0 8px 22px rgba(17, 22, 45, 0.12);
+}
+
+.nav-toggle:active {
+    transform: scale(0.97);
+}
+
+.nav-toggle:focus-visible {
+    outline: 3px solid rgba(121, 101, 255, 0.28);
+    outline-offset: 3px;
+}
+
+.nav-toggle-line {
+    display: block;
+    width: 24px;
+    height: 2.5px;
+    margin: 4px auto;
+    border-radius: 999px;
+    background: var(--ink);
+    transform-origin: center;
+    transition: transform 0.22s ease;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-line:nth-child(1) {
+    transform: translateY(5.25px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-line:nth-child(2) {
+    transform: translateY(-5.25px) rotate(-45deg);
+}
+/* navigation links styling */
+
+.nav-links > a:not(.button),
+.link-button {
+    color: var(--ink);
+    font-weight: 650;
+}
+
+.revision-locked {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #5f6478 !important;
+    white-space: nowrap;
+}
+
+.revision-lock-icon {
+    font-size: 0.82rem;
+    line-height: 1;
+}
+
+.revision-lock-label {
+    padding: 3px 7px;
+    border: 1px solid #dfe3f3;
+    border-radius: 999px;
+    color: #6c7187;
+    background: #f7f7fc;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.revision-locked:hover,
+.revision-locked:focus-visible {
+    color: #4d36cb !important;
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+}
+
+.link-button {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
