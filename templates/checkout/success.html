@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Payment Successful | UniNotes{% endblock %}
+{% block content %}
+<section class="shell section result-card">
+    <div class="result-icon success-icon" aria-hidden="true">✓</div>
+    <h1>Payment successful</h1>
+    <p>{{ note.title }} is now available in your account.</p>
+    <a class="button" href="{% url 'notes:download' note.pk %}">Download note</a>
+    <a class="button button-secondary" href="{% url 'notes:purchases' %}">Go to my purchases</a>
+    <a class="button button-secondary" href="{% url 'notes:browse' %}">Browse more notes</a>
+</section>
+{% endblock %}
