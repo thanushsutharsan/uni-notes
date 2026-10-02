@@ -29,11 +29,10 @@
         {% for subject in subjects %}
             <a class="subject-card" href="{% url 'notes:browse' %}?subject={{ subject.slug }}">
                 <div class="subject-card-media">
-                    <img
-                        src="{% static 'images/subjects/' %}{{ subject.slug }}.png"
-                        alt="{{ subject.name }} study subject illustration"
-                        data-fallback="{% static 'images/subjects/fallback.png' %}"
-                        onerror="this.onerror=null;this.src=this.dataset.fallback">
+                  <img
+                      src="{% static 'images/subjects/' %}{{ subject.slug }}.png"
+                      alt="{{ subject.name }} study subject illustration"
+                >
                 </div>
                 <div class="subject-card-body">
                     <strong>{{ subject.name }}</strong>
