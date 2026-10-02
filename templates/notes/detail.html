@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ note.title }} | UniNotes{% endblock %}
+{% block content %}
+<section class="shell section detail-grid">
+    <div class="detail-cover">
+        {% if note.cover_url %}
+            <img
+                src="{{ note.cover_url }}"
+                alt="Cover for {{ note.title }}"
+                onerror="if (this.dataset.fallbackApplied) { this.onerror=null; this.src='{% static &quot;images/subjects/fallback.png&quot; %}'; } else { this.dataset.fallbackApplied='1'; this.src='{% static &quot;images/subjects/&quot; %}{{ note.subject.slug }}.png'; }">
+        {% else %}
+            <img
+                src="{% static 'images/subjects/' %}{{ note.subject.slug }}.png"
+                alt="{{ note.subject.name }} study notes cover"
+                onerror="this.onerror=null;this.src='{% static &quot;images/subjects/fallback.png&quot; %}';">
+        {% endif %}
+    </div>
+    <div class="detail-copy">
+        <span class="eyebrow">{{ note.subject.name }}</span>
+        <h1>{{ note.title }}</h1>
+        <div class="price">£{{ note.price }}</div>
+        <p>{{ note.description }}</p>
+
+        {% if purchased %}
+            <a class="button" href="{% url 'notes:download' note.pk %}">Download note</a>
+        {% elif user.is_authenticated %}
+            <form action="{% url 'checkout:buy' note.pk %}" method="post">
+                {% csrf_token %}
+                <button class="button button-wide" type="submit">Buy now — £{{ note.price }}</button>
+            </form>
+            <p class="helper-text">Secure test payment is handled by Stripe Checkout.</p>
+        {% else %}
+            <a class="button button-wide" href="{% url 'login' %}?next={{ request.path }}">Login to buy</a>
+            <p class="helper-text">Create an account so your purchases stay linked to you.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
