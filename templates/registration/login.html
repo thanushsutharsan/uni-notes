@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Login | UniNotes{% endblock %}
+{% block content %}
+<section class="shell section auth-layout">
+    <div class="auth-side">
+        <img class="brand-mark" src="{% static 'images/uninotes-logo.png' %}" alt="UniNotes logo">
+        <h1>Welcome back</h1>
+        <p>Login to access your purchased revision notes.</p>
+    </div>
+    <div class="form-card">
+        <span class="eyebrow">Student account</span>
+        <h2>Login</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="field-error">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                </div>
+            {% endfor %}
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            <button class="button button-wide" type="submit">Login</button>
+        </form>
+        <p class="form-footer">No account? <a href="{% url 'register' %}">Register</a></p>
+    </div>
+</section>
+{% endblock %}
