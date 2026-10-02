@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Payment Cancelled | UniNotes{% endblock %}
+{% block content %}
+<section class="shell section result-card">
+    <div class="result-icon cancel-icon" aria-hidden="true">×</div>
+    <h1>Payment cancelled</h1>
+    <p>You have not been charged for {{ note.title }}.</p>
+    <a class="button" href="{{ note.get_absolute_url }}">Return to note</a>
+    <a class="button button-secondary" href="{% url 'notes:browse' %}">Browse notes</a>
+</section>
+{% endblock %}
