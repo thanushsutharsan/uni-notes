@@ -1,0 +1,122 @@
+[
+{
+  "model": "notes.studynote",
+  "pk": 1,
+  "fields": {
+    "subject": 1,
+    "title": "Marketing Principles Revision Notes",
+    "description": "Key marketing models, definitions and exam-focused summaries.",
+    "price": "5.00",
+    "cover_url": "",
+    "note_file": "study_notes/marketing_principles.pdf",
+    "download_url": "",
+    "is_active": true,
+    "created_at": "2026-10-02T22:03:31.882Z"
+  }
+},
+{
+  "model": "notes.studynote",
+  "pk": 2,
+  "fields": {
+    "subject": 2,
+    "title": "Data Structures Summary Notes",
+    "description": "Arrays, stacks, queues, linked lists and trees explained clearly.",
+    "price": "6.00",
+    "cover_url": "",
+    "note_file": "study_notes/data_structures.pdf",
+    "download_url": "",
+    "is_active": true,
+    "created_at": "2026-10-02T22:03:31.882Z"
+  }
+},
+{
+  "model": "notes.studynote",
+  "pk": 3,
+  "fields": {
+    "subject": 3,
+    "title": "Contract Law Complete Notes",
+    "description": "A concise overview of core contract law principles.",
+    "price": "7.00",
+    "cover_url": "",
+    "note_file": "study_notes/contract_law.pdf",
+    "download_url": "",
+    "is_active": true,
+    "created_at": "2026-10-02T22:03:31.883Z"
+  }
+},
+{
+  "model": "notes.studynote",
+  "pk": 4,
+  "fields": {
+    "subject": 4,
+    "title": "Calculus Fundamentals",
+    "description": "Differentiation and integration rules with revision reminders.",
+    "price": "5.50",
+    "cover_url": "",
+    "note_file": "study_notes/calculus_fundamentals.pdf",
+    "download_url": "",
+    "is_active": true,
+    "created_at": "2026-10-02T22:03:31.884Z"
+  }
+},
+{
+  "model": "notes.studynote",
+  "pk": 5,
+  "fields": {
+    "subject": 5,
+    "title": "Cognitive Psychology Revision Guide",
+    "description": "Memory, attention and research evaluation in concise sections.",
+    "price": "5.50",
+    "cover_url": "",
+    "note_file": "study_notes/cognitive_psychology.pdf",
+    "download_url": "",
+    "is_active": true,
+    "created_at": "2026-10-02T22:03:31.884Z"
+  }
+},
+{
+  "model": "notes.studynote",
+  "pk": 6,
+  "fields": {
+    "subject": 6,
+    "title": "Microeconomics Exam Notes",
+    "description": "Demand, supply, equilibrium and elasticity for exam revision.",
+    "price": "6.00",
+    "cover_url": "",
+    "note_file": "study_notes/microeconomics.pdf",
+    "download_url": "",
+    "is_active": true,
+    "created_at": "2026-10-02T22:03:31.885Z"
+  }
+},
+{
+  "model": "notes.studynote",
+  "pk": 7,
+  "fields": {
+    "subject": 2,
+    "title": "Database Systems Revision Notes",
+    "description": "Relational databases, keys, normalisation and SQL fundamentals.",
+    "price": "6.50",
+    "cover_url": "",
+    "note_file": "study_notes/database_systems.pdf",
+    "download_url": "",
+    "is_active": true,
+    "created_at": "2026-10-02T22:03:31.886Z"
+  }
+},
+{
+  "model": "notes.studynote",
+  "pk": 8,
+  "fields": {
+    "subject": 1,
+    "title": "Business Finance Essentials",
+    "description": "Revenue, costs, profit and break-even explained for revision.",
+    "price": "5.00",
+    "cover_url": "",
+    "note_file": "study_notes/business_finance.pdf",
+    "download_url": "",
+    "is_active": true,
+    "created_at": "2026-10-02T22:03:31.886Z"
+  }
+}
+]
