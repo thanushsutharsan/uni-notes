@@ -3544,3 +3544,609 @@ Success Displayed
 ```
 
 This combination of **visual confirmation, server-side validation and clear feedback** helps ensure that users understand the result of important actions and reduces accidental or unauthorised changes.
+
+
+## V. Surface
+
+The **Surface Plane** represents the final visual appearance of **UniNotes** and brings together the decisions made during the Strategy, Scope, Structure and Skeleton stages.
+
+The surface design focuses on creating a modern educational platform that feels clear, trustworthy and easy to use. Visual decisions were made to support the functionality of the website rather than distract from it.
+
+The interface uses a consistent combination of:
+
+- Navy text
+- Purple interactive elements
+- White content surfaces
+- Soft purple and grey backgrounds
+- Rounded cards
+- Consistent button styles
+- Clear typography
+- Responsive spacing
+- Accessible focus states
+- Subject-related imagery
+- A consistent UniNotes logo
+
+The final design aims to give UniNotes its own visual identity while maintaining a professional appearance suitable for university students.
+
+
+### Design Decisions
+
+The visual design of UniNotes was developed around the needs of the target audience.
+
+University students need to quickly identify resources, understand prices, locate account functionality and manage their own revision material. Therefore, the design avoids unnecessary visual complexity and places greater emphasis on readability and clear actions.
+
+
+#### Colour Scheme
+
+UniNotes uses a mainly **navy, purple and white colour palette**.
+
+The main colours are stored as CSS variables so they can be reused consistently throughout the application.
+
+| Colour | Hex Value | Usage |
+|---|---|---|
+| **Dark Navy** | `#171a35` | Main text, footer background and important interface elements |
+| **Primary Purple** | `#5b3df5` | Primary buttons, interactive elements and branding accents |
+| **Dark Purple** | `#4430c7` | Hover states, links and stronger purple contrast |
+| **Muted Grey** | `#666a7a` | Secondary text and supporting information |
+| **White** | `#ffffff` | Cards, forms and primary content surfaces |
+| **Soft Surface** | `#f5f6ff` | Soft background areas and visual separation |
+| **Page Background** | `#fbfbfe` | Main website background |
+| **Border Colour** | `#e2e4ef` | Borders around cards and interface components |
+| **Danger Red** | `#c63d4f` | Destructive actions such as deletion |
+| **Success Green** | `#168a5b` | Successful-result indicators |
+| **Focus Orange** | `#ffbf47` | Visible keyboard focus outline |
+
+Purple was selected as the primary accent because it provides a strong contrast against the white interface while giving UniNotes a recognisable identity.
+
+Dark navy is used instead of pure black for most text because it maintains strong readability while working more naturally with the purple colour scheme.
+
+White surfaces are used for cards and forms to separate important content from the light page background.
+
+
+#### Typography
+
+UniNotes uses the following font stack:
+
+`Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+
+**Inter** is the preferred typeface, with system fonts available as fallbacks.
+
+A sans-serif font was selected because it provides:
+
+- Clear readability
+- A modern appearance
+- Good performance at small sizes
+- Consistency across interface elements
+- Suitable presentation for digital content
+
+Typography is used to create hierarchy throughout the application.
+
+Large headings identify the main purpose of each page, while smaller headings separate individual sections.
+
+Supporting information such as:
+
+- Subjects
+- Dates
+- Help text
+- Descriptions
+- Secondary information
+
+uses more muted styling so that it does not compete with the main content.
+
+The homepage hero uses responsive typography through CSS `clamp()` so that the heading adapts to the available screen width without requiring separate fixed font sizes for every device.
+
+
+#### Images and Media
+
+Images are used to support the content rather than being included only for decoration.
+
+UniNotes includes:
+
+- The UniNotes logo
+- Homepage hero imagery
+- Subject images
+- Study-note cover images
+- Fallback images
+
+The project contains subject-specific images for areas such as:
+
+- Computer Science
+- Law
+- Economics
+- Mathematics
+- Psychology
+- Business
+
+Subject imagery helps users visually distinguish between different study areas.
+
+Study-note cards can display a resource-specific `cover_url`. If that image is unavailable, the interface falls back to the relevant subject image.
+
+If the subject image is also unavailable, a general fallback image is used.
+
+This creates a more robust visual system because a broken external image does not leave the interface with an empty or broken image element.
+
+Images use responsive CSS such as:
+
+- `max-width: 100%`
+- `object-fit: cover`
+- Defined aspect ratios
+
+This helps maintain a consistent card layout across different resources and screen sizes.
+
+
+#### Icons
+
+UniNotes does not depend on a large external icon library.
+
+Simple interface icons and symbols are used only where they improve understanding.
+
+Examples include:
+
+- Hamburger navigation lines
+- Lock indicator for restricted Revision access
+- Success indicator
+- Cancellation indicator
+
+The responsive hamburger icon is created using CSS rather than an external image.
+
+When the menu opens, the lines transform to indicate the changed navigation state.
+
+Icons are used alongside text where necessary so that important actions are not communicated using an icon alone.
+
+Decorative icon elements can also use `aria-hidden="true"` where appropriate so that unnecessary information is not announced by screen readers.
+
+
+#### Buttons
+
+Buttons use a consistent design throughout UniNotes.
+
+The primary button style uses:
+
+- Purple background
+- White text
+- Rounded corners
+- Clear padding
+- Strong font weight
+- Minimum interactive height
+
+The main button styling includes:
+
+- `min-height: 44px`
+- `border-radius: 10px`
+- Purple background
+- Darker purple hover state
+
+Primary buttons are used for important actions such as:
+
+- Register
+- Search
+- View
+- Save
+- Purchase
+
+Secondary buttons use a white background with purple text.
+
+This allows lower-priority actions to remain available without competing visually with the primary action.
+
+Dangerous actions use the red danger colour so they can be visually distinguished from normal actions.
+
+Button styles include:
+
+| Button Type | Purpose |
+|---|---|
+| **Primary Button** | Main page action |
+| **Small Button** | Compact actions within cards |
+| **Wide Button** | Full-width actions where appropriate |
+| **Secondary Button** | Lower-priority or alternative action |
+| **Danger Button** | Destructive action such as deletion |
+
+Hover states are also used to show users that the element is interactive.
+
+
+#### Forms
+
+Form styling remains consistent between authentication forms and revision-note forms.
+
+Inputs, select menus and textareas use:
+
+- White backgrounds
+- Dark navy text
+- Light grey borders
+- Rounded corners
+- Consistent internal padding
+- Full available width
+- Visible focus states
+
+Standard form controls use a minimum height of approximately `46px`, helping make them easier to interact with.
+
+Textareas use a larger minimum height because users may need to enter longer revision content.
+
+Form labels are displayed above fields and use increased font weight so that the purpose of each field is clear.
+
+Validation errors are displayed near the relevant field and use a darker red colour.
+
+Fields containing an error also receive a red border.
+
+This gives users both textual and visual feedback instead of relying on colour alone.
+
+
+#### Cards and Components
+
+Cards are one of the main reusable visual components within UniNotes.
+
+Cards are used for:
+
+- Subjects
+- Study notes
+- Revision notes
+- Forms
+- Study-note details
+- Purchases
+- Empty states
+- Checkout results
+
+A common visual style is used across these components:
+
+- White background
+- `1px` border
+- Rounded corners
+- Subtle shadow
+- Consistent spacing
+
+The primary card radius is defined as:
+
+`18px`
+
+The shared shadow is:
+
+`0 14px 35px rgba(30, 34, 90, 0.10)`
+
+This gives content enough visual separation from the page background without creating an overly heavy interface.
+
+
+##### Study Note Cards
+
+Study-note cards include:
+
+- Cover image
+- Subject
+- Study-note title
+- Price
+- View action
+
+The information is kept concise so users can compare multiple resources quickly.
+
+
+##### Subject Cards
+
+Subject cards contain:
+
+- Subject illustration
+- Subject name
+- Number of available notes
+
+The image and text are grouped together within a single interactive card.
+
+
+##### Revision Cards
+
+Revision cards contain:
+
+- Subject badge
+- Date information
+- Revision-note title
+- Content preview
+- Relevant actions
+
+On desktop, revision cards can be displayed across multiple columns.
+
+On smaller devices, the number of columns is reduced until cards display in a single vertical column.
+
+
+#### Layout
+
+The main application content uses a reusable `.shell` container.
+
+The maximum content width is approximately:
+
+`1120px`
+
+The width is defined responsively using:
+
+`width: min(1120px, calc(100% - 32px));`
+
+This prevents content from becoming excessively wide on large displays while maintaining appropriate margins on smaller screens.
+
+The main layouts use CSS Grid and Flexbox.
+
+Examples include:
+
+| Area | Layout |
+|---|---|
+| Subject Cards | CSS Grid |
+| Study Note Cards | CSS Grid |
+| Revision Cards | CSS Grid |
+| Navigation | Flexbox |
+| Purchase Rows | Flexbox |
+| Detail Page | CSS Grid |
+| Authentication Page | CSS Grid |
+| Form Actions | Flexbox |
+
+The combination of Grid and Flexbox allows page components to reorganise according to the available screen width.
+
+
+#### Spacing
+
+Consistent spacing is used to prevent the interface from appearing crowded.
+
+Main page sections normally use approximately:
+
+`64px`
+
+of vertical padding on larger screens.
+
+On smaller devices this is reduced to approximately:
+
+`44px`
+
+Cards contain consistent internal padding according to their purpose.
+
+Examples include:
+
+- Study-note card body: `20px`
+- Purchase row: `22px`
+- Revision card: `24px`
+- Detail content: `34px`
+- Authentication cards: `38px`
+
+Consistent spacing helps separate unrelated content while keeping related content visually grouped.
+
+
+#### Animations and Effects
+
+Animations and visual effects are intentionally limited.
+
+UniNotes does not use large or distracting animations because the main purpose of the website is revision and resource access.
+
+Subtle effects are used to provide interaction feedback.
+
+These include:
+
+- Smooth scrolling
+- Navigation-menu transitions
+- Button hover states
+- Navigation hover effects
+- Hamburger icon transformation
+- Small active-state transformations
+- Card shadows
+- Sticky navigation with background blur
+
+The responsive navigation uses short transitions for:
+
+- Height
+- Opacity
+- Position
+- Visibility
+
+This allows the menu to open smoothly without creating a distracting animation.
+
+The navigation toggle also slightly scales when actively pressed.
+
+These effects provide feedback while maintaining a professional interface.
+
+
+### Visual Consistency
+
+Visual consistency is maintained by reusing the same styling rules across the application.
+
+CSS variables define important design values such as:
+
+- Colours
+- Border radius
+- Shadows
+
+Reusable classes are then applied to components such as:
+
+- Buttons
+- Cards
+- Forms
+- Headings
+- Navigation
+- Messages
+
+For example, study-note cards, revision cards and purchase rows all use similar:
+
+- Borders
+- Backgrounds
+- Rounded corners
+- Shadows
+
+This helps users recognise that these elements belong to the same application.
+
+The same purple colour is also used consistently for primary actions and important links.
+
+Consistency reduces the amount of new interface behaviour users need to learn when moving between pages.
+
+
+### Branding
+
+UniNotes uses a dedicated visual identity rather than relying only on text.
+
+The main branding includes:
+
+- **UniNotes name**
+- **UniNotes logo**
+- **Purple primary colour**
+- **Dark navy typography**
+- **Subject imagery**
+- **University-focused hero imagery**
+- **Consistent rounded interface design**
+
+The UniNotes logo is displayed within the main navigation and is linked to the homepage.
+
+The logo also includes alternative text:
+
+`UniNotes logo`
+
+The homepage uses a large hero image combined with a dark gradient overlay.
+
+This allows white heading text to remain readable while maintaining a visually engaging introduction to the website.
+
+The hero message reinforces the purpose of the brand by focusing on university revision and affordable study resources.
+
+
+### Colour Contrast
+
+Colour contrast is important because important information must remain readable against its background.
+
+The main colour combinations provide strong contrast.
+
+| Foreground | Background | Approximate Contrast |
+|---|---|---:|
+| `#171a35` Dark Navy | `#ffffff` White | **17.0:1** |
+| `#4430c7` Dark Purple | `#ffffff` White | **8.42:1** |
+| `#5b3df5` Primary Purple | `#ffffff` White | **6.12:1** |
+| `#666a7a` Muted Text | `#ffffff` White | **5.37:1** |
+| `#c63d4f` Danger Red | `#ffffff` White | **5.02:1** |
+
+These core text combinations provide sufficient contrast for normal text under WCAG AA contrast guidance.
+
+The hero section also applies a dark gradient over its background image so that white text is not displayed directly against a visually complex photograph.
+
+Colour is not used as the only method of communicating information.
+
+For example:
+
+- Error fields receive a border and an error message
+- Restricted Revision access includes text and a lock indicator
+- Buttons include descriptive text
+- Success and error messages include readable content
+
+Keyboard focus is highlighted using a visible orange outline:
+
+`#ffbf47`
+
+This makes the currently focused control easier to identify.
+
+
+### Responsive Visual Design
+
+The visual design adapts at several CSS breakpoints.
+
+The main responsive breakpoints include:
+
+- `860px`
+- `620px`
+- `480px`
+
+At widths below approximately `860px`:
+
+- Full navigation changes to a collapsible menu
+- Multi-column page layouts become simpler
+- Detail pages become single-column
+- Authentication layouts become single-column
+- Subject cards change from four columns to two
+- Study-note cards change from three columns to two
+- Revision cards change from three columns to two
+
+At widths below approximately `620px`:
+
+- Subject cards become one column
+- Study-note cards become one column
+- Revision cards become one column
+- Search controls stack vertically
+- Filter controls stack vertically
+- Purchase rows become vertical
+- Footer content stacks
+- Page spacing is reduced
+- Forms receive smaller internal padding
+
+At very small screen widths, additional navigation adjustments are made to preserve usable spacing.
+
+This ensures that the same visual design remains recognisable across mobile, tablet and desktop devices without forcing desktop layouts onto smaller screens.
+
+
+### Accessibility of Visual Elements
+
+Visual accessibility was considered throughout the final styling.
+
+The interface includes:
+
+- Visible keyboard focus states
+- High-contrast primary text
+- Clear form labels
+- Alternative text for meaningful images
+- Descriptive links
+- Large interactive buttons
+- Error text alongside error colouring
+- Responsive text sizing
+- Readable line spacing
+- Screen-reader-only labels where visual labels are unnecessary
+- Clear distinction between primary and secondary actions
+
+A global `:focus-visible` style provides a visible outline around keyboard-focused elements.
+
+The website also includes a **Skip to content** link.
+
+The link remains hidden during normal browsing but becomes visible when focused with the keyboard, allowing keyboard and screen-reader users to bypass repeated navigation.
+
+Study images contain alternative text such as:
+
+- Subject study illustration
+- Study-note cover
+- UniNotes logo
+
+The application also includes fallback images so that missing external imagery does not create broken visual content.
+
+
+### Final Planned User Interface
+
+The final planned user interface combines the low-fidelity wireframes created during the Skeleton stage with the visual styling developed during the Surface stage.
+
+The wireframes established:
+
+- Where content should appear
+- How users should navigate
+- Where buttons should be positioned
+- How forms should be structured
+- How study resources should be presented
+- How layouts should change between devices
+
+The Surface stage then adds:
+
+- UniNotes branding
+- Purple and navy colour scheme
+- Typography
+- Real imagery
+- Shadows
+- Rounded corners
+- Responsive spacing
+- Hover states
+- Focus indicators
+- Feedback colours
+
+The final interface can therefore be understood as the progression:
+
+`User Requirements → Structure → Wireframes → Visual Design → Final Interface`
+
+The planned visual outcome for each major page is shown below.
+
+| Page | Final Interface Design |
+|---|---|
+| **Home** | Large branded hero image with clear heading and search functionality, followed by subject cards and featured study-note cards |
+| **Browse** | Structured resource discovery page containing keyword search, subject filtering and responsive study-note cards |
+| **Study Note Detail** | Large resource image alongside the note title, subject, price, description and purchase action |
+| **My Purchases** | Clean list of resources associated with the authenticated user's purchases with clear access actions |
+| **Revision Notes** | Personal dashboard containing responsive revision cards with subject, date and management options |
+| **Revision Detail** | Focused reading layout for an individual revision note with content and attachment information |
+| **Add / Edit Revision Note** | Clear single-purpose form containing title, subject, content and optional attachment fields |
+| **Registration** | Branded authentication layout with clear labels, validation feedback and registration action |
+| **Login** | Simple authentication interface focused on allowing returning users to access their account |
+| **Checkout Success** | Clear result interface confirming successful completion of the purchase process |
+| **Checkout Cancelled** | Clear result interface explaining that the checkout process was not completed |
+
+The final interface maintains the same underlying structure across the application while adapting individual components according to the page's purpose.
+
+This provides consistency without requiring every page to have exactly the same layout.
+
+Overall, the Surface design completes the UX process by transforming the functional wireframes into a **recognisable, responsive and accessible UniNotes interface** while ensuring that visual styling continues to support the main purpose of the application: helping university students find, purchase and organise revision resources.
