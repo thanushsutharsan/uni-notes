@@ -236,4 +236,71 @@ textarea {
     background: transparent;
     cursor: pointer;
 }
+/* hero section */
+
+.hero {
+    color: #fff;
+    background:
+        linear-gradient(90deg, rgba(9, 13, 28, 0.9) 0%, rgba(9, 13, 28, 0.78) 35%, rgba(9, 13, 28, 0.45) 58%, rgba(9, 13, 28, 0.18) 100%),
+        url("../images/uninotes-home-hero.png") center center / cover no-repeat;
+    overflow: hidden;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 620px);
+    gap: 0;
+    align-items: center;
+    justify-content: start;
+    min-height: 560px;
+    padding-block: 72px;
+}
+
+.hero h1 {
+    max-width: 700px;
+    margin: 10px 0 18px;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+}
+
+.hero p {
+    max-width: 560px;
+    color: #eef0ff;
+    font-size: 1.08rem;
+}
+
+.hero-copy {
+    max-width: 620px;
+}
+
+.eyebrow {
+    display: inline-block;
+    color: #7965ff;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.hero .eyebrow {
+    color: #c8c1ff;
+}
+
+.hero-search {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    max-width: 640px;
+    margin-top: 28px;
+}
+
+.hero-search input {
+    min-width: 0;
+}
+
+.hero-card {
+    position: relative;
+    min-height: 330px;
+}
 
