@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ revision_note.title }} | UniNotes{% endblock %}
+{% block content %}
+<section class="shell section revision-detail-shell">
+    <article class="revision-detail-card">
+        <div class="revision-detail-header">
+            <div>
+                <span class="eyebrow">{{ revision_note.subject }}</span>
+                <h1>{{ revision_note.title }}</h1>
+                <p class="helper-text">
+                    Last updated {{ revision_note.updated_at|date:"d M Y, H:i" }}
+                </p>
+            </div>
+            <div class="revision-actions">
+                <a class="button button-secondary" href="{% url 'notes:revision_edit' revision_note.pk %}">
+                    Edit
+                </a>
+                <a class="button button-danger" href="{% url 'notes:revision_delete' revision_note.pk %}">
+                    Delete
+                </a>
+            </div>
+        </div>
+
+        <div class="revision-content">
+            {{ revision_note.content|linebreaks }}
+        </div>
+
+        {% if revision_note.attachment %}
+            <div class="revision-attachment">
+                <strong>Uploaded file</strong>
+                <a href="{{ revision_note.attachment.url }}" target="_blank" rel="noopener">
+                    Open attachment
+                </a>
+            </div>
+        {% endif %}
+
+        <a href="{% url 'notes:revision_list' %}">← Back to revision notes</a>
+    </article>
+</section>
+{% endblock %}
