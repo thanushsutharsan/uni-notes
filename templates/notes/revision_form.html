@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | UniNotes{% endblock %}
+{% block content %}
+<section class="shell section form-shell">
+    <div class="form-card">
+        <span class="eyebrow">Revision</span>
+        <h1>{{ page_title }}</h1>
+        <p class="helper-text">
+            Save your own study notes to your account. You can also attach a PDF,
+            Word document or text file up to 5 MB.
+        </p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="message error">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="form-group {% if field.errors %}has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="help-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="form-actions">
+                <button class="button" type="submit">Save revision note</button>
+                <a class="button button-secondary" href="{% url 'notes:revision_list' %}">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
