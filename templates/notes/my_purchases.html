@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}My Purchases | UniNotes{% endblock %}
+{% block content %}
+<section class="shell section narrow">
+    <div class="page-heading">
+        <span class="eyebrow">Your library</span>
+        <h1>My purchases</h1>
+        <p>Your purchased Uni Notes are saved here and ready to download.</p>
+    </div>
+
+    <div class="purchase-list">
+        {% for purchase in purchases %}
+            <article class="purchase-row">
+                <div>
+                    <span class="note-subject">{{ purchase.note.subject.name }}</span>
+                    <h2>{{ purchase.note.title }}</h2>
+                    <p>Purchased {{ purchase.purchased_at|date:"j M Y" }} · £{{ purchase.amount_paid }}</p>
+                </div>
+                <a class="button" href="{% url 'notes:download' purchase.note.pk %}">Download note</a>
+            </article>
+        {% empty %}
+            <div class="empty-state">
+                <h2>No purchases yet</h2>
+                <p>Your purchased notes will appear here.</p>
+                <a class="button" href="{% url 'notes:browse' %}">Browse notes</a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
