@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}My Revision Notes | UniNotes{% endblock %}
+{% block content %}
+<section class="shell section revision-page">
+    <div class="section-heading revision-heading">
+        <div>
+            <span class="eyebrow">Your study space</span>
+            <h1>My revision notes</h1>
+            <p class="helper-text">
+                Create, upload and manage private revision notes saved to your account.
+            </p>
+        </div>
+        <a class="button" href="{% url 'notes:revision_create' %}">
+            + Add revision note
+        </a>
+    </div>
+
+    <div class="revision-grid">
+        {% for note in revision_notes %}
+            <article class="revision-card">
+                <div class="revision-card-top">
+                    <span class="revision-subject">{{ note.subject }}</span>
+                    <span class="revision-date">
+                        Updated {{ note.updated_at|date:"d M Y" }}
+                    </span>
+                </div>
+                <h2>
+                    <a href="{% url 'notes:revision_detail' note.pk %}">
+                        {{ note.title }}
+                    </a>
+                </h2>
+                <p>{{ note.content|truncatewords:28 }}</p>
+                {% if note.attachment %}
+                    <span class="attachment-badge">Attachment saved</span>
+                {% endif %}
+                <div class="revision-actions">
+                    <a href="{% url 'notes:revision_detail' note.pk %}">View</a>
+                    <a href="{% url 'notes:revision_edit' note.pk %}">Edit</a>
+                    <a class="danger-link" href="{% url 'notes:revision_delete' note.pk %}">
+                        Delete
+                    </a>
+                </div>
+            </article>
+        {% empty %}
+            <div class="empty-state">
+                <h2>No revision notes yet</h2>
+                <p>
+                    Add your first revision note to keep your study material in one place.
+                </p>
+                <a class="button" href="{% url 'notes:revision_create' %}">
+                    Create first note
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
