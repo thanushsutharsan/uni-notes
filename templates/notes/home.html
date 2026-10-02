@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}UniNotes | Study smarter{% endblock %}
+{% block content %}
+<section class="hero home-hero">
+    <div class="shell hero-grid">
+        <div class="hero-copy">
+            <span class="eyebrow">University revision made simpler</span>
+            <h1>High-quality study notes for university students.</h1>
+            <p>Browse affordable revision notes by subject and access your purchases from one account.</p>
+            <form action="{% url 'notes:browse' %}" method="get" class="hero-search">
+                <label class="sr-only" for="home-search">Search study notes</label>
+                <input id="home-search" name="q" type="search">
+                <button class="button" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="shell section">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">Explore</span>
+            <h2>Popular subjects</h2>
+        </div>
+        <a href="{% url 'notes:browse' %}">View all notes →</a>
+    </div>
+    <div class="subject-grid">
+        {% for subject in subjects %}
+            <a class="subject-card" href="{% url 'notes:browse' %}?subject={{ subject.slug }}">
+                <div class="subject-card-media">
+                    <img
+                        src="{% static 'images/subjects/' %}{{ subject.slug }}.png"
+                        alt="{{ subject.name }} study subject illustration"
+                        data-fallback="{% static 'images/subjects/fallback.png' %}"
+                        onerror="this.onerror=null;this.src=this.dataset.fallback">
+                </div>
+                <div class="subject-card-body">
+                    <strong>{{ subject.name }}</strong>
+                    <span>{{ subject.notes.count }} notes</span>
+                </div>
+            </a>
+        {% empty %}
+            <p>No subjects have been added yet.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="shell section">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">Featured</span>
+            <h2>Latest study notes</h2>
+        </div>
+    </div>
+    <div class="note-grid">
+        {% for note in featured_notes %}
+            {% include "notes/partials_note_card.html" %}
+        {% empty %}
+            <p>No study notes are available yet.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
