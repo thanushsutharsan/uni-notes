@@ -489,3 +489,290 @@ textarea {
     gap: 16px;
 }
 
+/* buttons and form elements */
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    color: #fff;
+    background: var(--primary);
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.button:hover {
+    color: #fff;
+    background: var(--primary-dark);
+    text-decoration: none;
+}
+
+.button-small {
+    min-height: 36px;
+    padding: 7px 13px;
+}
+
+.button-wide {
+    width: 100%;
+}
+
+.button-secondary {
+    color: var(--primary-dark);
+    background: #fff;
+}
+
+.button-secondary:hover {
+    color: var(--primary-dark);
+    background: #f1efff;
+}
+
+.button-danger {
+    border-color: var(--danger);
+    background: var(--danger);
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid #cfd2df;
+    border-radius: 9px;
+    color: var(--ink);
+    background: #fff;
+}
+
+textarea {
+    min-height: 130px;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    min-height: auto;
+}
+
+.filter-bar {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto auto;
+    gap: 12px;
+    align-items: end;
+    padding: 18px;
+    margin-bottom: 30px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.filter-bar label,
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.8fr) 1.2fr;
+    gap: 44px;
+    align-items: start;
+}
+
+.detail-cover,
+.detail-copy {
+    overflow: hidden;
+}
+
+.detail-copy {
+    padding: 34px;
+}
+
+.detail-copy h1 {
+    margin: 10px 0 4px;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.05;
+}
+
+.price {
+    margin: 12px 0 22px;
+    color: var(--primary-dark);
+    font-size: 1.65rem;
+    font-weight: 850;
+}
+
+.helper-text,
+.help-text,
+.form-footer {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.auth-layout {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 24px;
+    max-width: 920px;
+}
+
+.auth-side,
+.form-card {
+    padding: 38px;
+}
+
+.auth-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 470px;
+    background: linear-gradient(145deg, #eeecff, #fafaff);
+}
+
+.brand-mark {
+    display: block;
+    width: min(220px, 100%);
+    height: auto;
+    max-height: 76px;
+    margin-bottom: 20px;
+    object-fit: contain;
+    object-position: left center;
+}
+
+.form-shell {
+    max-width: 760px;
+}
+
+.form-group {
+    margin: 0 0 18px;
+}
+
+.field-error {
+    margin-top: 6px;
+    color: #a72035;
+    font-weight: 650;
+}
+
+.has-error input,
+.has-error select,
+.has-error textarea {
+    border-color: #a72035;
+}
+
+.messages {
+    padding-top: 16px;
+}
+
+.message {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #eef0ff;
+}
+
+.message + .message {
+    margin-top: 8px;
+}
+
+.message.success {
+    background: #e4f7ef;
+}
+
+.message.error {
+    background: #fde9ec;
+}
+
+.message.warning {
+    background: #fff3db;
+}
+
+.purchase-list {
+    display: grid;
+    gap: 14px;
+}
+
+.purchase-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px;
+}
+
+.purchase-row h2 {
+    margin: 4px 0;
+    font-size: 1.08rem;
+}
+
+.purchase-row p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    padding: 42px;
+    text-align: center;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+}
+
+th {
+    background: #f6f6fc;
+}
+
+.action-links {
+    display: flex;
+    gap: 14px;
+}
+
+.danger-link {
+    color: var(--danger);
+}
+
+.result-card {
+    max-width: 680px;
+    margin-top: 60px;
+    margin-bottom: 60px;
+    padding: 56px 30px;
+    text-align: center;
+}
+
+.result-icon {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    margin: 0 auto 22px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 2.6rem;
+    font-weight: 800;
+}
+
+.success-icon {
+    background: var(--success);
+}
+
+.cancel-icon {
+    background: var(--danger);
+}
+
