@@ -1,16 +1,20 @@
 {% load static %}
 <article class="note-card">
     <a class="cover" href="{{ note.get_absolute_url }}" aria-label="View {{ note.title }}">
-        {% if note.cover_url %}
+   {% if note.cover_url %}
             <img
                 src="{{ note.cover_url }}"
                 alt="Cover for {{ note.title }}"
-                onerror="if (this.dataset.fallbackApplied) { this.onerror=null; this.src='{% static &quot;images/subjects/fallback.png&quot; %}'; } else { this.dataset.fallbackApplied='1'; this.src='{% static &quot;images/subjects/&quot; %}{{ note.subject.slug }}.png'; }">
+                data-fallback="{% static 'images/subjects/fallback.png' %}"
+                onerror="this.onerror=null; this.src=this.dataset.fallback;"
+            >
         {% else %}
             <img
                 src="{% static 'images/subjects/' %}{{ note.subject.slug }}.png"
                 alt="{{ note.subject.name }} study notes cover"
-                onerror="this.onerror=null;this.src='{% static &quot;images/subjects/fallback.png&quot; %}';">
+                data-fallback="{% static 'images/subjects/fallback.png' %}"
+                onerror="this.onerror=null; this.src=this.dataset.fallback;"
+            >
         {% endif %}
     </a>
     <div class="note-card-body">
