@@ -4,17 +4,17 @@
 {% block content %}
 <section class="shell section detail-grid">
     <div class="detail-cover">
-        {% if note.cover_url %}
-            <img
-                src="{{ note.cover_url }}"
-                alt="Cover for {{ note.title }}"
-                onerror="if (this.dataset.fallbackApplied) { this.onerror=null; this.src='{% static &quot;images/subjects/fallback.png&quot; %}'; } else { this.dataset.fallbackApplied='1'; this.src='{% static &quot;images/subjects/&quot; %}{{ note.subject.slug }}.png'; }">
-        {% else %}
-            <img
-                src="{% static 'images/subjects/' %}{{ note.subject.slug }}.png"
-                alt="{{ note.subject.name }} study notes cover"
-                onerror="this.onerror=null;this.src='{% static &quot;images/subjects/fallback.png&quot; %}';">
-        {% endif %}
+       {% if note.cover_url %}
+    <img
+        src="{{ note.cover_url }}"
+        alt="Cover for {{ note.title }}"
+    >
+{% else %}
+    <img
+        src="{% static 'images/subjects/' %}{{ note.subject.slug }}.png"
+        alt="{{ note.subject.name }} study notes cover"
+    >
+{% endif %}
     </div>
     <div class="detail-copy">
         <span class="eyebrow">{{ note.subject.name }}</span>
