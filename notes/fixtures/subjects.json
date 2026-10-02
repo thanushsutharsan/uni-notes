@@ -1,0 +1,50 @@
+[
+{
+  "model": "notes.subject",
+  "pk": 1,
+  "fields": {
+    "name": "Business",
+    "slug": "business"
+  }
+},
+{
+  "model": "notes.subject",
+  "pk": 2,
+  "fields": {
+    "name": "Computer Science",
+    "slug": "computer-science"
+  }
+},
+{
+  "model": "notes.subject",
+  "pk": 3,
+  "fields": {
+    "name": "Law",
+    "slug": "law"
+  }
+},
+{
+  "model": "notes.subject",
+  "pk": 4,
+  "fields": {
+    "name": "Mathematics",
+    "slug": "mathematics"
+  }
+},
+{
+  "model": "notes.subject",
+  "pk": 5,
+  "fields": {
+    "name": "Psychology",
+    "slug": "psychology"
+  }
+},
+{
+  "model": "notes.subject",
+  "pk": 6,
+  "fields": {
+    "name": "Economics",
+    "slug": "economics"
+  }
+}
+]
