@@ -5476,3 +5476,605 @@ The physical PDF still needs to exist in the deployment or be stored using an ex
 
 By debugging each problem separately, I was able to progressively move UniNotes from a local Django application to a functioning Heroku deployment using PostgreSQL and production fixture data.
 
+## Authentication Error
+![authentication-error-screenshot](static/images/in-dep-bugs/authentication-error.png)
+
+### Stripe Authentication Error During Heroku Deployment
+
+During the deployment and testing of UniNotes on Heroku, an authentication error occurred when attempting to purchase a study note through the Stripe Checkout system.
+
+The application itself deployed successfully and the checkout view was being reached correctly. However, when the user selected the **Buy** button, Stripe rejected the API request.
+
+The error appeared on the deployed Heroku application rather than during the initial deployment process.
+
+---
+
+### Error Message
+
+When attempting to purchase a note, Django displayed the following error:
+
+```text
+AuthenticationError at /checkout/buy/7/
+
+Invalid API Key provided: ssk_test********************************
+
+Request Method: POST
+
+Request URL:
+https://uni-notes-09bbb519e883.herokuapp.com/checkout/buy/7/
+
+Django Version: 5.2.17
+
+Exception Type:
+AuthenticationError
+
+Raised during:
+checkout.views.create_checkout_session
+```
+
+The traceback showed that the error occurred when the application attempted to create a Stripe Checkout Session.
+
+The relevant section of the traceback was:
+
+```text
+/app/checkout/views.py, line 38, in create_checkout_session
+
+session = stripe.checkout.Session.create(...)
+```
+
+This confirmed that Django successfully reached the checkout view, but Stripe rejected the authentication credentials before the checkout session could be created.
+
+---
+
+### Initial Investigation
+
+The Stripe environment variables used by the project were checked using:
+
+```bash
+grep -R "STRIPE_" -n --exclude-dir=venv --exclude-dir=.git .
+```
+
+The project was configured to use the following environment variables:
+
+```python
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "").strip()
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "").strip()
+```
+
+The following files referenced the Stripe configuration:
+
+```text
+uninotes/settings.py
+
+checkout/views.py
+
+checkout/tests.py
+
+.env
+
+.env.example
+```
+
+The local `.env` file contained the development Stripe configuration while Heroku used environment variables stored in its Config Vars.
+
+---
+
+### Confirming Stripe Configuration
+
+The Django production error page confirmed that the Stripe settings existed on Heroku.
+
+The following settings were available:
+
+```text
+STRIPE_PUBLIC_KEY
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+```
+
+This meant the error was not caused by Stripe environment variables being completely missing.
+
+The issue was therefore narrowed down to the actual value stored inside the `STRIPE_SECRET_KEY` environment variable.
+
+---
+
+### Root Cause
+
+The Stripe error message revealed that the secret key being supplied to Stripe started with:
+
+```text
+ssk_test_
+```
+
+However, a Stripe test secret key should start with:
+
+```text
+sk_test_
+```
+
+The incorrect value contained an additional `s` at the beginning:
+
+```text
+incorrect:
+
+ssk_test_...
+```
+
+Instead of:
+
+```text
+correct:
+
+sk_test_...
+```
+
+Because Stripe received an invalid secret key format, it rejected the request and raised:
+
+```text
+stripe.error.AuthenticationError
+```
+
+Therefore, the issue was not caused by the Django checkout logic.
+
+The application successfully attempted to communicate with Stripe, but Stripe refused the request because the secret API key stored in Heroku was invalid.
+
+---
+
+### Security Consideration
+
+During debugging, the original Stripe test secret key had been displayed.
+
+Although this was only a test key, secret API keys should never be publicly exposed or committed to GitHub.
+
+The exposed key was therefore treated as compromised and replaced with a newly generated Stripe test secret key.
+
+The actual key is not included anywhere in this README.
+
+Sensitive values are represented using placeholders such as:
+
+```text
+pk_test_YOUR_PUBLIC_KEY
+
+sk_test_YOUR_SECRET_KEY
+```
+
+---
+
+### Fix
+
+A new Stripe test secret key was generated from the Stripe Dashboard.
+
+The new Stripe keys were then added directly to Heroku Config Vars.
+
+The public test key was added using:
+
+```bash
+heroku config:set STRIPE_PUBLIC_KEY="pk_test_YOUR_NEW_PUBLIC_KEY" -a uni-notes
+```
+
+The new secret test key was added using:
+
+```bash
+heroku config:set STRIPE_SECRET_KEY="sk_test_YOUR_NEW_SECRET_KEY" -a uni-notes
+```
+
+The webhook secret was also configured.
+
+During development it could remain empty until webhook functionality was required:
+
+```bash
+heroku config:set STRIPE_WEBHOOK_SECRET="" -a uni-notes
+```
+
+---
+
+### Checking the Secret Key Safely
+
+Instead of printing the entire Stripe secret key in the terminal, only the beginning of the value was checked.
+
+The following command was used:
+
+```bash
+heroku config:get STRIPE_SECRET_KEY -a uni-notes | cut -c1-8
+```
+
+The expected result was:
+
+```text
+sk_test_
+```
+
+This confirmed that Heroku was now using a correctly formatted Stripe test secret key.
+
+The Stripe public key was checked in the same way:
+
+```bash
+heroku config:get STRIPE_PUBLIC_KEY -a uni-notes | cut -c1-8
+```
+
+The expected output was:
+
+```text
+pk_test_
+```
+
+This method allowed the configuration to be checked without exposing the complete API keys.
+
+---
+
+### Restarting the Heroku Application
+
+After updating the environment variables, the Heroku application was restarted so that the new configuration would be loaded.
+
+```bash
+heroku restart -a uni-notes
+```
+
+The deployed application was then reopened using:
+
+```bash
+heroku open -a uni-notes
+```
+
+The checkout process could then be tested again using Stripe's test environment.
+
+---
+
+### Protecting the Local `.env` File
+
+The local project uses a `.env` file for development environment variables.
+
+For example:
+
+```text
+STRIPE_PUBLIC_KEY=pk_test_YOUR_PUBLIC_KEY
+STRIPE_SECRET_KEY=sk_test_YOUR_SECRET_KEY
+STRIPE_WEBHOOK_SECRET=
+```
+
+The `.env` file contains sensitive information and must not be committed to GitHub.
+
+The following command was used to confirm that Git ignored the file:
+
+```bash
+git check-ignore .env
+```
+
+The expected output was:
+
+```text
+.env
+```
+
+The `.gitignore` file should therefore contain:
+
+```gitignore
+.env
+```
+
+An `.env.example` file is included instead.
+
+This allows the required environment variable names to be documented without exposing any real credentials.
+
+Example:
+
+```text
+STRIPE_PUBLIC_KEY=pk_test_replace_me
+STRIPE_SECRET_KEY=sk_test_replace_me
+STRIPE_WEBHOOK_SECRET=
+```
+
+---
+
+### Why `.env.example` Is Safe
+
+The `.env.example` file contains only placeholder values.
+
+For example:
+
+```text
+STRIPE_PUBLIC_KEY=pk_test_replace_me
+STRIPE_SECRET_KEY=sk_test_replace_me
+STRIPE_WEBHOOK_SECRET=
+```
+
+This file can safely be committed to GitHub because it does not contain working API credentials.
+
+The actual `.env` file remains excluded from version control.
+
+---
+
+### Stripe Configuration in `settings.py`
+
+Stripe configuration is retrieved from environment variables inside `uninotes/settings.py`.
+
+```python
+STRIPE_PUBLIC_KEY = os.environ.get(
+    "STRIPE_PUBLIC_KEY",
+    "",
+).strip()
+
+STRIPE_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY",
+    "",
+).strip()
+
+STRIPE_WEBHOOK_SECRET = os.environ.get(
+    "STRIPE_WEBHOOK_SECRET",
+    "",
+).strip()
+```
+
+This approach means API credentials are not hard-coded into the application source code.
+
+Different values can therefore be used for local development and the deployed Heroku application.
+
+---
+
+### Stripe Configuration in `checkout/views.py`
+
+Before creating a Stripe Checkout Session, the application checks whether a secret key has been configured.
+
+The checkout view contains logic similar to:
+
+```python
+if not settings.STRIPE_SECRET_KEY:
+    # stripe has not been configured
+```
+
+Stripe is then configured using:
+
+```python
+stripe.api_key = settings.STRIPE_SECRET_KEY
+```
+
+The Checkout Session is created using:
+
+```python
+session = stripe.checkout.Session.create(
+    ...
+)
+```
+
+The authentication error occurred at this stage because the value supplied to:
+
+```python
+stripe.api_key
+```
+
+was incorrectly formatted.
+
+Once the correct environment variable was added to Heroku, no changes to the main Stripe checkout logic were required.
+
+---
+
+### Additional Deployment Issue Identified
+
+While investigating the Stripe authentication problem, the Django error page also revealed that the deployed application was running with:
+
+```text
+DEBUG = True
+```
+
+This is suitable during local development but should not be enabled on a production deployment.
+
+With `DEBUG = True`, Django can display detailed information including:
+
+```text
+environment configuration
+
+installed applications
+
+database information
+
+request information
+
+server information
+
+tracebacks
+
+application paths
+```
+
+Although Django automatically hides certain sensitive values, detailed debugging information should not normally be publicly available on a deployed application.
+
+For production, the project should use:
+
+```python
+DEBUG = False
+```
+
+The production environment can instead control this using an environment variable.
+
+For example:
+
+```python
+DEBUG = os.environ.get(
+    "DEBUG",
+    "False",
+).lower() == "true"
+```
+
+Heroku can then be configured using:
+
+```bash
+heroku config:set DEBUG=False -a uni-notes
+```
+
+This allows local development and production to use different debugging settings.
+
+---
+
+### Testing the Fix
+
+After updating the Stripe secret key and restarting the application, the following process was used to test the checkout system:
+
+1. Open the deployed UniNotes website.
+
+2. Sign into a test user account.
+
+3. Navigate to a paid study note.
+
+4. Select the **Buy** button.
+
+5. Confirm that `/checkout/buy/<note_id>/` accepts the POST request.
+
+6. Confirm that no `AuthenticationError` is displayed.
+
+7. Confirm that Stripe creates a Checkout Session.
+
+8. Confirm that the user is redirected to the Stripe Checkout page.
+
+9. Complete the transaction using Stripe test payment details.
+
+10. Confirm that the application returns to the correct success page.
+
+---
+
+### Expected Checkout Flow
+
+The expected payment process is:
+
+```text
+User selects Buy
+        |
+        v
+Django receives POST request
+        |
+        v
+create_checkout_session()
+        |
+        v
+Stripe secret key loaded from environment
+        |
+        v
+stripe.checkout.Session.create()
+        |
+        v
+Stripe validates API credentials
+        |
+        v
+Checkout Session created
+        |
+        v
+User redirected to Stripe Checkout
+        |
+        v
+Test payment completed
+        |
+        v
+User returned to UniNotes
+```
+
+Before the fix, the process stopped here:
+
+```text
+User selects Buy
+        |
+        v
+Django receives POST request
+        |
+        v
+create_checkout_session()
+        |
+        v
+Incorrect STRIPE_SECRET_KEY
+        |
+        v
+Stripe rejects API request
+        |
+        v
+AuthenticationError
+```
+
+---
+
+### Final Cause
+
+The authentication problem was caused by an incorrectly configured Heroku environment variable.
+
+```text
+Incorrect:
+
+STRIPE_SECRET_KEY=ssk_test_...
+```
+
+The correct Stripe test secret key format is:
+
+```text
+Correct:
+
+STRIPE_SECRET_KEY=sk_test_...
+```
+
+The extra `s` caused Stripe's API authentication system to reject the request.
+
+---
+
+### Final Resolution
+
+The issue was resolved by:
+
+```text
+1. identifying the Stripe AuthenticationError
+
+2. checking the traceback
+
+3. confirming that the error occurred during Stripe Checkout Session creation
+
+4. checking the Stripe environment variable names
+
+5. confirming that Heroku contained Stripe configuration
+
+6. identifying the incorrect `ssk_test_` prefix
+
+7. generating a new Stripe test secret key
+
+8. replacing the incorrect Heroku Config Var
+
+9. checking only the key prefix to avoid exposing credentials
+
+10. restarting the Heroku application
+
+11. testing the checkout process again
+
+12. ensuring `.env` remained excluded from Git
+
+13. keeping placeholder credentials inside `.env.example`
+
+14. identifying that production should use `DEBUG = False`
+```
+
+---
+
+### What I Learned
+
+This issue demonstrated the importance of separating application code from sensitive configuration.
+
+The Django checkout code itself was functioning correctly. The failure was caused by an incorrectly configured deployment environment variable.
+
+The debugging process also demonstrated how a traceback can be used to identify whether a problem originates from:
+
+```text
+Django application logic
+
+environment configuration
+
+a third-party API
+
+database configuration
+
+deployment configuration
+```
+
+In this case, the traceback showed that the request successfully reached:
+
+```text
+checkout.views.create_checkout_session
+```
+
+and failed only after Stripe attempted to authenticate the API request.
+
+This helped isolate the issue as a Stripe credential configuration problem rather than an error in the application's checkout logic.
+
+The issue also highlighted the importance of never exposing secret API keys and of rotating any key that may have been accidentally shared during development.
