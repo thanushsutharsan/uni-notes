@@ -6959,3 +6959,555 @@ A future version could use a dedicated cloud storage service for study resources
 
 Despite these limitations, the database design provides the relationships and functionality required for the current version of UniNotes.
 
+
+### CRUD Functionality
+
+#### CRUD Overview
+
+One of the main features I developed for UniNotes is the ability for registered users to create and manage their own revision notes.
+
+I implemented this functionality using Django's Create, Read, Update and Delete (CRUD) operations.
+
+CRUD refers to the four main operations used when managing information stored in a database:
+
+| Operation | Purpose | UniNotes Implementation |
+|---|---|---|
+| Create | Add new information to the database. | Users create personal revision notes. |
+| Read | Retrieve information from the database. | Users view their saved revision notes. |
+| Update | Modify existing information. | Users edit their revision notes. |
+| Delete | Remove information from the database. | Users permanently delete revision notes. |
+
+I implemented these operations using the `RevisionNote` model in `notes/models.py` and the corresponding functions in `notes/views.py`.
+
+The revision note functionality is available to authenticated users only.
+
+Each revision note is linked to the user who created it, allowing the application to retrieve and manage notes belonging to the correct account.
+
+I used Django's ModelForm functionality to handle creating and editing records rather than manually processing every form field.
+
+This helped reduce repeated code and made the forms easier to maintain.
+
+#### Create
+
+The Create functionality allows registered users to add new revision notes to their accounts.
+
+Users can enter the following information:
+
+- Revision note title.
+- Subject name.
+- Revision note content.
+- Optional file attachment.
+
+Attachments can be PDF, DOC, DOCX or TXT files, with a maximum file size of 5 MB.
+
+The Create functionality is handled by the `revision_create()` view in `notes/views.py`.
+
+The URL used to access the page is:
+
+```text
+/revision/add/
+```
+
+The Django URL pattern is:
+
+```python
+path("revision/add/", views.revision_create, name="revision_create")
+```
+
+When a user opens the page, Django creates an empty instance of `RevisionNoteForm`.
+
+After the user completes the form and submits it, the browser sends the information to the Django view using a POST request.
+
+The view then checks whether the form is valid before saving anything to the database.
+
+The following code handles creating a revision note:
+
+```python
+@login_required
+def revision_create(request):
+    if request.method == "POST":
+        form = RevisionNoteForm(request.POST, request.FILES)
+        if form.is_valid():
+            note = form.save(commit=False)
+            note.owner = request.user
+            note.save()
+            messages.success(request, "Revision note saved to your account.")
+            return redirect(note.get_absolute_url())
+    else:
+        form = RevisionNoteForm()
+
+    return render(
+        request,
+        "notes/revision_form.html",
+        {"form": form, "page_title": "Add revision note"},
+    )
+```
+
+I used `form.save(commit=False)` because I needed to assign the logged-in user as the owner before saving the record.
+
+The line `note.owner = request.user` connects the new revision note to the current user.
+
+This is important because the owner field is not included in the user-facing form.
+
+After the record has been saved, the user is redirected to the revision note detail page.
+
+A success message is also displayed to confirm that the information has been saved.
+
+If the form contains invalid information, Django displays the form again with validation errors.
+
+**Create process:**
+
+1. The user logs into UniNotes.
+2. The user visits the revision notes page.
+3. The user selects Add Revision Note.
+4. The application displays the revision note form.
+5. The user enters the required information.
+6. The user optionally uploads an attachment.
+7. The form is submitted using POST.
+8. Django validates the submitted information.
+9. The logged-in user is assigned as the owner.
+10. The new record is saved to the database.
+11. The user is redirected to the created revision note.
+
+This feature gives students a way to save their own revision materials within UniNotes.
+
+#### Read
+
+The Read functionality allows users to retrieve and view information already stored in the database.
+
+I implemented two main ways of reading revision notes:
+
+- Viewing a list of personal revision notes.
+- Viewing an individual revision note in more detail.
+
+The revision notes list is handled by the `revision_notes()` view.
+
+```python
+@login_required
+def revision_notes(request):
+    notes = RevisionNote.objects.filter(owner=request.user)
+    return render(
+        request,
+        "notes/revision_list.html",
+        {"revision_notes": notes},
+    )
+```
+
+The query:
+
+```python
+RevisionNote.objects.filter(owner=request.user)
+```
+
+retrieves revision notes belonging to the currently logged-in user.
+
+I used this filter because users should not be able to view other people's personal revision notes.
+
+The records are passed to the `revision_list.html` template.
+
+The page displays information including:
+
+- Revision note title.
+- Subject.
+- A preview of the content.
+- Last updated date.
+- Whether an attachment is available.
+- Links to view, edit or delete the note.
+
+I used a Django template loop to display the records.
+
+The template also contains an empty-state message when a user has not created any revision notes.
+
+**Viewing an individual revision note**
+
+The `revision_detail()` view retrieves one revision note using its primary key.
+
+```python
+@login_required
+def revision_detail(request, pk):
+    note = get_object_or_404(
+        RevisionNote,
+        pk=pk,
+        owner=request.user,
+    )
+    return render(
+        request,
+        "notes/revision_detail.html",
+        {"revision_note": note},
+    )
+```
+
+I used `get_object_or_404()` to retrieve the requested record.
+
+The query checks both the primary key and the owner.
+
+If the record does not exist, or the record does not belong to the logged-in user, Django returns a 404 response.
+
+This prevents users from viewing another person's revision note simply by changing the ID in the URL.
+
+The detail page displays the full content of the selected revision note.
+
+**Additional Read functionality**
+
+UniNotes also retrieves other database information outside the revision note CRUD feature.
+
+For example:
+
+- `home()` retrieves featured study resources.
+- `browse_notes()` retrieves active study resources and applies search filters.
+- `note_detail()` retrieves information about individual study resources.
+- `my_purchases()` retrieves purchases belonging to the logged-in user.
+
+These functions demonstrate how Django's ORM is used throughout the application to retrieve relevant information.
+
+#### Update
+
+The Update functionality allows registered users to edit revision notes they have already created.
+
+This is useful because students may need to correct mistakes, add more information or update their revision materials as they continue studying.
+
+The Update functionality is handled by the `revision_edit()` view.
+
+The URL contains the primary key of the revision note being edited.
+
+```text
+/revision/<id>/edit/
+```
+
+The application first retrieves the requested revision note and checks whether it belongs to the logged-in user.
+
+The following view handles editing an existing revision note:
+
+```python
+@login_required
+def revision_edit(request, pk):
+    note = get_object_or_404(
+        RevisionNote,
+        pk=pk,
+        owner=request.user,
+    )
+    if request.method == "POST":
+        form = RevisionNoteForm(
+            request.POST,
+            request.FILES,
+            instance=note,
+        )
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Revision note updated.")
+            return redirect(note.get_absolute_url())
+    else:
+        form = RevisionNoteForm(instance=note)
+
+    return render(
+        request,
+        "notes/revision_form.html",
+        {
+            "form": form,
+            "page_title": "Edit revision note",
+            "revision_note": note,
+        },
+    )
+```
+
+I reused `RevisionNoteForm` for both creating and editing revision notes.
+
+The main difference is the use of the `instance` argument.
+
+For example:
+
+```python
+form = RevisionNoteForm(instance=note)
+```
+
+This loads the existing information into the form so the user can see what has already been saved.
+
+When the user submits their changes, the form receives the existing record again:
+
+```python
+form = RevisionNoteForm(
+    request.POST,
+    request.FILES,
+    instance=note,
+)
+```
+
+This tells Django to update the existing database record rather than create a new one.
+
+After validation, `form.save()` stores the updated information.
+
+The user then receives the message:
+
+```text
+Revision note updated.
+```
+
+**Update process:**
+
+1. The user opens their revision notes.
+2. The user selects the note they want to edit.
+3. The user selects Edit.
+4. Django retrieves the existing record.
+5. The form displays the previously saved information.
+6. The user changes the required fields.
+7. The updated form is submitted.
+8. Django validates the submitted information.
+9. The existing database record is updated.
+10. The user is redirected to the updated revision note.
+
+I also used the `updated_at` field in the `RevisionNote` model.
+
+This field automatically records the time of the most recent save, helping users identify when their notes were last changed.
+
+#### Delete
+
+The Delete functionality allows registered users to permanently remove revision notes they no longer need.
+
+I included a separate confirmation page because deleting information is a destructive action.
+
+The Delete functionality is handled by the `revision_delete()` view.
+
+The URL structure is:
+
+```text
+/revision/<id>/delete/
+```
+
+The following code handles deletion:
+
+```python
+@login_required
+def revision_delete(request, pk):
+    note = get_object_or_404(
+        RevisionNote,
+        pk=pk,
+        owner=request.user,
+    )
+    if request.method == "POST":
+        note.delete()
+        messages.success(request, "Revision note deleted.")
+        return redirect("notes:revision_list")
+
+    return render(
+        request,
+        "notes/revision_confirm_delete.html",
+        {"revision_note": note},
+    )
+```
+
+I used `get_object_or_404()` with the owner field to prevent users from deleting revision notes belonging to another account.
+
+When the user first selects Delete, Django displays the `revision_confirm_delete.html` template.
+
+The page shows the title of the selected revision note and asks the user to confirm the action.
+
+The user can either:
+
+- Confirm the deletion.
+- Cancel and return to the revision note.
+
+The application only deletes the database record when it receives a POST request.
+
+The confirmation form also includes Django's CSRF token.
+
+```django
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, delete note</button>
+</form>
+```
+
+This prevents a normal GET request from deleting a record.
+
+Once the user confirms the action, Django executes:
+
+```python
+note.delete()
+```
+
+The user is redirected to the revision notes list and receives a success message.
+
+**Delete process:**
+
+1. The user opens an existing revision note.
+2. The user selects Delete.
+3. Django checks that the note belongs to the current user.
+4. The application displays a confirmation page.
+5. The user chooses whether to continue.
+6. If the user cancels, the record remains unchanged.
+7. If the user confirms, a POST request is submitted.
+8. Django deletes the record.
+9. The user returns to the revision notes list.
+10. A success message confirms the deletion.
+
+This additional confirmation step reduces the likelihood of a user accidentally deleting their revision notes.
+
+Deleting the database record is permanent. The current view does not implement a recycle bin or recovery feature.
+
+#### CRUD User Interface Feedback
+
+I wanted users to understand what happens when they create, edit or delete a revision note.
+
+To achieve this, I used Django's messages framework to display feedback after successful actions.
+
+| Operation | User Feedback |
+|---|---|
+| Create | Revision note saved to your account. |
+| Read | The requested revision note is displayed. |
+| Update | Revision note updated. |
+| Delete | Revision note deleted. |
+| Invalid form | Validation errors are displayed beside the relevant fields. |
+| Missing or inaccessible note | Django returns a 404 response. |
+
+I also included navigation links to help users move between pages.
+
+For example, the revision notes list contains actions to view, edit and delete individual notes.
+
+The revision note form includes a Cancel option so users can leave without submitting changes.
+
+The Delete confirmation page also contains a Cancel option.
+
+When a user has no revision notes, the application displays an empty-state message encouraging them to create their first note.
+
+These features help make the CRUD functionality easier to understand and use.
+
+#### CRUD Permissions
+
+The revision note CRUD functionality is restricted to authenticated users.
+
+I used Django's `@login_required` decorator on the following views:
+
+- `revision_notes()`
+- `revision_detail()`
+- `revision_create()`
+- `revision_edit()`
+- `revision_delete()`
+
+This prevents anonymous users from accessing the personal revision note pages directly.
+
+I also implemented ownership checks when retrieving individual revision notes.
+
+For example:
+
+```python
+note = get_object_or_404(
+    RevisionNote,
+    pk=pk,
+    owner=request.user,
+)
+```
+
+This query ensures that the requested record belongs to the logged-in user.
+
+If someone changes the ID in the URL to reference another user's note, the view returns a 404 response instead of displaying or modifying the record.
+
+The owner field is assigned in the backend during creation, rather than being supplied through the form.
+
+This prevents users from choosing another account as the owner through the normal form.
+
+**Permission summary**
+
+| Action | Anonymous User | Registered User |
+|---|---|---|
+| Browse public study resources | Allowed | Allowed |
+| View personal revision notes | Restricted | Own notes only |
+| Create revision notes | Restricted | Allowed |
+| Edit revision notes | Restricted | Own notes only |
+| Delete revision notes | Restricted | Own notes only |
+| View other users' revision notes | Restricted | Restricted |
+| Download purchased study resources | Restricted | Requires a purchase record |
+
+These restrictions help protect the database records associated with each account.
+
+One limitation to consider is that direct media-file URLs require separate protection if uploaded attachments must remain private. The current ownership checks protect the revision note views, but they do not automatically provide private file storage.
+
+#### CRUD Testing
+
+I created automated Django tests for the revision note functionality in `notes/tests.py`.
+
+These tests use Django's `TestCase` class and test client to simulate requests.
+
+The `RevisionCrudTests` class covers the main CRUD operations.
+
+The following tests are included:
+
+| Test Function | Purpose |
+|---|---|
+| `test_user_can_create_revision_note` | Checks that a revision note can be created and linked to its owner. |
+| `test_user_can_view_own_revision_note` | Checks that a user can access their own revision note. |
+| `test_user_can_edit_own_revision_note` | Checks that changes to a revision note are saved. |
+| `test_user_can_delete_own_revision_note` | Checks that a revision note can be deleted. |
+| `test_user_cannot_view_another_users_revision_note` | Checks that another user's revision note returns a 404 response. |
+
+For example, I created a test that checks whether a new revision note is correctly saved.
+
+```python
+def test_user_can_create_revision_note(self):
+    response = self.client.post(
+        reverse("notes:revision_create"),
+        {
+            "title": "Arrays",
+            "subject": "Computer Science",
+            "content": "Arrays store ordered values.",
+        },
+    )
+    self.assertEqual(RevisionNote.objects.count(), 1)
+    self.assertEqual(response.status_code, 302)
+    self.assertEqual(RevisionNote.objects.first().owner, self.user)
+```
+
+This test checks three things:
+
+1. One revision note has been created in the database.
+2. The application returns a redirect after the form is submitted.
+3. The new revision note belongs to the correct logged-in user.
+
+I also included a test that checks whether users can view another person's revision note.
+
+```python
+def test_user_cannot_view_another_users_revision_note(self):
+    note = RevisionNote.objects.create(
+        owner=self.other_user,
+        title="Private note",
+        subject="Psychology",
+        content="Private revision content.",
+    )
+    response = self.client.get(
+        reverse("notes:revision_detail", args=[note.pk])
+    )
+    self.assertEqual(response.status_code, 404)
+```
+
+This test checks that the application returns a 404 response when a user tries to view a revision note belonging to another account.
+
+The automated tests can be run using:
+
+```bash
+python manage.py test notes
+```
+
+The complete test results, additional permission tests, manual testing evidence and any corrections made during testing will be documented in the Testing section of this README.
+
+#### CRUD Evaluation
+
+Overall, the CRUD functionality provides registered users with a way to create and manage personal revision notes within UniNotes.
+
+The Create operation allows users to store revision information and optional attachments.
+
+The Read operation retrieves saved information and displays it through Django templates.
+
+The Update operation allows users to make changes without creating duplicate records.
+
+The Delete operation allows users to remove records after confirming their decision.
+
+One important part of the implementation is the use of ownership checks to restrict access to personal revision note records.
+
+Using Django's ModelForm functionality also helped reduce code duplication because the same form can be used for both creating and editing records.
+
+The interface provides success messages, validation errors and confirmation pages to help users understand the outcome of their actions.
+
+A possible future improvement would be introducing a soft-delete feature, allowing users to recover accidentally deleted revision notes.
+
+Additional automated tests could also be added to cover attempts to edit or delete another user's notes, invalid file uploads and deletion using GET requests.
+
+The current implementation provides the four main database operations needed for the personal revision note feature of UniNotes.
