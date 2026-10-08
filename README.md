@@ -6078,3 +6078,393 @@ and failed only after Stripe attempted to authenticate the API request.
 This helped isolate the issue as a Stripe credential configuration problem rather than an error in the application's checkout logic.
 
 The issue also highlighted the importance of never exposing secret API keys and of rotating any key that may have been accidentally shared during development.
+
+
+
+# In Development Changes
+
+# Django Application Architecture
+
+## Django Project Structure
+
+UniNotes was developed using Django, a Python web framework that provides the tools needed to build a full-stack web application.
+
+I organised the project into separate Django applications to keep different responsibilities manageable and avoid placing all the functionality into one large application.
+
+The main project structure is shown below:
+
+```text
+uni-notes-main/
+│
+├── uninotes/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── notes/
+│   ├── models.py
+│   ├── views.py
+│   ├── forms.py
+│   ├── urls.py
+│   ├── decorators.py
+│   ├── tests.py
+│   ├── migrations/
+│   ├── fixtures/
+│   └── management/
+│
+├── checkout/
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   └── tests.py
+│
+├── templates/
+│   ├── base.html
+│   ├── notes/
+│   ├── checkout/
+│   └── registration/
+│
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── images/
+│
+├── media/
+├── manage.py
+├── requirements.txt
+├── Procfile
+└── runtime.txt
+```
+
+Each directory has a particular purpose. The `uninotes` directory contains the main Django configuration, while the `notes` and `checkout` directories contain the application's functionality.
+
+The `templates` directory stores the HTML templates, and the `static` directory contains the CSS, JavaScript and images used throughout the website.
+
+This structure made the project easier to manage during development because I could work on individual features without unnecessarily changing unrelated parts of the application.
+
+## Django Apps
+
+### App 1 - Notes
+
+The `notes` application handles most of the functionality available to users.
+
+Its responsibilities include:
+
+- Displaying study resources on the home page.
+- Searching for study notes using keywords.
+- Filtering available study resources by subject.
+- Displaying individual study note information.
+- Registering new users.
+- Displaying purchased resources.
+- Allowing users to download purchased study notes.
+- Creating personal revision notes.
+- Viewing personal revision notes.
+- Editing existing revision notes.
+- Deleting revision notes.
+
+The application also contains the main database models:
+
+- `Subject`
+- `StudyNote`
+- `RevisionNote`
+- `Purchase`
+
+I used `models.py` to define how the data is stored, `views.py` to process user requests, and `forms.py` to handle registration and revision note forms.
+
+The `urls.py` file connects the relevant URLs to their views.
+
+### App 2 - Checkout
+
+The `checkout` application handles the payment process.
+
+Rather than placing all the Stripe payment logic inside the `notes` application, I separated it into its own Django app.
+
+The checkout application is responsible for:
+
+- Starting a Stripe Checkout session.
+- Redirecting users to the Stripe payment page.
+- Handling the return from a successful checkout.
+- Checking the payment status with Stripe.
+- Handling cancelled payments.
+- Recording verified purchases using the `Purchase` model from the `notes` application.
+
+The main payment functions are located in `checkout/views.py`.
+
+The application also contains its own `urls.py` file to manage the checkout-related URL patterns.
+
+### Why the Project Was Split Into Multiple Apps
+
+I decided to separate the project into multiple Django applications because the study note features and payment functionality have different responsibilities.
+
+The `notes` application mainly deals with resources, accounts and personal revision notes.
+
+The `checkout` application focuses on processing payments through Stripe.
+
+This approach made it easier to organise the code and locate particular functions when testing or fixing problems.
+
+It also means that changes to the payment process can usually be made without changing the code responsible for displaying study notes.
+
+## Django MVC / MVT Architecture
+
+Django uses the Model-View-Template (MVT) architecture.
+
+This separates the application into three main parts:
+
+- Models
+- Views
+- Templates
+
+### Models
+
+Models define the structure of the data stored in the database.
+
+In UniNotes, I created models for subjects, study notes, revision notes and purchases.
+
+For example, the `RevisionNote` model stores information about revision notes created by registered users.
+
+Each revision note is linked to its owner using a foreign key.
+
+This relationship allows users to have multiple revision notes while keeping ownership information attached to each record.
+
+### Views
+
+Views contain the Python logic used to process incoming requests.
+
+For example, the `browse_notes` view retrieves active study notes from the database and applies keyword or subject filters when requested.
+
+The revision note views also handle creating, editing and deleting records.
+
+I used Django functions such as `render()`, `redirect()` and `get_object_or_404()` to return the appropriate response.
+
+### Templates
+
+Templates are responsible for displaying information to users.
+
+I used Django templates to connect the backend data with the HTML pages.
+
+For example, the browse page receives the available study notes from its view and displays them as individual resource cards.
+
+Using templates meant I could display database information without manually writing separate HTML for every study resource.
+
+### URLs
+
+URLs determine which Django view is executed when a user visits a particular address.
+
+The main URL configuration is located in `uninotes/urls.py`.
+
+This file includes the URL patterns from the `notes` and `checkout` applications.
+
+Each app has its own `urls.py` file, making the routing easier to organise.
+
+## Separation of Responsibilities
+
+### Model Logic
+
+Model logic is responsible for defining data structures and relationships.
+
+I used Django model fields such as `CharField`, `TextField`, `ForeignKey`, `DecimalField` and `FileField`.
+
+Some models also include methods such as `get_absolute_url()` to return the correct detail page for a database record.
+
+### View / Business Logic
+
+Views are responsible for handling requests and deciding what action should happen.
+
+For example, when a user creates a revision note, the view first checks whether the submitted form is valid.
+
+It then connects the new revision note to the logged-in user before saving it to the database.
+
+The checkout views contain the payment-related logic, including creating Stripe Checkout sessions and checking successful payment details.
+
+### Template Logic
+
+Templates display data and provide the interface that users interact with.
+
+I kept database queries and payment processing out of the HTML templates.
+
+Instead, the views prepare the required information and pass it to the templates through a context dictionary.
+
+The templates then use that information to display the correct content.
+
+## Django Template Syntax
+
+### Template Inheritance
+
+To avoid repeating the same header, navigation and footer on every page, I created a shared `base.html` template.
+
+Other pages extend this template using Django's template inheritance system.
+
+For example:
+
+```django
+{% extends "base.html" %}
+{% block title %}Browse Notes | UniNotes{% endblock %}
+{% block content %}
+    <h1>Browse Notes</h1>
+{% endblock %}
+```
+
+This made the website more consistent and reduced the amount of duplicated HTML.
+
+### Template Variables
+
+Template variables allow database information to appear on the page.
+
+For example:
+
+```django
+{{ note.title }}
+{{ note.price }}
+{{ note.subject.name }}
+```
+
+These variables are used to display information about individual study notes.
+
+### Template Tags
+
+I used Django template tags to control how information is displayed.
+
+For example, the `{% url %}` tag generates links using named URL patterns.
+
+The `{% static %}` tag is used to reference static files such as stylesheets and images.
+
+### Conditional Rendering
+
+Conditional statements allow templates to display different information depending on a particular condition.
+
+For example, the navigation checks whether the user is authenticated.
+
+Registered users can see links to their revision notes and purchases, while anonymous users are shown login and registration options.
+
+### Loops
+
+Django template loops are used to display multiple records from the database.
+
+For example:
+
+```django
+{% for note in notes %}
+    <h2>{{ note.title }}</h2>
+    <p>£{{ note.price }}</p>
+{% empty %}
+    <p>No notes found.</p>
+{% endfor %}
+```
+
+This avoids manually writing HTML for every study note.
+
+### Reusable Templates / Includes
+
+I created a reusable study note card template called `partials_note_card.html`.
+
+This template is included within pages that need to display study resources.
+
+For example:
+
+```django
+{% include "notes/partials_note_card.html" %}
+```
+
+Using a reusable template made it easier to maintain consistent card designs throughout the website.
+
+## URL Structure
+
+### URL Naming Conventions
+
+I used descriptive names for URL patterns so they could be referenced throughout the project.
+
+For example:
+
+- `notes:home`
+- `notes:browse`
+- `notes:detail`
+- `notes:revision_create`
+- `notes:revision_edit`
+- `notes:revision_delete`
+- `checkout:buy`
+- `checkout:success`
+
+This is useful because links can refer to URL names rather than relying on hard-coded paths.
+
+### App URLs
+
+Both Django applications contain their own URL configuration files.
+
+The main URL configuration includes these files using Django's `include()` function.
+
+This separates the routing for study notes from the routing for payments.
+
+### Dynamic URLs
+
+I used dynamic URLs for pages that display or manage individual records.
+
+For example:
+
+```python
+path("notes/<int:pk>/", views.note_detail, name="detail")
+```
+
+The `<int:pk>` section represents the primary key of a database record.
+
+This allows one view and one template to display different study notes depending on the selected record.
+
+## Custom Python Logic
+
+### Custom Functions
+
+I created Python functions to manage the application's features.
+
+For example:
+
+- `browse_notes()` searches and filters study resources.
+- `revision_create()` creates personal revision notes.
+- `revision_edit()` updates existing revision notes.
+- `revision_delete()` deletes revision notes.
+- `download_note()` handles access to purchased study note files.
+- `create_checkout_session()` begins the Stripe Checkout process.
+
+These functions are organised into their relevant Django applications.
+
+### Conditional Logic
+
+Conditional statements are used throughout the project.
+
+For example, the application checks whether users are authenticated before allowing them to access personal revision notes.
+
+It also checks whether a submitted form is valid before saving data.
+
+During checkout, the application checks whether a user has already purchased a resource before allowing another checkout session to be created.
+
+### Loops
+
+Loops are used in Django templates to display collections of study notes and revision notes.
+
+The backend retrieves the relevant records and passes them to the templates, which iterate over the data to generate the interface.
+
+### Reusable Backend Logic
+
+I used reusable Django functionality to avoid repeating unnecessary code.
+
+Examples include:
+
+- `@login_required` to restrict pages to authenticated users.
+- `get_object_or_404()` to retrieve records safely.
+- `get_absolute_url()` to generate detail-page URLs.
+- `RevisionNoteForm` for both creating and editing revision notes.
+- A custom `anonymous_required` decorator for registration.
+
+This approach helped keep the project organised and made individual features easier to maintain.
+
+## Django Architecture Evaluation
+
+Overall, Django's MVT architecture provided a suitable structure for UniNotes.
+
+Separating models, views and templates made it easier to understand which part of the application was responsible for each task.
+
+Organising the project into `notes` and `checkout` also helped separate the core study-note functionality from payment processing.
+
+One area that could be improved in the future is moving more complex payment operations into dedicated service functions instead of keeping all the Stripe logic directly in the checkout views.
+
+This would improve the separation of responsibilities further and make the payment functionality easier to test and maintain.
+
