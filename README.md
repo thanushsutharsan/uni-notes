@@ -8014,3 +8014,461 @@ One limitation is that uploaded files are currently checked mainly by their exte
 Additional automated tests could also be introduced to check more invalid input scenarios.
 
 Overall, the forms support the main registration and revision note management features required for UniNotes.
+
+
+
+### Authentication, Authorisation and Permissions
+
+#### Authentication Overview
+
+I used Django's built-in authentication system to manage user accounts in UniNotes.
+
+Authentication allows the application to identify users and control access to features that require an account.
+
+I chose Django's authentication system because it already provides functionality for registration, login sessions, password validation and logout.
+
+This was important for UniNotes because students need their own accounts to manage personal revision notes and access purchased study resources.
+
+The authentication system is connected to the following files:
+
+- `notes/forms.py` - Registration form and validation.
+- `notes/views.py` - Registration and restricted application views.
+- `notes/decorators.py` - Custom authentication-related decorator.
+- `uninotes/urls.py` - Registration, login and logout URLs.
+- `templates/registration/` - Registration and login templates.
+- `templates/base.html` - Navigation links based on login status.
+
+#### Registration
+
+I created a registration page that allows new visitors to create a UniNotes account.
+
+The registration page can be accessed at:
+
+```text
+/accounts/register/
+```
+
+The registration form contains four main fields:
+
+- Username
+- Email address
+- Password
+- Password confirmation
+
+I used Django's `UserCreationForm` and added custom email validation.
+
+The registration view is located in `notes/views.py`.
+
+```python
+@anonymous_required
+def register(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(
+                request,
+                "Account created successfully.",
+            )
+            return redirect("notes:home")
+    else:
+        form = RegisterForm()
+
+    return render(
+        request,
+        "registration/register.html",
+        {"form": form},
+    )
+```
+
+When a user submits the form, Django checks whether the information is valid.
+
+If validation passes, the user account is created and the application automatically logs the user in.
+
+The user is then redirected to the home page.
+
+I also used a custom `anonymous_required` decorator to prevent users who are already logged in from accessing the registration page unnecessarily.
+
+**Registration Screenshot**
+
+![UniNotes registration page](static/images/testing/forms-testing/registration-form.png)
+
+*Picture 14: The UniNotes registration page allows new visitors to create an account.*
+
+**Successful Registration Screenshot**
+
+![Successful user registration](static/images/testing/authentication-testing/registration-success.png)
+
+*Picture 15: After successful registration, the user is redirected to the home page and receives a confirmation message.*
+
+#### Login
+
+I used Django's built-in `LoginView` to handle user login.
+
+The login page is available at:
+
+```text
+/accounts/login/
+```
+
+Users must enter their username and password to access their accounts.
+
+The login URL is defined in `uninotes/urls.py`.
+
+```python
+path(
+    "accounts/login/",
+    auth_views.LoginView.as_view(
+        redirect_authenticated_user=True
+    ),
+    name="login",
+)
+```
+
+When a user submits their login details, Django checks whether the credentials match an existing account.
+
+If the credentials are correct, Django creates an authenticated session.
+
+If the credentials are incorrect, the login form displays an error message.
+
+I enabled `redirect_authenticated_user=True` because users who are already logged in do not need to see the login page again.
+
+After a successful login, users are redirected to their requested page when a valid `next` parameter is provided, or to the configured home page.
+
+**Login Page Screenshot**
+
+![UniNotes login page](static/images/testing/authentication-testing/login-page.png)
+
+*Picture 16: The login page allows registered users to sign into their UniNotes accounts.*
+
+**Invalid Login Screenshot**
+
+![Invalid login credentials](static/images/testing/authentication-testing/invalid-login.png)
+
+*Picture 17: The login form displays an error when a user enters incorrect authentication details.*
+
+#### Logout
+
+I used Django's built-in `LogoutView` to allow registered users to end their sessions.
+
+The logout URL is:
+
+```text
+/accounts/logout/
+```
+
+The logout functionality is configured in `uninotes/urls.py`.
+
+```python
+path(
+    "accounts/logout/",
+    auth_views.LogoutView.as_view(),
+    name="logout",
+)
+```
+
+The logout button is displayed in the navigation when a user is authenticated.
+
+I used a POST form instead of a normal navigation link.
+
+```django
+<form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+```
+
+This allows the logout action to be processed through a POST request with CSRF protection.
+
+After logging out, the user is redirected to the home page.
+
+The navigation also changes to display the Login and Register options.
+
+**Logged-In Navigation Screenshot**
+
+![Logged-in navigation](static/images/testing/authentication-testing/logged-in-navigation.png)
+
+*Picture 18: The navigation displays the Revision, My Purchases and Logout options when a user is authenticated.*
+
+**Logged-Out Navigation Screenshot**
+
+![Logged-out navigation](static/images/testing/authentication-testing/logged-out-navigation.png)
+
+*Picture 19: After logging out, the navigation displays Login and Register instead of account-specific options.*
+
+#### Why Users Need Accounts
+
+I included user accounts because UniNotes contains features that need to be associated with individual students.
+
+Registered accounts allow users to:
+
+- Create personal revision notes.
+- View their previously saved revision notes.
+- Edit their own revision notes.
+- Delete their own revision notes.
+- Purchase study resources.
+- Access their purchase history.
+- Download resources they have purchased.
+
+The application uses the authenticated user to identify the correct records in the database.
+
+For example, the `RevisionNote` model contains an `owner` field that links each revision note to its creator.
+
+Similarly, the `Purchase` model links purchased resources to the registered user.
+
+This means users can return to their accounts and access their saved information.
+
+#### Anonymous User Permissions
+
+Anonymous users are visitors who have not logged into an account.
+
+I allowed anonymous users to access the public areas of UniNotes.
+
+These include:
+
+- Home page.
+- Browse study notes page.
+- Search functionality.
+- Subject filtering.
+- Individual study resource details.
+- Registration page.
+- Login page.
+
+However, anonymous users cannot access personal revision notes, purchase history or protected downloads.
+
+If they attempt to access a page protected by `@login_required`, Django redirects them to the login page.
+
+The application also displays a locked Revision navigation link for anonymous visitors.
+
+This explains that an account is required to use the feature.
+
+**Restricted Revision Access Screenshot**
+
+![Revision feature requires login](static/images/testing/authentication-testing/revision-login-required.png)
+
+*Picture 20: An anonymous visitor who attempts to access personal revision notes is redirected to the login page.*
+
+#### Registered User Permissions
+
+Registered users can access the public features and additional account functionality.
+
+They can:
+
+- Create revision notes.
+- View their own revision notes.
+- Edit their own revision notes.
+- Delete their own revision notes.
+- Purchase study resources.
+- Access their purchase history.
+- Download purchased study notes.
+
+However, being logged in does not mean a user can access every database record.
+
+I added ownership checks to restrict personal revision note access.
+
+Users can manage their own revision notes, but they cannot access another user's personal notes through the revision note views.
+
+#### Admin Permissions
+
+Django provides built-in staff and superuser functionality through its authentication system.
+
+However, the current UniNotes project does not include a custom administration dashboard.
+
+The Django admin application is not currently enabled in `INSTALLED_APPS`, and there is no `/admin/` URL configured.
+
+The main application views do not currently use a separate custom staff role or permission system for managing study resources.
+
+Introducing an administration dashboard could be a future improvement.
+
+This would make it easier for authorised administrators to manage subjects, study resources and uploaded materials.
+
+#### Ownership Checks
+
+Ownership checks are important because UniNotes allows users to create personal revision notes.
+
+I used Django's `get_object_or_404()` function to retrieve records while checking their owners.
+
+For example:
+
+```python
+note = get_object_or_404(
+    RevisionNote,
+    pk=pk,
+    owner=request.user,
+)
+```
+
+This code checks two conditions:
+
+1. The revision note has the requested primary key.
+2. The revision note belongs to the currently logged-in user.
+
+If the record does not exist or belongs to another account, Django returns a 404 response.
+
+I implemented ownership checks in the following views:
+
+- `revision_detail()`
+- `revision_edit()`
+- `revision_delete()`
+
+I also restricted the revision notes list to records belonging to the current user.
+
+```python
+notes = RevisionNote.objects.filter(
+    owner=request.user
+)
+```
+
+This ensures that the personal revision notes page only retrieves records associated with the authenticated account.
+
+**Unauthorised Access Screenshot**
+
+![Unauthorised revision note access](static/images/testing/authentication-testing/ownership-protection.png)
+
+*Picture 21: The application returns a 404 response when a logged-in user attempts to access a revision note belonging to another account.*
+
+#### Restricted Pages
+
+I used Django's `@login_required` decorator to protect features that require authentication.
+
+For example:
+
+```python
+@login_required
+def revision_notes(request):
+    notes = RevisionNote.objects.filter(
+        owner=request.user
+    )
+
+    return render(
+        request,
+        "notes/revision_list.html",
+        {"revision_notes": notes},
+    )
+```
+
+The decorator checks whether the user is authenticated before allowing the view to execute.
+
+If the user is not authenticated, Django redirects them to the login page.
+
+I used this decorator on the following features:
+
+- Revision notes list.
+- Revision note detail page.
+- Create revision note.
+- Edit revision note.
+- Delete revision note.
+- My Purchases.
+- Purchased resource downloads.
+- Stripe Checkout.
+- Payment success and cancellation pages.
+
+This prevents anonymous users from accessing the restricted Django views directly.
+
+#### Preventing Unauthorised Data Access
+
+I implemented several measures to help protect user information.
+
+**Authentication Checks**
+
+I used `@login_required` to prevent anonymous users from accessing restricted pages.
+
+**Ownership Checks**
+
+I checked the owner of revision notes before allowing users to view, edit or delete them.
+
+**Purchase Checks**
+
+Before allowing a study resource to be downloaded, the application checks whether the current user has a matching purchase record.
+
+The download view contains the following database query:
+
+```python
+purchase = get_object_or_404(
+    Purchase.objects.select_related("note"),
+    user=request.user,
+    note_id=pk,
+)
+```
+
+If no matching purchase exists, Django returns a 404 response.
+
+**CSRF Protection**
+
+I included `{% csrf_token %}` in POST forms to help protect against cross-site request forgery.
+
+**Password Security**
+
+I used Django's built-in authentication system, which stores passwords using secure password hashing rather than plain text.
+
+The project also includes Django's standard password validators.
+
+These checks help protect the application's user accounts and personal data.
+
+One limitation is that files stored in publicly accessible media locations may require additional protection.
+
+Ownership checks in Django views do not automatically make direct media file URLs private.
+
+#### Authentication and Authorisation Testing
+
+I created automated tests in `notes/tests.py` using Django's `TestCase` class.
+
+The existing test suite includes authentication and access-control tests.
+
+The following tests are implemented:
+
+| Test | Expected Result |
+|---|---|
+| Anonymous user visits My Purchases | Redirect to login. |
+| Anonymous user visits Revision Notes | Redirect to login. |
+| Logged-in user visits Register | Redirect to home page. |
+| Logged-in user visits Login | Redirect to home page. |
+| User attempts to download a resource without purchasing it | Return 404. |
+| User attempts to view another user's revision note | Return 404. |
+
+The automated tests can be run using:
+
+```bash
+python manage.py test notes
+```
+
+I also plan to manually test authentication and permissions using separate test accounts.
+
+The manual testing will include:
+
+1. Registering a new account.
+2. Logging in with valid credentials.
+3. Attempting to log in with invalid credentials.
+4. Logging out successfully.
+5. Attempting to access revision notes without logging in.
+6. Attempting to view another user's revision note.
+7. Attempting to edit another user's revision note.
+8. Attempting to delete another user's revision note.
+9. Attempting to download a study resource without purchasing it.
+
+I will record the actual results and supporting evidence in the Testing section.
+
+The current automated tests cover several important access restrictions, but additional tests would improve coverage of unauthorised edit and delete requests.
+
+#### Authentication and Authorisation Evaluation
+
+Overall, Django's built-in authentication system provided the functionality needed to manage user accounts in UniNotes.
+
+Using Django's existing login and logout views reduced the amount of authentication code I needed to write.
+
+The custom registration form allowed me to include email validation and automatically authenticate users after registration.
+
+I also used conditional template rendering to change the navigation depending on whether a user is logged in.
+
+The `@login_required` decorator helped restrict account-specific pages, while ownership checks protected personal revision note records.
+
+The Purchase model is also used to check whether users have access to paid study materials through the protected download view.
+
+One area for future improvement is the introduction of a dedicated administration dashboard.
+
+Another improvement would be implementing private cloud file storage for user attachments and paid resources.
+
+Additional automated permission tests would also help confirm that users cannot edit or delete records belonging to other accounts.
+
+The existing implementation supports the main authentication and authorisation requirements of UniNotes.
