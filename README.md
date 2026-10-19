@@ -7071,6 +7071,13 @@ If the form contains invalid information, Django displays the form again with va
 
 This feature gives students a way to save their own revision materials within UniNotes.
 
+
+##### Create Revision Note Screenshot
+
+![Create Revision Note](static/images/testing/crud-testing/revision-create.png)
+
+*Picture 1: The Create form allows registered users to add personal revision notes, including a title, subject, content and optional attachment.*
+
 #### Read
 
 The Read functionality allows users to retrieve and view information already stored in the database.
@@ -7159,6 +7166,21 @@ For example:
 - `my_purchases()` retrieves purchases belonging to the logged-in user.
 
 These functions demonstrate how Django's ORM is used throughout the application to retrieve relevant information.
+
+
+##### Revision Notes List Screenshot
+
+![Revision Notes List](static/images/testing/crud-testing/revison-list.png)
+
+*Picture 2: The revision notes page displays notes belonging to the logged-in user, with options to view, edit or delete them.*
+
+
+##### Individual Revision Note Screenshot
+
+![Revision Note Details](static/images/testing/crud-testing/revision-detail.png)
+
+*Picture 3: The detail page displays the selected revision note, including its title, subject and saved content.*
+
 
 #### Update
 
@@ -7259,6 +7281,14 @@ I also used the `updated_at` field in the `RevisionNote` model.
 
 This field automatically records the time of the most recent save, helping users identify when their notes were last changed.
 
+
+##### Edit Revision Note Screenshot
+
+![Edit Revision Note](static/images/testing/crud-testing/revision-edit.png)
+
+*Picture 4: The Update form displays existing revision note information, allowing users to make changes and save them.*
+
+
 #### Delete
 
 The Delete functionality allows registered users to permanently remove revision notes they no longer need.
@@ -7344,6 +7374,14 @@ This additional confirmation step reduces the likelihood of a user accidentally 
 
 Deleting the database record is permanent. The current view does not implement a recycle bin or recovery feature.
 
+
+##### Delete Confirmation Screenshot
+
+![Delete Revision Note](static/images/testing/crud-testing/revision-delete.png)
+
+*Picture 5: The Delete confirmation page asks users to confirm their decision before permanently removing a revision note.*
+
+
 #### CRUD User Interface Feedback
 
 I wanted users to understand what happens when they create, edit or delete a revision note.
@@ -7370,6 +7408,14 @@ The Delete confirmation page also contains a Cancel option.
 When a user has no revision notes, the application displays an empty-state message encouraging them to create their first note.
 
 These features help make the CRUD functionality easier to understand and use.
+
+
+##### CRUD Success Message Screenshot
+
+![CRUD Success Message](static/images/testing/crud-testing/revision-success.png)
+
+*Picture 6: A success message confirms that a revision note has been successfully saved or updated.*
+
 
 #### CRUD Permissions
 
