@@ -7557,3 +7557,460 @@ A possible future improvement would be introducing a soft-delete feature, allowi
 Additional automated tests could also be added to cover attempts to edit or delete another user's notes, invalid file uploads and deletion using GET requests.
 
 The current implementation provides the four main database operations needed for the personal revision note feature of UniNotes.
+
+
+
+### Forms and Validation
+
+#### Django Forms
+
+I used Django forms to collect, process and validate information submitted by users.
+
+Forms are an important part of UniNotes because users need to register for an account and manage their own revision notes.
+
+I used Django's built-in form functionality rather than manually validating each submitted field.
+
+The forms are located in `notes/forms.py`.
+
+I created two main forms:
+
+- `RegisterForm` - allows new users to register.
+- `RevisionNoteForm` - allows registered users to create and edit revision notes.
+
+Using Django forms helped me organise the validation logic separately from the HTML templates and backend views.
+
+#### Create Forms
+
+I implemented two forms that allow users to submit new information to the application.
+
+##### User Registration Form
+
+I created a registration form to allow visitors to create a UniNotes account.
+
+The registration form inherits from Django's built-in `UserCreationForm`.
+
+I extended this form by adding a required email address field.
+
+The form contains:
+
+- Username
+- Email address
+- Password
+- Password confirmation
+
+The following code is from `notes/forms.py`:
+
+```python
+class RegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            "username",
+            "email",
+            "password1",
+            "password2",
+        )
+```
+
+I chose `UserCreationForm` because it provides built-in validation for usernames and passwords.
+
+It also checks that the two passwords match before creating the account.
+
+When the form is submitted, Django validates the information.
+
+If the submitted data is valid, the account is created, the user is automatically logged in and redirected to the home page.
+
+If the form is invalid, the user remains on the registration page and receives validation feedback.
+
+**Registration Form Screenshot**
+
+![UniNotes Registration Form](static/images/testing/forms-testing/registration-form.png)
+
+*Picture 7: The UniNotes registration form allows new users to create an account using their username, email address and password.*
+
+##### Revision Note Creation Form
+
+I also created a form that allows registered users to add personal revision notes.
+
+This form is based on Django's `ModelForm` and is connected to the `RevisionNote` model.
+
+The form contains:
+
+- Title
+- Subject
+- Content
+- Optional attachment
+
+The following code is from `notes/forms.py`:
+
+```python
+class RevisionNoteForm(forms.ModelForm):
+    class Meta:
+        model = RevisionNote
+        fields = (
+            "title",
+            "subject",
+            "content",
+            "attachment",
+        )
+        widgets = {
+            "content": forms.Textarea(
+                attrs={"rows": 10}
+            ),
+        }
+```
+
+I used a larger text area for the content field so that students have enough space to write their revision information.
+
+The form also supports uploading a document alongside the revision note.
+
+When the user submits the form, Django checks that the information is valid before saving it.
+
+I used the following code in `notes/views.py`:
+
+```python
+if form.is_valid():
+    note = form.save(commit=False)
+    note.owner = request.user
+    note.save()
+```
+
+Using `commit=False` allows the logged-in user to be assigned as the owner before the revision note is saved.
+
+This is important because the owner field should be controlled by the backend rather than selected by the user.
+
+**Revision Note Creation Screenshot**
+
+![Revision Note Creation Form](static/images/testing/forms-testing/revision-form.png)
+
+*Picture 8: The revision note creation form allows registered users to enter a title, subject, content and optional file attachment.*
+
+#### Edit Forms
+
+I reused the `RevisionNoteForm` to allow registered users to edit existing revision notes.
+
+Instead of creating a completely separate form, I passed the existing database record into the form using Django's `instance` argument.
+
+For example:
+
+```python
+form = RevisionNoteForm(instance=note)
+```
+
+This loads the previously saved information into the form.
+
+When the user submits their changes, the view processes the updated information:
+
+```python
+form = RevisionNoteForm(
+    request.POST,
+    request.FILES,
+    instance=note,
+)
+```
+
+If the submitted data passes validation, Django saves the changes to the existing revision note.
+
+I reused the form because the same fields are needed for both creating and editing revision notes.
+
+This reduced duplicated code and made the forms easier to maintain.
+
+**Edit Revision Note Screenshot**
+
+![Edit Revision Note Form](static/images/testing/crud-testing/revision-edit.png)
+
+*Picture 9: The Edit form displays the previously saved revision note information, allowing users to update their content.*
+
+#### Form Validation
+
+I implemented validation to prevent incomplete or invalid information from being accepted through the application's forms.
+
+Django provides built-in validation for common requirements, while custom validation methods can be used for more specific checks.
+
+##### Required Fields
+
+Some fields must contain information before the form can be submitted successfully.
+
+For registration, the required fields include:
+
+- Username
+- Email address
+- Password
+- Password confirmation
+
+For revision notes, the required fields include:
+
+- Title
+- Subject
+- Content
+
+The attachment field is optional.
+
+If a required field is left empty, Django marks the form as invalid.
+
+The form is displayed again with validation errors so that the user can correct the missing information.
+
+This helps prevent incomplete revision notes from being saved.
+
+**Required Fields Validation Screenshot**
+
+![Required Fields Validation](static/images/testing/forms-testing/required-fields.png)
+
+*Picture 10: Required field validation prevents an incomplete revision note form from being accepted and identifies the fields that need information.*
+
+##### Format Validation
+
+I used Django's built-in field types and validators to check the format of submitted information.
+
+For example, the registration form uses:
+
+```python
+email = forms.EmailField(required=True)
+```
+
+This checks whether the submitted email address follows a valid format.
+
+I also used `FileExtensionValidator` to control which attachment extensions are accepted.
+
+The `RevisionNote` model allows the following attachment extensions:
+
+- PDF
+- DOC
+- DOCX
+- TXT
+
+The validator is defined in `notes/models.py`:
+
+```python
+FileExtensionValidator(
+    allowed_extensions=[
+        "pdf",
+        "doc",
+        "docx",
+        "txt",
+    ]
+)
+```
+
+If a user attempts to upload a file with an unsupported extension, the form returns a validation error.
+
+This helps control the types of files submitted to the application.
+
+However, checking a file extension does not guarantee that the file contents are safe. More detailed file validation could be introduced in future development.
+
+**Unsupported File Validation Screenshot**
+
+![Unsupported File Validation](static/images/testing/forms-testing/file-extension-validation.png)
+
+*Picture 11: File extension validation rejects an unsupported attachment type and displays feedback explaining which formats are permitted.*
+
+##### Range / Value Validation
+
+I also used field limits to control the amount of information users can submit.
+
+The `RevisionNote` model contains the following limits:
+
+| Field | Maximum Length |
+|---|---|
+| Title | 120 characters |
+| Subject | 100 characters |
+| Content | 5,000 characters |
+
+These restrictions are defined in the model fields.
+
+For example:
+
+```python
+title = models.CharField(max_length=120)
+
+subject = models.CharField(max_length=100)
+
+content = models.TextField(max_length=5000)
+```
+
+When these fields are processed through the ModelForm, Django validates their maximum lengths.
+
+I also included a maximum file size of 5 MB for revision note attachments.
+
+The `StudyNote` model includes a minimum price validator of £0.50.
+
+These checks help prevent invalid values and unnecessarily large submissions.
+
+##### Custom Validation
+
+I created custom validation methods for registration emails and revision note attachments.
+
+**Duplicate Email Validation**
+
+The `RegisterForm` contains a `clean_email()` method.
+
+```python
+def clean_email(self):
+    email = self.cleaned_data["email"].lower()
+
+    if User.objects.filter(
+        email__iexact=email
+    ).exists():
+        raise forms.ValidationError(
+            "An account already uses this email."
+        )
+
+    return email
+```
+
+This method converts the email address to lowercase before checking whether another account already uses it.
+
+I used `email__iexact` to make the database lookup case-insensitive.
+
+For example, if an existing account uses `student@example.com`, a new registration using `STUDENT@example.com` should not be accepted through this form.
+
+If the email address is already registered, Django raises a validation error.
+
+This helps prevent duplicate email addresses during registration.
+
+**Duplicate Email Validation Screenshot**
+
+![Duplicate Email Validation](static/images/testing/forms-testing/duplicate-email-validation.png)
+
+*Picture 12: The registration form displays an error when a user attempts to register with an email address already associated with an existing account.*
+
+**Attachment File Size Validation**
+
+I also created a `clean_attachment()` method to validate uploaded file sizes.
+
+The code is located in `notes/forms.py`.
+
+```python
+def clean_attachment(self):
+    attachment = self.cleaned_data.get(
+        "attachment"
+    )
+
+    if attachment and attachment.size > 5 * 1024 * 1024:
+        raise forms.ValidationError(
+            "The uploaded file must be 5 MB or smaller."
+        )
+
+    return attachment
+```
+
+This method checks the uploaded attachment before the form is accepted.
+
+If the file is larger than the configured limit, the form raises a validation error.
+
+The user receives the message:
+
+"The uploaded file must be 5 MB or smaller."
+
+I added this restriction to prevent users from uploading unnecessarily large documents.
+
+**Attachment Size Validation Screenshot**
+
+![Attachment Size Validation](static/images/testing/forms-testing/attachment-validation.png)
+
+*Picture 13: The attachment validation displays an error when a user attempts to upload a file larger than the permitted size.*
+
+#### Model-Level Validation
+
+I also used Django model validators to define restrictions directly in the database models.
+
+These are located in `notes/models.py`.
+
+For example, the `StudyNote` model uses `MinValueValidator` to define the minimum permitted resource price.
+
+```python
+price = models.DecimalField(
+    max_digits=6,
+    decimal_places=2,
+    validators=[
+        MinValueValidator(Decimal("0.50"))
+    ],
+)
+```
+
+The model also uses `FileExtensionValidator` to restrict uploaded study resource files to PDF extensions.
+
+The `RevisionNote` model uses a similar validator for personal revision note attachments.
+
+Model validators are useful because Django can use these restrictions when validating forms based on the models.
+
+However, saving a model directly through the ORM does not automatically run every model validator.
+
+Therefore, validation should also be considered when records are created or modified outside the application's normal forms.
+
+#### User Feedback for Invalid Data
+
+I wanted the forms to provide clear feedback when users submitted invalid information.
+
+Both the registration and revision note templates display error messages near the relevant form fields.
+
+For example, the revision note template contains the following code:
+
+```django
+{% for field in form %}
+    <div class="form-group {% if field.errors %}has-error{% endif %}">
+        <label for="{{ field.id_for_label }}">
+            {{ field.label }}
+        </label>
+
+        {{ field }}
+
+        {% if field.help_text %}
+            <div class="help-text">
+                {{ field.help_text }}
+            </div>
+        {% endif %}
+
+        {% for error in field.errors %}
+            <div class="field-error">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+{% endfor %}
+```
+
+This allows Django to display validation errors alongside the relevant input fields.
+
+Examples of feedback include:
+
+- Required information is missing.
+- An invalid email address has been entered.
+- An email address is already registered.
+- An unsupported file extension has been uploaded.
+- An attachment exceeds the file size limit.
+- Passwords do not match during registration.
+
+If validation fails, the form is displayed again rather than saving invalid information.
+
+The form templates also contain Django's CSRF token.
+
+```django
+{% csrf_token %}
+```
+
+This provides protection against cross-site request forgery during form submissions.
+
+Although CSRF protection is separate from input validation, both are important for handling form submissions securely.
+
+#### Forms and Validation Evaluation
+
+Overall, Django forms provided a suitable way to manage user input throughout UniNotes.
+
+Using `UserCreationForm` made it easier to implement registration without manually creating password validation functionality.
+
+Using `ModelForm` for revision notes allowed the form fields to remain connected to the database model.
+
+Reusing the revision note form for both creating and editing records reduced code duplication.
+
+Custom validation methods helped prevent duplicate registration emails and oversized attachments.
+
+The validation messages also make it easier for users to understand why a form submission was unsuccessful.
+
+One limitation is that uploaded files are currently checked mainly by their extension and file size rather than detailed file-content inspection.
+
+Additional automated tests could also be introduced to check more invalid input scenarios.
+
+Overall, the forms support the main registration and revision note management features required for UniNotes.
