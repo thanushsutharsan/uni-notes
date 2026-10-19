@@ -8472,3 +8472,707 @@ Another improvement would be implementing private cloud file storage for user at
 Additional automated permission tests would also help confirm that users cannot edit or delete records belonging to other accounts.
 
 The existing implementation supports the main authentication and authorisation requirements of UniNotes.
+
+
+### E-Commerce and Payments
+
+#### E-Commerce Purpose
+
+I developed UniNotes with e-commerce functionality to allow students to purchase digital study resources through the website.
+
+The main purpose of this feature is to give users access to downloadable study materials that can support their learning and revision.
+
+I decided to offer individual purchases rather than a subscription because students may only need resources for particular subjects.
+
+The e-commerce functionality allows users to:
+
+- Browse available study resources.
+- View resource information and prices.
+- Register or log in before purchasing.
+- Purchase individual study notes.
+- Complete payments using Stripe Checkout.
+- View previously purchased resources.
+- Download study materials they have purchased.
+
+The payment functionality is handled by the `checkout` Django application.
+
+The purchase records are stored in the `Purchase` model within the `notes` application.
+
+#### Payment User Flow
+
+I designed the payment process to be straightforward so that users can purchase their selected study resources without unnecessary steps.
+
+The user journey follows this process:
+
+1. The user visits the Browse Notes page.
+2. The user selects a study resource.
+3. The detail page displays the resource title, description, subject and price.
+4. The user logs in or creates an account if required.
+5. The user selects the Buy Now button.
+6. Django checks whether the resource has already been purchased.
+7. The application creates a Stripe Checkout session.
+8. The user is redirected to Stripe's hosted checkout page.
+9. The user completes or cancels the payment.
+10. Following a successful checkout, Stripe redirects the user to the payment success URL.
+11. Django retrieves the checkout session from Stripe and checks the returned details.
+12. If the verification checks pass, the purchase is recorded in the database.
+13. The user can download the purchased study resource.
+
+This process connects the frontend, Django backend, Stripe API and database.
+
+#### Payment Provider
+
+I selected Stripe as the payment provider for UniNotes.
+
+Stripe provides a hosted checkout page that allows users to complete payments without requiring me to develop a separate payment form.
+
+I chose Stripe because it provides:
+
+- A hosted payment interface.
+- Integration with Python.
+- Support for GBP payments.
+- Test payment functionality.
+- Payment session verification.
+- API documentation.
+- Payment error handling.
+
+Using Stripe Checkout means UniNotes does not need to directly collect or store customers' card details.
+
+This was useful because I could focus on the Django integration and how purchases are recorded in the database.
+
+#### Payment Integration
+
+I integrated Stripe using its Python library.
+
+The payment-related files are located in the following directory:
+
+```text
+checkout/
+├── __init__.py
+├── apps.py
+├── models.py
+├── views.py
+├── urls.py
+├── tests.py
+└── migrations/
+```
+
+The main payment functions are located in `checkout/views.py`.
+
+These include:
+
+- `create_checkout_session()`
+- `payment_success()`
+- `payment_cancel()`
+
+The URL patterns are defined in `checkout/urls.py`.
+
+```python
+from django.urls import path
+
+from . import views
+
+app_name = "checkout"
+
+urlpatterns = [
+    path(
+        "buy/<int:pk>/",
+        views.create_checkout_session,
+        name="buy",
+    ),
+    path(
+        "success/",
+        views.payment_success,
+        name="success",
+    ),
+    path(
+        "cancel/<int:pk>/",
+        views.payment_cancel,
+        name="cancel",
+    ),
+]
+```
+
+These URLs connect the checkout process to the relevant Django views.
+
+The main project URL configuration includes the checkout application using:
+
+```python
+path("checkout/", include("checkout.urls"))
+```
+
+#### Products / Services / Purchases
+
+The products available on UniNotes are downloadable study resources.
+
+Each resource is represented by a `StudyNote` database model.
+
+The model contains information including:
+
+- Subject.
+- Title.
+- Description.
+- Price.
+- Cover image URL.
+- Downloadable file.
+- Active status.
+
+The `price` field uses Django's `DecimalField` to store monetary values.
+
+The `is_active` field controls whether a resource is available through the application's public browsing and purchasing functionality.
+
+When a user purchases a study resource, the application stores the purchase information in the `Purchase` model.
+
+The Purchase model includes the following fields:
+
+| Field | Purpose |
+|---|---|
+| user | Identifies the user who purchased the resource. |
+| note | Identifies the purchased study resource. |
+| stripe_session_id | Stores the Stripe Checkout session identifier. |
+| amount_paid | Records the payment amount returned by Stripe. |
+| purchased_at | Records when the purchase was created. |
+
+This allows users to return to their accounts and access their purchased study resources.
+
+##### Study Resource Purchase Screenshot
+
+![Study Resource Purchase](static/images/testing/payment-testing/study-note-purchase.png)
+
+*Picture 22: The study resource detail page displays the resource title, subject, description, price and Buy Now button before checkout.*
+
+#### Checkout Process
+
+The checkout process begins when an authenticated user selects Buy Now.
+
+The study resource detail page uses a POST form to begin checkout.
+
+```django
+<form
+    action="{% url 'checkout:buy' note.pk %}"
+    method="post"
+>
+    {% csrf_token %}
+
+    <button type="submit">
+        Buy now — £{{ note.price }}
+    </button>
+</form>
+```
+
+I used POST because selecting Buy Now creates a Stripe Checkout session.
+
+The CSRF token provides protection against cross-site request forgery.
+
+The `create_checkout_session()` view retrieves the selected study resource.
+
+```python
+note = get_object_or_404(
+    StudyNote,
+    pk=pk,
+    is_active=True,
+)
+```
+
+This checks whether the study resource exists and is active.
+
+The application also checks whether the user has already purchased it.
+
+```python
+if Purchase.objects.filter(
+    user=request.user,
+    note=note,
+).exists():
+    messages.info(
+        request,
+        "You already own this study note.",
+    )
+    return redirect("notes:purchases")
+```
+
+This prevents users from starting another checkout through the normal purchasing process for a resource they already own.
+
+The application also checks whether the Stripe secret key has been configured.
+
+If the key is missing, the user receives an error message instead of being redirected to checkout.
+
+Once the checks pass, Django creates a Stripe Checkout session.
+
+```python
+session = stripe.checkout.Session.create(
+    mode="payment",
+    customer_email=request.user.email or None,
+    line_items=[
+        {
+            "price_data": {
+                "currency": "gbp",
+                "product_data": {
+                    "name": note.title
+                },
+                "unit_amount": int(
+                    note.price * Decimal("100")
+                ),
+            },
+            "quantity": 1,
+        }
+    ],
+    metadata={
+        "user_id": str(request.user.pk),
+        "note_id": str(note.pk),
+    },
+    success_url=success_url,
+    cancel_url=cancel_url,
+)
+```
+
+The Checkout session contains:
+
+- Product name.
+- Product price.
+- GBP currency.
+- Quantity of one.
+- Customer email, if available.
+- User ID and study resource ID.
+- Success URL.
+- Cancellation URL.
+
+I converted the price from pounds into pence because Stripe requires amounts in the smallest currency unit.
+
+For example, a £5.00 resource is passed to Stripe as 500 pence.
+
+After the session is created, Django redirects the user to Stripe.
+
+```python
+return redirect(session.url, code=303)
+```
+
+This opens Stripe's hosted checkout page.
+
+##### Stripe Checkout Screenshot
+
+![Stripe Checkout](static/images/testing/payment-testing/stripe-checkout.png)
+
+*Picture 23: Stripe Checkout displays the selected study resource and payment amount, allowing the user to complete the payment through Stripe's hosted interface.*
+
+#### Payment Data Flow
+
+The payment process involves communication between the UniNotes Django application, Stripe and the database.
+
+When a user selects Buy Now, Django sends a request to Stripe to create a checkout session.
+
+Stripe returns a session containing a checkout URL.
+
+The user is redirected to this URL to complete the payment.
+
+After a successful checkout, Stripe redirects the browser to the configured success URL with the session identifier.
+
+The `payment_success()` view retrieves the session identifier from the request.
+
+```python
+session_id = request.GET.get("session_id", "")
+```
+
+The application then retrieves the Checkout session directly from Stripe.
+
+```python
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+session = stripe.checkout.Session.retrieve(
+    session_id
+)
+```
+
+The retrieved information is checked before creating a purchase record.
+
+The application verifies that:
+
+- The payment status is `paid`.
+- The session metadata contains the authenticated user's ID.
+- The session metadata identifies a study resource.
+
+If these checks pass, the application retrieves the relevant study resource.
+
+It then records the purchase using Django's `get_or_create()` method.
+
+```python
+Purchase.objects.get_or_create(
+    user=request.user,
+    note=note,
+    defaults={
+        "stripe_session_id": session.id,
+        "amount_paid": amount_paid,
+    },
+)
+```
+
+I used `get_or_create()` because it prevents another Purchase record from being created if the same user returns to the payment success URL again.
+
+The Purchase model also contains a unique constraint covering the user and study resource.
+
+Once the purchase record exists, the application displays the payment success page.
+
+#### Successful Payment Feedback
+
+After the Stripe session has been verified and the purchase has been recorded, the application displays the payment success page.
+
+This page is located at:
+
+```text
+templates/checkout/success.html
+```
+
+The page displays:
+
+- Payment successful heading.
+- Purchased resource name.
+- Download Note button.
+- My Purchases link.
+- Browse More Notes link.
+
+This provides feedback that the application has recorded the purchase.
+
+Users can also return to My Purchases to access their study resources.
+
+##### Successful Payment Screenshot
+
+![Payment Success](static/images/testing/payment-testing/payment-success.png)
+
+*Picture 24: The payment success page confirms that the study resource has been purchased and provides a link to download it.*
+
+##### My Purchases Screenshot
+
+![My Purchases](static/images/testing/payment-testing/my-purchases.png)
+
+*Picture 25: The My Purchases page displays study resources associated with the logged-in user's account, including download options.*
+
+#### Failed Payment Feedback
+
+I implemented error handling to provide feedback when users cancel checkout or when the payment cannot be verified.
+
+**Payment Cancellation**
+
+If a user cancels Stripe Checkout, the browser returns to the cancellation page.
+
+The cancellation view is handled by `payment_cancel()`.
+
+```python
+@login_required
+def payment_cancel(request, pk):
+    note = get_object_or_404(
+        StudyNote,
+        pk=pk,
+    )
+
+    messages.warning(
+        request,
+        "Payment was cancelled. You have not been charged.",
+    )
+
+    return render(
+        request,
+        "checkout/cancel.html",
+        {"note": note},
+    )
+```
+
+The cancellation page displays a message explaining that the user has left checkout.
+
+It also provides links allowing users to return to the selected study resource or browse other notes.
+
+The current cancellation view does not independently retrieve the Stripe session to verify its final payment status.
+
+##### Payment Cancellation Screenshot
+
+![Payment Cancelled](static/images/testing/payment-testing/payment-cancelled.png)
+
+*Picture 26: The payment cancellation page displays feedback when the user returns from a cancelled checkout and provides navigation back to the study resources.*
+
+**Payment Verification Error**
+
+I also included error handling for situations where Django cannot verify the Stripe Checkout session.
+
+For example, the application checks whether a checkout session ID has been supplied.
+
+```python
+session_id = request.GET.get("session_id", "")
+
+if not session_id or not settings.STRIPE_SECRET_KEY:
+    messages.error(
+        request,
+        "We could not verify this payment.",
+    )
+    return redirect("notes:browse")
+```
+
+If the session ID is missing, the application redirects the user to the Browse Notes page and displays an error message.
+
+This prevents the success view from recording a purchase without the required session information.
+
+I tested this error-handling scenario by opening the payment success URL on the deployed application without providing a checkout session ID.
+
+The URL follows this format:
+
+```text
+https://your-app-domain/checkout/success/
+```
+
+The request must be made while logged into a test account because the view requires authentication.
+
+This tests the missing-session-ID error-handling path. It does not simulate a failed card payment or a Stripe service outage.
+
+##### Payment Verification Error Screenshot
+
+![Payment Verification Error](static/images/testing/payment-testing/payment-error.png)
+
+*Picture 27: UniNotes redirects the user to Browse Notes and displays an error message when the payment success URL is accessed without a Stripe Checkout session ID.*
+
+The application also handles Stripe API errors during payment verification.
+
+```python
+try:
+    session = stripe.checkout.Session.retrieve(
+        session_id
+    )
+except stripe.error.StripeError:
+    messages.error(
+        request,
+        "Stripe could not verify this payment.",
+    )
+    return redirect("notes:browse")
+```
+
+If Stripe raises an API error, Django displays an error message instead of proceeding with the purchase.
+
+However, a separate screenshot would be required to demonstrate this API failure scenario.
+
+#### Payment Validation
+
+I included validation checks to reduce the risk of recording incorrect or duplicate purchases.
+
+These checks include:
+
+1. Requiring authentication before checkout.
+2. Requiring POST requests to create checkout sessions.
+3. Checking that the selected study resource exists.
+4. Checking that the resource is active.
+5. Checking whether the user has already purchased the resource.
+6. Checking whether Stripe has been configured.
+7. Retrieving the payment session directly from Stripe.
+8. Checking that the returned payment status is paid.
+9. Comparing the session user ID with the authenticated user's ID.
+10. Checking that the session identifies a study resource.
+11. Preventing duplicate purchase records.
+
+The Purchase model also includes a unique constraint:
+
+```python
+models.UniqueConstraint(
+    fields=["user", "note"],
+    name="unique_user_note_purchase",
+)
+```
+
+This prevents multiple Purchase records for the same user and study resource.
+
+However, the current payment verification logic does not independently compare the payment amount and currency returned by Stripe with the expected resource price.
+
+This is a limitation that should be addressed before accepting live payments.
+
+#### Payment Security
+
+I considered payment security when developing the Stripe integration.
+
+**Environment Variables**
+
+I used environment variables to configure Stripe credentials.
+
+These are accessed through Django settings.
+
+```python
+STRIPE_PUBLIC_KEY = os.environ.get(
+    "STRIPE_PUBLIC_KEY", ""
+).strip()
+
+STRIPE_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY", ""
+).strip()
+
+STRIPE_WEBHOOK_SECRET = os.environ.get(
+    "STRIPE_WEBHOOK_SECRET", ""
+).strip()
+```
+
+This avoids hard-coding Stripe credentials into the project's source files.
+
+**Stripe Hosted Checkout**
+
+Stripe Checkout collects card payment information on Stripe's hosted payment page.
+
+UniNotes does not directly store card numbers or other card details.
+
+**Authentication**
+
+The checkout process uses Django's `@login_required` decorator.
+
+This prevents anonymous users from initiating the checkout view directly.
+
+**CSRF Protection**
+
+The checkout form includes Django's CSRF token to protect POST requests against cross-site request forgery.
+
+**Purchase Ownership**
+
+Each Purchase record is connected to a registered user.
+
+The download view checks whether the logged-in user has purchased the requested resource.
+
+**Duplicate Purchase Protection**
+
+I used both a duplicate purchase check in the checkout view and a unique database constraint.
+
+This helps prevent users from obtaining multiple Purchase records for the same resource.
+
+**Payment Security Limitations**
+
+The current implementation does not include a Stripe webhook endpoint.
+
+Although the project settings contain `STRIPE_WEBHOOK_SECRET`, this setting is not currently used by a webhook processing view.
+
+The application relies on the user returning to the success page before recording a verified purchase.
+
+This means a customer could complete payment but close their browser before the purchase is recorded.
+
+A future improvement would be to implement a verified Stripe webhook that processes successful payment events independently of the browser redirect.
+
+I would also add explicit amount and currency verification before granting access to purchased resources.
+
+These improvements should be completed before accepting real customer payments.
+
+#### Payment Testing
+
+I created automated tests for the checkout functionality in:
+
+```text
+checkout/tests.py
+```
+
+The tests use Django's `TestCase` and Python's `unittest.mock` functionality.
+
+The existing test methods are:
+
+| Test | Purpose |
+|---|---|
+| `test_checkout_session_redirects_to_stripe` | Checks that the checkout view redirects to the Stripe URL returned by a mocked session creation request. |
+| `test_success_creates_purchase` | Checks that a mocked paid Stripe session results in a Purchase record. |
+
+For example, the checkout redirect test mocks the Stripe session creation method.
+
+```python
+@override_settings(
+    STRIPE_SECRET_KEY="sk_test_example"
+)
+@patch(
+    "checkout.views.stripe.checkout.Session.create"
+)
+def test_checkout_session_redirects_to_stripe(
+    self,
+    mock_create,
+):
+    mock_create.return_value = MagicMock(
+        url="https://checkout.stripe.com/test"
+    )
+
+    response = self.client.post(
+        reverse(
+            "checkout:buy",
+            args=[self.note.pk],
+        )
+    )
+
+    self.assertEqual(response.status_code, 303)
+```
+
+This checks that the application responds with the expected redirect.
+
+I also created a test that simulates a successfully paid Stripe Checkout session.
+
+The test verifies that the application creates a Purchase record for the correct user and study resource.
+
+These tests check the Django payment integration using mocked Stripe responses.
+
+They do not prove that a real end-to-end Stripe transaction has completed.
+
+The checkout tests can be run using:
+
+```bash
+python manage.py test checkout
+```
+
+The actual test results will be recorded in the Testing section after execution.
+
+Additional automated tests would improve coverage of:
+
+- Invalid checkout session IDs.
+- Missing Stripe credentials.
+- Failed API requests.
+- Unpaid Stripe sessions.
+- Incorrect user metadata.
+- Incorrect payment amounts.
+- Duplicate purchase attempts.
+- Cancellation behaviour.
+
+#### Test Payments
+
+Stripe's test environment allows payment scenarios to be tested without processing real transactions.
+
+For manual testing, I will check the following scenarios:
+
+| Test Scenario | Expected Result |
+|---|---|
+| Browse study resources | Available resources and prices are displayed. |
+| Select Buy Now while logged out | Login is required. |
+| Select Buy Now while logged in | A Stripe Checkout session is created. |
+| Complete a successful test payment | The purchase is recorded and the success page is displayed. |
+| Cancel checkout | The cancellation page is displayed. |
+| Open the success URL without a session ID | The user is redirected to Browse Notes with an error message. |
+| Purchase a resource already owned | The user is redirected to My Purchases. |
+| Open My Purchases | The user's purchased resources are listed. |
+| Download a purchased resource | The protected download view returns the resource, if the file is available. |
+| Attempt a download without purchasing | The application returns a 404 response. |
+
+Actual outcomes and screenshots will be documented in the Testing section.
+
+I will only mark a test as passed after verifying its result.
+
+##### Purchased Resource Download Screenshot
+
+![Purchased Study Resource Download](static/images/testing/payment-testing/purchased-download.png)
+
+*Picture 28: After a purchase has been recorded, the study resource detail page displays the Download Note button instead of Buy Now.*
+
+#### E-Commerce and Payments Evaluation
+
+Overall, integrating Stripe allowed me to implement a purchasing process for downloadable study resources within UniNotes.
+
+The integration connects the study resource details page, Django checkout views, Stripe API and Purchase database model.
+
+Using Stripe's hosted checkout page reduced the need to build a separate payment interface and avoided directly handling card information.
+
+I also included authentication checks, existing purchase checks and payment session verification before recording purchases.
+
+The My Purchases page provides users with a way to return to previously purchased resources.
+
+I included success, cancellation and verification error feedback to help users understand the outcome of the checkout process.
+
+However, the current payment implementation has some limitations.
+
+Purchase fulfilment depends on the customer returning to the success page, and the application does not yet use Stripe webhooks to confirm payment events independently.
+
+The payment verification logic also needs additional checks for the expected amount and currency.
+
+A future version could improve the payment integration through verified webhooks, stronger payment validation, and more reliable private storage of downloadable study materials.
+
+These improvements would make the application more suitable for handling real customer payments.
+
+The current implementation demonstrates how a Django application can communicate with an external payment provider and connect verified checkout information with database records.
+
