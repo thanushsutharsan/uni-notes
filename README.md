@@ -9995,3 +9995,585 @@ The proposed corrections addressed the two issues separately rather than changin
 These tests also helped me understand the difference between application behaviour, test configuration and production configuration.
 
 The final outcome will be documented using the actual retest results once both tests have been rerun.
+
+
+
+### Security
+
+#### Security Overview
+
+Security was an important consideration when developing UniNotes because the application manages registered user accounts, personal revision notes, uploaded files and purchase information.
+
+I used Django's built-in security features alongside additional checks in my views and forms to help protect user information.
+
+The main security measures in UniNotes include:
+
+- Environment variables for sensitive configuration.
+- Django secret key configuration.
+- Authentication and password hashing.
+- Restricted access to account-specific pages.
+- Ownership checks for personal revision notes.
+- CSRF protection on forms.
+- Input and file validation.
+- Purchase verification before downloads.
+- Stripe-hosted payment processing.
+- HTTPS-related production settings.
+- Django security middleware.
+- Git ignore rules for sensitive local files.
+
+These measures help reduce common security risks, although further improvements are required before the application is suitable for handling live customer payments.
+
+#### Environment Variables
+
+I used environment variables to separate sensitive settings from the application's source code.
+
+This is important because credentials and configuration values should not be hard-coded into files uploaded to GitHub.
+
+The environment configuration is managed in `uninotes/settings.py`.
+
+I used the `python-dotenv` library to load environment variables from a local `.env` file.
+
+```python
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
+```
+
+The project uses environment variables for:
+
+- `SECRET_KEY`
+- `DEBUG`
+- `ALLOWED_HOSTS`
+- `CSRF_TRUSTED_ORIGINS`
+- `DATABASE_URL`
+- `STRIPE_PUBLIC_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+
+Using environment variables allows different settings to be used during local development and deployment.
+
+For example, local development can use SQLite and debugging, while the deployed application can use a hosted database and disable debugging.
+
+The repository also contains an `.env.example` file showing the names of the required variables without containing real credentials.
+
+#### Secret Keys
+
+Django uses a secret key for cryptographic signing and other security-related operations.
+
+The secret key is configured in `uninotes/settings.py`.
+
+```python
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-local-development-key-change-before-deployment",
+)
+```
+
+During development, I used a fallback value to allow the application to start without a locally configured secret key.
+
+However, this fallback must not be used in production.
+
+A production environment should have its own securely generated `SECRET_KEY` configured through environment variables.
+
+An improvement would be to make the application refuse to start in production if a real secret key has not been supplied.
+
+This would prevent an accidentally deployed application from using the predictable development fallback.
+
+
+
+#### Database Environment Variable
+
+UniNotes supports different database configurations depending on the environment.
+
+The database configuration is located in `uninotes/settings.py`.
+
+The application retrieves the database connection information using:
+
+```python
+database_url = os.environ.get(
+    "DATABASE_URL", ""
+).strip()
+```
+
+If a database URL is supplied, the project uses `dj-database-url` to configure the connection.
+
+```python
+DATABASES = {
+    "default": dj_database_url.parse(
+        database_url,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
+```
+
+If no database URL is provided, the application uses SQLite.
+
+This approach allows the project to support PostgreSQL in a hosted environment without placing database passwords directly in the source code.
+
+The database connection string may contain sensitive authentication information.
+
+For this reason, it should be stored securely and should not appear in GitHub commits, screenshots or README examples.
+
+#### .gitignore
+
+I used a `.gitignore` file to prevent certain local files from being included in Git commits.
+
+This is important because development environments often contain files that should not be uploaded to a public repository.
+
+The following entries are included in my project's `.gitignore`:
+
+```gitignore
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+staticfiles/
+.DS_Store
+```
+
+The `.env` entry helps prevent local environment credentials from being committed.
+
+The virtual environment folders are excluded because they contain locally installed Python packages.
+
+Python cache files and local database files are also excluded.
+
+The `staticfiles/` directory is ignored because it contains generated static files collected for deployment.
+
+A limitation is that `.gitignore` does not remove secrets that have already been committed.
+
+If a secret is accidentally committed, it must be revoked or rotated and removed from the repository history where necessary.
+
+##### Git Ignore Screenshot
+
+![UniNotes Git Ignore Configuration](static/images/testing/security-testing/gitignore-security.png)
+
+*Picture 35: The .gitignore file excludes the local environment file, virtual environments, database files and generated files from version control.*
+
+#### DEBUG Configuration
+
+Django's `DEBUG` setting controls whether detailed error information is displayed.
+
+The configuration in UniNotes is:
+
+```python
+DEBUG = os.environ.get(
+    "DEBUG", "True"
+).lower() == "true"
+```
+
+During local development, enabling debugging helps identify problems because Django displays detailed tracebacks.
+
+However, these tracebacks can expose information about the application's internal structure.
+
+For production, `DEBUG` should be set to `False`.
+
+For example, the Heroku configuration should contain:
+
+```text
+DEBUG=False
+```
+
+When debugging is disabled, Django does not display its detailed technical traceback pages to ordinary visitors.
+
+The current settings default to `True` when the environment variable is missing.
+
+This makes it particularly important to confirm that `DEBUG=False` is configured in Heroku.
+
+A future improvement would be to use a safer production default and enable debugging explicitly only during development.
+
+#### HTTPS
+
+HTTPS protects information transmitted between a user's browser and the website by encrypting the connection.
+
+This is important for UniNotes because users enter login credentials and access personal account information.
+
+The Django settings include security options that are enabled when `DEBUG=False`.
+
+```python
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+```
+
+These settings have the following purposes:
+
+| Setting | Purpose |
+|---|---|
+| SECURE_SSL_REDIRECT | Redirects HTTP requests to HTTPS. |
+| SESSION_COOKIE_SECURE | Sends session cookies only over HTTPS. |
+| CSRF_COOKIE_SECURE | Sends CSRF cookies only over HTTPS. |
+| SECURE_HSTS_SECONDS | Instructs browsers to prefer HTTPS for a defined period. |
+| SECURE_HSTS_INCLUDE_SUBDOMAINS | Extends the HSTS policy to subdomains. |
+
+Heroku operates behind a reverse proxy, so Django must also correctly recognise when the original browser request used HTTPS.
+
+This configuration should be verified before relying on Django's HTTPS redirects.
+
+The HSTS configuration should also be reviewed carefully, especially when using a shared hosting domain rather than a domain fully controlled by the project.
+
+##### HTTPS Deployment Screenshot
+
+![UniNotes HTTPS Connection](static/images/testing/security-testing/https-connection.png)
+
+*Picture 36: The deployed UniNotes website is accessed through an HTTPS address, providing evidence that the browser is using an encrypted connection.*
+
+#### CSRF Protection
+
+Cross-Site Request Forgery (CSRF) is an attack where a malicious website attempts to make a user's browser submit an unwanted request to another website.
+
+Django provides built-in CSRF protection through its middleware and template tags.
+
+UniNotes includes the following middleware:
+
+```python
+"django.middleware.csrf.CsrfViewMiddleware",
+```
+
+I also used `{% csrf_token %}` in POST forms.
+
+For example, the revision note form contains:
+
+```django
+<form
+    method="post"
+    enctype="multipart/form-data"
+>
+    {% csrf_token %}
+```
+
+The CSRF token allows Django to check that protected form submissions include a valid token.
+
+I included CSRF protection in:
+
+- Registration forms.
+- Login forms.
+- Logout forms.
+- Revision note creation forms.
+- Revision note editing forms.
+- Revision note deletion confirmation forms.
+- Stripe checkout initiation forms.
+
+This provides protection against unauthorised cross-site form submissions.
+
+##### CSRF Protection Screenshot
+
+![Django CSRF Protection](static/images/testing/security-testing/csrf-protection.png)
+
+*Picture 37: The revision note form template contains Django's CSRF token, which helps protect POST form submissions against cross-site request forgery.*
+
+#### Django Security Middleware
+
+Django uses middleware to process requests and responses.
+
+I included several middleware components that contribute to the application's security.
+
+These are configured in `uninotes/settings.py`.
+
+```python
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+```
+
+The main security-related middleware includes:
+
+**SecurityMiddleware**
+
+Supports HTTPS-related security settings and response headers.
+
+**SessionMiddleware**
+
+Allows Django to manage user sessions.
+
+**CsrfViewMiddleware**
+
+Provides CSRF protection for applicable requests.
+
+**AuthenticationMiddleware**
+
+Associates the authenticated user with each request.
+
+**XFrameOptionsMiddleware**
+
+Adds protections against certain clickjacking attacks by controlling whether pages can be embedded in frames.
+
+**WhiteNoiseMiddleware**
+
+Supports serving the application's static files, such as CSS and JavaScript.
+
+Although WhiteNoise is not a replacement for Django's security controls, it helps provide static assets in the deployed environment.
+
+##### Django Middleware Screenshot
+
+![Django Middleware Configuration](static/images/testing/security-testing/security-middleware.png)
+
+*Picture 38: The middleware configuration includes Django's security, session, authentication, CSRF and clickjacking protection components.*
+
+#### Password Security
+
+UniNotes uses Django's built-in user authentication system.
+
+Django stores passwords using password hashing rather than saving plain-text passwords in the database.
+
+I used Django's `UserCreationForm` for account registration.
+
+The project also includes the following password validators:
+
+- UserAttributeSimilarityValidator.
+- MinimumLengthValidator.
+- CommonPasswordValidator.
+- NumericPasswordValidator.
+
+These validators help reject passwords that are too similar to user information, too short, too common or entirely numeric.
+
+I chose Django's existing authentication tools rather than attempting to create my own password storage system.
+
+This reduced the amount of custom security-sensitive code needed for registration.
+
+#### Authentication Security
+
+I used Django's authentication system to control access to registered-user features.
+
+The application includes:
+
+- User registration.
+- Login.
+- Logout.
+- Authenticated sessions.
+- Restricted account pages.
+- Password validation.
+
+I used the `@login_required` decorator to restrict access to features that require an account.
+
+For example:
+
+```python
+@login_required
+def revision_notes(request):
+    notes = RevisionNote.objects.filter(
+        owner=request.user
+    )
+
+    return render(
+        request,
+        "notes/revision_list.html",
+        {"revision_notes": notes},
+    )
+```
+
+Anonymous users who attempt to access protected pages are redirected to login.
+
+I also used a custom `anonymous_required` decorator to redirect already-authenticated users away from registration.
+
+These checks help keep the user experience consistent and restrict access to account-specific functionality.
+
+#### Authorisation and Permissions
+
+Authentication confirms the user's identity, while authorisation determines what that user is allowed to access.
+
+For UniNotes, I implemented permissions primarily through Django view decorators and database queries.
+
+Anonymous users can browse public study resources.
+
+Registered users can additionally:
+
+- Create personal revision notes.
+- View their own revision notes.
+- Edit their own revision notes.
+- Delete their own revision notes.
+- View their purchases.
+- Download resources they have purchased.
+
+However, users should not be allowed to access another person's personal revision notes.
+
+I therefore included ownership checks in the revision note views.
+
+The current application does not include a custom role-based administration dashboard.
+
+This could be introduced in future development.
+
+#### Ownership Protection
+
+I implemented ownership protection using Django's `get_object_or_404()` function.
+
+For example:
+
+```python
+note = get_object_or_404(
+    RevisionNote,
+    pk=pk,
+    owner=request.user,
+)
+```
+
+This checks that the requested revision note exists and belongs to the current user.
+
+If the note belongs to another account, Django returns a 404 response.
+
+I used this approach in the revision note detail, edit and delete views.
+
+This prevents users from accessing or modifying another person's revision notes through these views by changing an ID in the URL.
+
+##### Ownership Protection Screenshot
+
+![Revision Note Ownership Protection](static/images/testing/authentication-testing/ownership-protection.png)
+
+*Picture 39: UniNotes returns a 404 response when an authenticated test user attempts to access a revision note belonging to another account.*
+
+#### Secure Payment Handling
+
+UniNotes uses Stripe Checkout for processing payments.
+
+Using Stripe's hosted checkout means the application does not directly collect or store customer card numbers.
+
+I used environment variables for Stripe API credentials.
+
+The checkout process also includes several checks:
+
+- Users must be authenticated.
+- Checkout must be initiated through a POST request.
+- The selected resource must be active.
+- Existing purchase records are checked.
+- Stripe's payment status is checked after session retrieval.
+- The returned session metadata is compared with the logged-in user.
+- Duplicate purchase records are restricted.
+
+The `Purchase` model includes a unique database constraint covering the user and study resource.
+
+However, the current payment implementation has limitations.
+
+The success view does not independently verify the paid amount and currency against the expected resource price.
+
+The application also does not currently process verified Stripe webhooks.
+
+These improvements are necessary before the application should accept live customer payments.
+
+#### External API Security
+
+The Stripe API is accessed through Django's backend rather than exposing the Stripe secret key in custom frontend JavaScript.
+
+The Stripe secret key is loaded using:
+
+```python
+STRIPE_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY", ""
+).strip()
+```
+
+The payment success view retrieves the Stripe Checkout session using the backend Stripe library.
+
+It also catches Stripe API errors during session retrieval.
+
+```python
+try:
+    session = stripe.checkout.Session.retrieve(
+        session_id
+    )
+except stripe.error.StripeError:
+    messages.error(
+        request,
+        "Stripe could not verify this payment.",
+    )
+    return redirect("notes:browse")
+```
+
+This prevents handled Stripe retrieval errors from immediately producing an unhandled exception in that view.
+
+An improvement would be to introduce equivalent error handling around Checkout session creation.
+
+Stripe credentials must not be exposed in screenshots, GitHub commits or browser-accessible code.
+
+#### Production Security
+
+When deploying UniNotes to Heroku, I need to ensure that the production environment uses secure configuration.
+
+The main production security requirements are:
+
+| Configuration | Required Production State |
+|---|---|
+| DEBUG | False |
+| SECRET_KEY | Unique, securely generated secret |
+| ALLOWED_HOSTS | Includes the deployed application's hostname |
+| CSRF_TRUSTED_ORIGINS | Includes the appropriate HTTPS origin where required |
+| DATABASE_URL | Secure hosted database connection |
+| STRIPE_SECRET_KEY | Stored as a private environment variable |
+| SESSION_COOKIE_SECURE | True |
+| CSRF_COOKIE_SECURE | True |
+| HTTPS | Enabled and verified |
+
+The application should also use its production dependencies from `requirements.txt`.
+
+For example, the project includes Gunicorn as the application server and WhiteNoise for static files.
+
+I can use Django's built-in deployment checks to identify potential configuration problems.
+
+```bash
+python manage.py check --deploy
+```
+
+This command checks several security-related Django settings.
+
+However, the results depend on the settings and environment variables used when the command runs.
+
+Running it locally with development settings does not automatically verify the deployed Heroku configuration.
+
+Any warnings should be reviewed and recorded before considering production security complete.
+
+The current media storage also needs attention.
+
+Uploaded files are stored using Django's local filesystem storage.
+
+This is not suitable for reliable private file storage on Heroku's temporary filesystem.
+
+A future improvement would be to use private persistent cloud storage with access-controlled downloads.
+
+#### Security Evaluation
+
+Overall, I used Django's built-in security features to provide a foundation for protecting UniNotes.
+
+Environment variables helped separate sensitive configuration from the source code.
+
+Django's authentication system provided password hashing, password validation and authenticated sessions.
+
+The `@login_required` decorator restricted account-specific pages, while ownership checks prevented users from accessing another person's revision notes through the protected views.
+
+I also included CSRF protection in POST forms and used Stripe Checkout to avoid directly collecting card payment information.
+
+The database relationships and unique constraints helped maintain ownership and purchase information.
+
+However, security is an area where further development is required.
+
+The most important improvements include:
+
+- Removing the predictable Django secret key fallback from production.
+- Using a safer production default for DEBUG.
+- Verifying HTTPS and reverse-proxy configuration on Heroku.
+- Checking HSTS settings against the deployment domain.
+- Implementing verified Stripe webhooks.
+- Validating payment amounts and currency before granting access.
+- Using private persistent storage for purchased resources and personal attachments.
+- Adding more automated security and permission tests.
+- Improving file validation beyond extensions and size limits.
+
+These improvements would strengthen UniNotes and make it more suitable for use beyond the current development project.
+
+The implemented security measures demonstrate how Django's authentication, middleware, database and form features can be used together to protect a full-stack web application.
