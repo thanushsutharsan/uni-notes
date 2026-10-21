@@ -8,6 +8,20 @@ from django.urls import reverse
 from notes.models import Purchase, StudyNote, Subject
 
 
+@override_settings(
+    STORAGES={
+        "default": {
+            "BACKEND": (
+                "django.core.files.storage.FileSystemStorage"
+            ),
+        },
+        "staticfiles": {
+            "BACKEND": (
+                "django.contrib.staticfiles.storage.StaticFilesStorage"
+            ),
+        },
+    }
+)
 class CheckoutTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(

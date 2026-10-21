@@ -1,3 +1,4 @@
+from django.http import HttpResponseRedirect
 from decimal import Decimal
 
 import stripe
@@ -55,7 +56,7 @@ def create_checkout_session(request, pk):
         success_url=success_url,
         cancel_url=cancel_url,
     )
-    return redirect(session.url, code=303)
+    return HttpResponseRedirect(session.url, status=303)
 
 
 @login_required
