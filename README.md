@@ -9176,3 +9176,822 @@ These improvements would make the application more suitable for handling real cu
 
 The current implementation demonstrates how a Django application can communicate with an external payment provider and connect verified checkout information with database records.
 
+
+### API Integration
+
+#### API Overview
+
+I integrated an external API into UniNotes to allow users to purchase digital study resources.
+
+The application uses the Stripe API to create checkout sessions, retrieve payment information and check whether payments have been completed.
+
+An Application Programming Interface (API) allows different software applications to communicate with one another.
+
+In UniNotes, Django communicates with Stripe using the Stripe Python library.
+
+The integration is located in `checkout/views.py`.
+
+I used the Stripe API rather than developing my own payment processing system because Stripe provides a hosted checkout service and manages the collection of card payment information.
+
+The main API operations are:
+
+- Creating a Stripe Checkout session.
+- Receiving the hosted checkout URL.
+- Retrieving a Checkout session after the user returns.
+- Checking the returned payment status.
+- Reading session metadata.
+- Recording verified purchase information in the UniNotes database.
+
+The browser does not communicate directly with the Stripe API through custom frontend JavaScript. Instead, Django handles the API requests on the server.
+
+#### Why the API Is Used
+
+I decided to use the Stripe API because UniNotes includes paid study resources.
+
+The application needs a way for users to complete payments and access the resources they have purchased.
+
+Using an external payment provider meant I did not need to build a separate payment card processing system.
+
+Stripe provides the following functionality:
+
+- Secure hosted checkout.
+- Payment processing.
+- Checkout session creation.
+- Payment status information.
+- Support for GBP payments.
+- Test-mode payment processing.
+- API integration with Python.
+- Payment error responses.
+
+Using the Stripe API also allowed me to connect the payment process to Django's existing user authentication and database models.
+
+For example, when a user purchases a study resource, the application can identify the selected note and associate the verified purchase with the authenticated user.
+
+#### API Data Flow
+
+The API integration begins when a registered user selects the Buy Now button on a study resource.
+
+The following steps explain how Django communicates with Stripe:
+
+1. The user selects a study resource.
+2. The user clicks Buy Now.
+3. Django receives a POST request.
+4. The view checks whether the resource exists and is active.
+5. Django checks whether the user already owns the resource.
+6. The view prepares the resource information.
+7. Django sends a request to Stripe to create a Checkout session.
+8. Stripe returns a session containing a checkout URL.
+9. Django redirects the user to Stripe Checkout.
+10. The user completes or cancels the payment.
+11. After successful checkout, Stripe redirects the browser to the configured success URL.
+12. Django retrieves the Checkout session from Stripe.
+13. Django checks the session's payment status and metadata.
+14. If the existing checks pass, the application records the purchase in the database.
+15. The user can access the purchased resource.
+
+**Creating a Stripe Checkout Session**
+
+The following code is located in `checkout/views.py`:
+
+```python
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+session = stripe.checkout.Session.create(
+    mode="payment",
+    customer_email=request.user.email or None,
+    line_items=[
+        {
+            "price_data": {
+                "currency": "gbp",
+                "product_data": {
+                    "name": note.title
+                },
+                "unit_amount": int(
+                    note.price * Decimal("100")
+                ),
+            },
+            "quantity": 1,
+        }
+    ],
+    metadata={
+        "user_id": str(request.user.pk),
+        "note_id": str(note.pk),
+    },
+    success_url=success_url,
+    cancel_url=cancel_url,
+)
+```
+
+The API request includes the selected study resource, its price and the URLs used when checkout is completed or cancelled.
+
+I included metadata containing the user ID and study resource ID.
+
+This allows the application to identify the relevant records when checking the returned Checkout session.
+
+Stripe returns a session containing a URL for the hosted checkout page.
+
+The application then redirects the browser using:
+
+```python
+return redirect(session.url, code=303)
+```
+
+This allows the user to complete payment on Stripe's hosted checkout page.
+
+##### Stripe API Checkout Request Screenshot
+
+![Stripe API checkout integration](static/images/testing/api-testing/api-checkout-request.png)
+
+*Picture 29: The Stripe Checkout integration in `checkout/views.py` creates a payment session using the selected study resource and authenticated user's information.*
+
+**Retrieving Payment Information**
+
+After the user returns from a successful checkout, the application retrieves the session ID from the URL.
+
+```python
+session_id = request.GET.get("session_id", "")
+```
+
+Django then sends another API request to Stripe:
+
+```python
+session = stripe.checkout.Session.retrieve(
+    session_id
+)
+```
+
+The returned session contains payment information and metadata.
+
+The application checks the payment status and verifies that the session is associated with the logged-in user.
+
+```python
+user_matches = (
+    session.metadata.get("user_id")
+    == str(request.user.pk)
+)
+
+note_id = session.metadata.get("note_id")
+
+if (
+    session.payment_status != "paid"
+    or not user_matches
+    or not note_id
+):
+    messages.error(
+        request,
+        "Payment has not been confirmed.",
+    )
+    return redirect("notes:browse")
+```
+
+These checks prevent the application from recording a purchase when the returned session does not meet the existing verification requirements.
+
+After the checks pass, Django retrieves the study resource and creates or retrieves the matching Purchase record.
+
+This connects the Stripe API response to the application's database.
+
+##### Stripe API Request Evidence
+
+![Stripe test API request](static/images/testing/api-testing/stripe-api-request-log.png)
+
+*Picture 30: Stripe's test-mode API request log provides evidence of communication between UniNotes and Stripe during checkout.*
+
+#### API Error Handling
+
+I implemented error handling for situations where the application cannot verify a Stripe Checkout session.
+
+External APIs can return errors for different reasons, including:
+
+- Invalid session identifiers.
+- Missing API credentials.
+- Incorrect API requests.
+- Temporary connection problems.
+- Stripe service errors.
+
+The payment success view checks whether the session ID and Stripe secret key are available before contacting Stripe.
+
+```python
+session_id = request.GET.get("session_id", "")
+
+if not session_id or not settings.STRIPE_SECRET_KEY:
+    messages.error(
+        request,
+        "We could not verify this payment.",
+    )
+    return redirect("notes:browse")
+```
+
+If either value is missing, the application displays an error message and redirects the user to Browse Notes.
+
+This prevents the application from continuing without the information required for payment verification.
+
+I also used a `try` and `except` block when retrieving the Checkout session.
+
+```python
+try:
+    session = stripe.checkout.Session.retrieve(
+        session_id
+    )
+except stripe.error.StripeError:
+    messages.error(
+        request,
+        "Stripe could not verify this payment.",
+    )
+    return redirect("notes:browse")
+```
+
+If Stripe raises an error covered by `StripeError`, Django displays a message instead of allowing the exception to propagate through this view.
+
+This makes the payment verification process easier for users to understand.
+
+#### Failed API Requests
+
+Failed API requests are an important part of defensive programming because external services cannot always be guaranteed to respond successfully.
+
+The current payment success view handles Stripe errors that occur when retrieving a Checkout session.
+
+For example, if the application attempts to retrieve a session that Stripe cannot identify, Stripe can return an API error.
+
+The `except stripe.error.StripeError` block catches this error and redirects the user to the Browse Notes page.
+
+However, the current `create_checkout_session()` view does not contain equivalent exception handling around the Stripe session creation request.
+
+This means an unexpected Stripe API error during session creation could result in an unhandled server error.
+
+An improvement would be to add error handling around `stripe.checkout.Session.create()`.
+
+This would allow the application to display a suitable message and return the user to the study resource page.
+
+##### Failed Stripe API Request Screenshot
+
+![Failed Stripe API request](static/images/testing/api-testing/api-error-response.png)
+
+*Picture 31: UniNotes displays an error message when Stripe cannot retrieve and verify a Checkout session, preventing the payment success view from recording an unverified purchase.*
+
+#### User Feedback When the API Fails
+
+I wanted UniNotes to provide understandable feedback when payment verification cannot be completed.
+
+The application uses Django's messages framework to display relevant error messages.
+
+The following messages are implemented:
+
+| Scenario | Feedback |
+|---|---|
+| Missing Stripe API configuration before checkout | Stripe is not configured. Add your test API keys first. |
+| Missing checkout session ID or Stripe configuration during verification | We could not verify this payment. |
+| Stripe raises an API error during session retrieval | Stripe could not verify this payment. |
+| Payment status or session metadata fails verification | Payment has not been confirmed. |
+
+These messages help users understand when the application cannot confirm their payment.
+
+The application redirects users to an appropriate page after the handled errors.
+
+For example, payment verification errors redirect the user to Browse Notes.
+
+This prevents the success page from being displayed when the existing verification checks have not passed.
+
+One improvement would be to provide more specific recovery instructions.
+
+For example, users could be directed to check their purchase history before attempting another payment.
+
+#### API Testing
+
+I created automated tests for the Stripe integration in `checkout/tests.py`.
+
+The tests use Django's `TestCase` class and Python's `unittest.mock` library.
+
+Mocking allows the Stripe API responses to be simulated without creating real payment requests.
+
+The existing tests include:
+
+**Test 1 - Checkout Session Redirect**
+
+The test named `test_checkout_session_redirects_to_stripe` checks whether the checkout view redirects to the URL returned by a mocked Stripe session creation request.
+
+The test uses:
+
+```python
+@override_settings(
+    STRIPE_SECRET_KEY="sk_test_example"
+)
+@patch(
+    "checkout.views.stripe.checkout.Session.create"
+)
+def test_checkout_session_redirects_to_stripe(
+    self,
+    mock_create,
+):
+    mock_create.return_value = MagicMock(
+        url="https://checkout.stripe.com/test"
+    )
+
+    response = self.client.post(
+        reverse(
+            "checkout:buy",
+            args=[self.note.pk],
+        )
+    )
+
+    self.assertEqual(response.status_code, 303)
+    self.assertEqual(
+        response.url,
+        "https://checkout.stripe.com/test",
+    )
+```
+
+This test checks the redirect behaviour without contacting the real Stripe API.
+
+**Test 2 - Successful Payment Verification**
+
+The test named `test_success_creates_purchase` checks whether a mocked paid Checkout session results in a Purchase record.
+
+The test creates a simulated Stripe session containing:
+
+- Session identifier.
+- Paid payment status.
+- Amount paid.
+- User ID.
+- Study resource ID.
+
+The application retrieves the mocked session and checks whether a Purchase record is created for the authenticated user.
+
+The test confirms the expected database outcome using:
+
+```python
+self.assertTrue(
+    Purchase.objects.filter(
+        user=self.user,
+        note=self.note,
+    ).exists()
+)
+```
+
+**Running the Tests**
+
+The checkout tests can be run using:
+
+```bash
+python manage.py test checkout
+```
+
+These tests confirm selected parts of the application's payment integration.
+
+However, mocked tests do not demonstrate that communication with the real Stripe API is successful.
+
+Additional tests should cover:
+
+- Missing session IDs.
+- Invalid session IDs.
+- Missing API credentials.
+- Stripe session creation failures.
+- Stripe session retrieval failures.
+- Unpaid sessions.
+- Incorrect session metadata.
+- Incorrect payment amounts.
+
+Manual testing using Stripe's test environment is also required to verify the complete payment flow.
+
+##### Stripe API Automated Test Screenshot
+
+![Stripe API automated test results](static/images/testing/api-testing/checkout-test-retest.png)
+
+*Picture 32: The Django terminal displays the results of the automated checkout tests that verify the application's Stripe integration using mocked API responses.*
+
+#### API Integration Evaluation
+
+Overall, the Stripe API allowed me to connect external payment functionality to UniNotes without developing a separate card payment system.
+
+Using Stripe's Python library provided a way to create checkout sessions and retrieve payment information through Django views.
+
+The application also connects the Stripe session metadata to the relevant user and study resource.
+
+I implemented checks to prevent purchases from being recorded when the returned payment status or metadata does not meet the existing requirements.
+
+Using Python mocking also allowed me to test selected API behaviours without processing real payments.
+
+However, the integration has some limitations.
+
+The current checkout session creation view does not handle every possible Stripe API error.
+
+The payment verification process also depends on users returning to the success page.
+
+A verified Stripe webhook could improve reliability by allowing the application to process payment events independently of the browser redirect.
+
+I would also strengthen payment verification by checking that the returned payment amount and currency match the selected study resource.
+
+These improvements would be important before enabling live customer payments.
+
+The current implementation demonstrates communication between a Django application and an external API, including request creation, response handling, payment verification and selected automated tests.
+
+
+##### Bugs Identified During API Testing
+
+During automated testing of the Stripe payment functionality, I encountered two problems that caused the checkout tests to fail.
+
+I identified these issues when running the checkout test suite from the VS Code terminal using:
+
+```bash
+python manage.py test checkout -v 2
+```
+
+The `-v 2` option provides more detailed test output, including individual test names and results.
+
+Django successfully created the test database, applied the required migrations and completed the system checks.
+
+However, neither of the two checkout tests passed.
+
+The initial results were:
+
+```text
+Found 2 test(s).
+
+System check identified no issues (0 silenced).
+
+test_checkout_session_redirects_to_stripe ... FAIL
+
+test_success_creates_purchase ... ERROR
+
+Ran 2 tests in 0.897s
+
+FAILED (failures=1, errors=1)
+```
+
+The first issue involved an incorrect HTTP redirect status code.
+
+The second issue occurred when Django attempted to render the payment success template using a static file that was missing from the static-file manifest.
+
+These problems were identified through automated tests rather than during normal use of the website.
+
+###### Initial Testing Result
+
+![Initial Failed Checkout Tests](static/images/testing/api-testing/checkout-test-failure.png)
+
+*Picture 33: The initial Django checkout test results show one failed assertion and one error. These results helped identify problems with the checkout redirect and static-file configuration.*
+
+###### Bug 1 - Incorrect Stripe Checkout Redirect Status Code
+
+**Problem Identified**
+
+The first bug occurred during the automated test named:
+
+`test_checkout_session_redirects_to_stripe`
+
+This test checks whether the application redirects the user to Stripe Checkout using the expected HTTP status code.
+
+The test expected HTTP status code `303`, but Django returned `302`.
+
+The terminal displayed:
+
+```text
+FAIL: test_checkout_session_redirects_to_stripe
+
+AssertionError: 302 != 303
+```
+
+This meant that the redirect response did not match the behaviour expected by the test.
+
+**Cause of the Problem**
+
+After reviewing `checkout/views.py`, I identified the following line inside the `create_checkout_session()` function:
+
+```python
+return redirect(session.url, code=303)
+```
+
+I had attempted to specify HTTP status code 303 by passing `code=303` to Django's `redirect()` function.
+
+However, this argument does not configure the response status code.
+
+Django's `redirect()` function was returning the normal HTTP 302 redirect.
+
+This caused the automated assertion to fail.
+
+**Original Code**
+
+The original code used:
+
+```python
+return redirect(session.url, code=303)
+```
+
+**Correction Made**
+
+The correction was to use Django's `HttpResponseRedirect` class and explicitly set the response status code to 303.
+
+First, I needed to import the class into `checkout/views.py`:
+
+```python
+from django.http import HttpResponseRedirect
+```
+
+I then replaced the original redirect statement with:
+
+```python
+return HttpResponseRedirect(
+    session.url,
+    status=303,
+)
+```
+
+**Before and After Comparison**
+
+Before:
+
+```python
+return redirect(session.url, code=303)
+```
+
+After:
+
+```python
+return HttpResponseRedirect(
+    session.url,
+    status=303,
+)
+```
+
+**Why This Change Was Made**
+
+HTTP 303 tells the browser to follow the redirect using a GET request.
+
+This is useful after a POST request because the browser can navigate to the destination without repeating the original POST operation.
+
+By explicitly returning HTTP 303, the checkout view can match the expected response behaviour.
+
+The change was intended to resolve the failing assertion without modifying the Stripe Checkout session creation logic.
+
+**Retesting**
+
+The existing test checks the response status and the destination URL.
+
+```python
+self.assertEqual(
+    response.status_code,
+    303,
+)
+
+self.assertEqual(
+    response.url,
+    "https://checkout.stripe.com/test",
+)
+```
+
+After applying the correction, the checkout tests need to be run again.
+
+```bash
+python manage.py test checkout -v 2
+```
+
+The corrected view should return HTTP 303 when Stripe successfully provides a checkout URL.
+
+The actual retest result must be confirmed by running the test suite.
+
+###### Bug 2 - Missing Static Files Manifest During Payment Success Testing
+
+**Problem Identified**
+
+The second issue occurred during the test named:
+
+`test_success_creates_purchase`
+
+This test simulates a successful Stripe payment and checks whether UniNotes creates a Purchase record for the logged-in user.
+
+During testing, Django attempted to render the payment success page.
+
+However, an error occurred when the template referenced a CSS file.
+
+The terminal displayed:
+
+```text
+ERROR: test_success_creates_purchase
+
+ValueError: Missing staticfiles manifest
+entry for 'css/style.css'
+```
+
+The error prevented the test from completing its assertions.
+
+**Cause of the Problem**
+
+After reviewing the traceback, I identified that the project uses WhiteNoise for static-file storage.
+
+The configuration is located in `uninotes/settings.py`.
+
+```python
+STORAGES = {
+    "default": {
+        "BACKEND": (
+            "django.core.files.storage."
+            "FileSystemStorage"
+        ),
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage."
+            "CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
+```
+
+WhiteNoise's manifest-based storage is useful for production because it provides versioned static-file references.
+
+However, the Django test runner does not automatically execute the production `collectstatic` process.
+
+When the payment success template attempted to load the CSS file, Django could not find its entry in the static-file manifest.
+
+The terminal also displayed a warning that the local `staticfiles` directory did not exist.
+
+This issue was related to the testing environment's static-file configuration rather than the mocked Stripe API response itself.
+
+**Original Code**
+
+The checkout test class in `checkout/tests.py` originally began with:
+
+```python
+class CheckoutTests(TestCase):
+```
+
+The tests inherited the normal static-file storage configuration from Django settings.
+
+**Correction Made**
+
+The proposed correction was to override the storage configuration for the checkout tests.
+
+This allows the tests to use Django's standard `StaticFilesStorage` instead of WhiteNoise's manifest-based storage.
+
+The following code was added immediately above the `CheckoutTests` class:
+
+```python
+@override_settings(
+    STORAGES={
+        "default": {
+            "BACKEND": (
+                "django.core.files.storage."
+                "FileSystemStorage"
+            ),
+        },
+        "staticfiles": {
+            "BACKEND": (
+                "django.contrib.staticfiles.storage."
+                "StaticFilesStorage"
+            ),
+        },
+    }
+)
+class CheckoutTests(TestCase):
+```
+
+**Before and After Comparison**
+
+Before:
+
+```python
+class CheckoutTests(TestCase):
+```
+
+After:
+
+```python
+@override_settings(
+    STORAGES={
+        "default": {
+            "BACKEND": (
+                "django.core.files.storage."
+                "FileSystemStorage"
+            ),
+        },
+        "staticfiles": {
+            "BACKEND": (
+                "django.contrib.staticfiles.storage."
+                "StaticFilesStorage"
+            ),
+        },
+    }
+)
+class CheckoutTests(TestCase):
+```
+
+**Why This Change Was Made**
+
+I wanted the checkout tests to run without requiring the production static-file manifest.
+
+Using `@override_settings` allows Django to temporarily replace the specified settings while the tests are running.
+
+This approach keeps the testing configuration separate from the normal application configuration.
+
+The change is intended to prevent the missing-manifest error during template rendering.
+
+It does not remove WhiteNoise from the production application or change how static files are collected for Heroku.
+
+**Retesting**
+
+After applying the storage override, I need to run the same command:
+
+```bash
+python manage.py test checkout -v 2
+```
+
+The payment success test should now be able to render the template without relying on the production static-file manifest.
+
+The test can then check its original assertions:
+
+```python
+self.assertEqual(
+    response.status_code,
+    200,
+)
+
+self.assertTrue(
+    Purchase.objects.filter(
+        user=self.user,
+        note=self.note,
+    ).exists()
+)
+```
+
+These assertions check that the success page returns HTTP 200 and that the expected Purchase record exists.
+
+The final result must be recorded after rerunning the test.
+
+###### Final Retesting Evidence
+
+After applying both corrections, the checkout test suite should be executed again.
+
+The test command is:
+
+```bash
+python manage.py test checkout -v 2
+```
+
+The expected successful result is:
+
+```text
+test_checkout_session_redirects_to_stripe ... ok
+test_success_creates_purchase ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests
+
+OK
+```
+
+This is the expected output, not a verified result until the tests have been rerun successfully.
+
+The screenshot below should contain the actual terminal output from the corrected test suite.
+
+![Checkout Automated Retest Results](static/images/testing/api-testing/checkout-test-retest.png)
+
+*Picture 34: The checkout test suite is rerun after correcting the HTTP redirect and static-file storage configuration. The terminal output provides evidence of the actual retest results.*
+
+###### Version Control and Deployment
+
+The corrections affect two files:
+
+| File | Change |
+|---|---|
+| `checkout/views.py` | Explicitly returns HTTP status code 303 when redirecting to Stripe Checkout. |
+| `checkout/tests.py` | Overrides static-file storage during automated checkout tests. |
+
+These changes should be saved in Git after they have been implemented and tested.
+
+The suggested commit message is:
+
+```text
+fix: correct Stripe checkout redirect and automated test static storage
+```
+
+**Git Commit Evidence**
+
+Commit hash: To be added after verifying the commit.
+
+**Heroku Deployment Verification**
+
+The corrected code can be deployed to Heroku after the automated tests pass.
+
+Following deployment, I should check that:
+
+- The application loads successfully.
+- The website's CSS and JavaScript still load correctly.
+- The study resource pages remain accessible.
+- The Buy Now button still redirects to Stripe Checkout.
+- The payment success page can render correctly.
+
+The results of these checks will be recorded in the Deployment Verification section.
+
+###### Testing Bug Evaluation
+
+The two issues demonstrated the importance of automated testing during Django development.
+
+The first test identified a difference between the redirect status code I intended to use and the response Django actually returned.
+
+The second test revealed a problem with using production static-file storage during automated template testing.
+
+Reviewing the traceback helped me identify the files and settings responsible for the errors.
+
+The proposed corrections addressed the two issues separately rather than changing unrelated parts of the application.
+
+These tests also helped me understand the difference between application behaviour, test configuration and production configuration.
+
+The final outcome will be documented using the actual retest results once both tests have been rerun.
