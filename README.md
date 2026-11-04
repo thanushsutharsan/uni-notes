@@ -11179,3 +11179,912 @@ Future improvements include:
 These improvements would make UniNotes more reliable and better prepared for handling unexpected situations.
 
 The current implementation demonstrates how Django's form validation, authentication, ownership checks, database queries and Python exception handling can work together to reduce errors and protect user information.
+
+
+### Code Quality and Organisation
+
+#### Code Quality Overview
+
+Code quality was an important consideration during the development of UniNotes because I wanted the application to be organised, readable and easy to maintain.
+
+As the project developed, I added features such as user authentication, personal revision notes, study resources, file uploads and Stripe payment integration.
+
+These features required different parts of the application to work together. I wanted to avoid placing all the functionality into one large file because this would make the code difficult to understand and maintain.
+
+To help improve code quality, I followed Django's project structure and separated the application into smaller components.
+
+The main areas I considered were:
+
+- Organising the project into separate Django applications.
+- Following Django's Model-View-Template architecture.
+- Separating models, views, forms and URL configurations.
+- Following Python PEP 8 coding conventions where possible.
+- Using descriptive function and variable names.
+- Reusing existing Django functionality.
+- Reducing unnecessary code duplication.
+- Separating HTML, CSS and JavaScript.
+- Using Django template inheritance.
+- Organising static files.
+- Keeping configuration settings separate from application logic.
+- Using Git and GitHub with structured commit messages.
+
+These approaches helped make UniNotes easier to develop, debug and update.
+
+#### Project Directory Structure
+
+I organised UniNotes using Django's standard project structure.
+
+The project contains two main Django applications called `notes` and `checkout`.
+
+The main Django configuration is stored in the `uninotes` directory.
+
+I also organised HTML templates, CSS, JavaScript, images and uploaded files into separate directories.
+
+The following structure shows the main directories and selected files from my project.
+
+```text
+uni-notes/
+│
+├── assets/
+│   └── wireframes/
+│
+├── checkout/
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+│
+├── media/
+│   └── study_notes/
+│
+├── notes/
+│   ├── decorators.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+│
+├── static/
+│   ├── css/
+│   │   └── style.css
+│   ├── images/
+│   └── js/
+│       └── nav.js
+│
+├── templates/
+│   ├── base.html
+│   ├── checkout/
+│   │   ├── cancel.html
+│   │   └── success.html
+│   ├── notes/
+│   │   ├── browse.html
+│   │   ├── revision_form.html
+│   │   └── revision_list.html
+│   └── registration/
+│       └── login.html
+│
+├── uninotes/
+│   ├── settings.py
+│   └── urls.py
+│
+├── .env.example
+├── .gitignore
+├── LICENCE.md
+├── Procfile
+├── README.md
+├── manage.py
+├── requirements.txt
+└── runtime.txt
+```
+
+This is a simplified structure showing the main directories and selected files rather than every file in the repository.
+
+The organisation helped me keep related functionality together.
+
+For example, when working on revision notes, I could find the relevant code inside the `notes` application.
+
+When working on payments, I could focus on the `checkout` application.
+
+This made development more manageable and helped me identify the correct files when fixing problems.
+
+#### Separation of Django Applications
+
+I divided UniNotes into two main Django applications so that different areas of functionality could be managed separately.
+
+##### Notes Application
+
+The `notes` application contains the main functionality of UniNotes.
+
+Its responsibilities include:
+
+- Displaying the home page.
+- Displaying study subjects.
+- Browsing and searching study resources.
+- Displaying individual study notes.
+- User registration.
+- Personal revision note creation.
+- Viewing personal revision notes.
+- Editing revision notes.
+- Deleting revision notes.
+- Viewing purchased resources.
+- Downloading purchased study notes.
+
+The main files include:
+
+| File | Responsibility |
+|---|---|
+| `notes/models.py` | Defines database models and relationships. |
+| `notes/forms.py` | Defines registration and revision note forms. |
+| `notes/views.py` | Processes requests and controls application logic. |
+| `notes/urls.py` | Defines URL patterns for the notes application. |
+| `notes/decorators.py` | Contains a custom authentication-related decorator. |
+
+Keeping these files separate makes it easier to understand how each part of the application works.
+
+##### Checkout Application
+
+The `checkout` application contains the Stripe payment functionality.
+
+Its responsibilities include:
+
+- Creating Stripe Checkout sessions.
+- Redirecting users to Stripe.
+- Handling payment success requests.
+- Handling payment cancellations.
+- Retrieving Stripe Checkout session information.
+- Recording purchases.
+- Testing checkout functionality.
+
+The main files include:
+
+| File | Responsibility |
+|---|---|
+| `checkout/views.py` | Contains Stripe payment processing logic. |
+| `checkout/urls.py` | Defines checkout URL patterns. |
+| `checkout/tests.py` | Contains automated Django checkout tests. |
+
+Separating the checkout functionality from the notes application made the project easier to maintain.
+
+For example, changes to Stripe payment processing can be made without unnecessarily changing the personal revision note functionality.
+
+#### Model-View-Template Architecture
+
+UniNotes follows Django's Model-View-Template (MVT) architecture.
+
+This separates the application's database structure, backend logic and frontend presentation.
+
+##### Models
+
+Models define the information stored in the database.
+
+The main models are stored in:
+
+```text
+notes/models.py
+```
+
+The application contains four main models:
+
+- `Subject`
+- `StudyNote`
+- `RevisionNote`
+- `Purchase`
+
+These models define the fields and relationships used to store information.
+
+For example, the `RevisionNote` model stores personal revision notes and connects them to registered users.
+
+The `Purchase` model records which study resources belong to users after purchase.
+
+##### Views
+
+Views contain the Python code that processes incoming HTTP requests.
+
+The main notes views are stored in:
+
+```text
+notes/views.py
+```
+
+For example, the `revision_notes()` view retrieves records belonging to the logged-in user.
+
+```python
+@login_required
+def revision_notes(request):
+    notes = RevisionNote.objects.filter(
+        owner=request.user
+    )
+
+    return render(
+        request,
+        "notes/revision_list.html",
+        {"revision_notes": notes},
+    )
+```
+
+This view retrieves the required information from the database and passes it to an HTML template.
+
+##### Templates
+
+Templates control how information is displayed in the browser.
+
+For example:
+
+```text
+templates/notes/revision_list.html
+```
+
+This template displays the personal revision notes returned by the view.
+
+Separating models, views and templates helped me keep the code organised.
+
+It also meant I could update the design of a page without unnecessarily changing its database structure.
+
+#### Separation of Models, Forms and Views
+
+I used separate Python files for models, forms and views.
+
+Each file has a different responsibility.
+
+| File | Purpose |
+|---|---|
+| `models.py` | Defines database structures and relationships. |
+| `forms.py` | Controls form fields and validation. |
+| `views.py` | Processes HTTP requests and responses. |
+| `urls.py` | Connects URL paths to view functions. |
+
+For example, the `RevisionNote` model defines the information stored for personal revision notes.
+
+The `RevisionNoteForm` controls which fields can be submitted and applies validation rules.
+
+The revision note views then process the submitted form.
+
+An example is:
+
+```python
+if form.is_valid():
+    note = form.save(commit=False)
+    note.owner = request.user
+    note.save()
+```
+
+This allows the form to handle validation while the view controls ownership assignment and database saving.
+
+Keeping these responsibilities separate helped reduce unnecessary duplication.
+
+It also made validation easier to manage because the same form could be reused in different views.
+
+#### Forms and Validation Organisation
+
+I placed the main Django forms inside:
+
+```text
+notes/forms.py
+```
+
+The file contains:
+
+- `RegisterForm`
+- `RevisionNoteForm`
+
+The `RegisterForm` extends Django's `UserCreationForm` to provide registration functionality.
+
+It also contains custom email validation to check whether another account already uses the submitted email address.
+
+The `RevisionNoteForm` extends Django's `ModelForm`.
+
+This form handles the information users submit when creating and updating personal revision notes.
+
+For example, I added an attachment size check.
+
+```python
+def clean_attachment(self):
+    attachment = self.cleaned_data.get("attachment")
+
+    if attachment and attachment.size > 5 * 1024 * 1024:
+        raise forms.ValidationError(
+            "The uploaded file must be 5 MB or smaller."
+        )
+
+    return attachment
+```
+
+This checks the size of an uploaded file before the form is accepted.
+
+By placing this validation inside the form, I avoided repeating the same check in the revision note creation and editing views.
+
+This helped keep the validation consistent.
+
+#### Python Coding Standards
+
+I considered the Python PEP 8 style guide when developing the backend.
+
+PEP 8 provides recommendations for writing Python code that is readable and consistent.
+
+The main areas I considered included indentation, spacing, line lengths, naming conventions and imports.
+
+##### Indentation
+
+I used four spaces for indentation in Python files.
+
+For example:
+
+```python
+if form.is_valid():
+    note = form.save(commit=False)
+    note.owner = request.user
+    note.save()
+```
+
+Consistent indentation is important because Python uses indentation to identify code blocks.
+
+##### Line Length
+
+I tried to avoid unnecessarily long lines of code.
+
+For example, database queries can be separated across multiple lines.
+
+```python
+note = get_object_or_404(
+    RevisionNote,
+    pk=pk,
+    owner=request.user,
+)
+```
+
+This makes the code easier to read.
+
+##### Spacing
+
+I used spacing around assignment operators and after commas.
+
+For example:
+
+```python
+note.owner = request.user
+```
+
+Consistent spacing improves readability and helps maintain the same style throughout the project.
+
+##### Import Organisation
+
+I kept imports at the beginning of Python files.
+
+For example, the notes views import functionality from Django and the application's own modules.
+
+```python
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import RegisterForm, RevisionNoteForm
+from .models import Purchase, RevisionNote, StudyNote, Subject
+```
+
+Grouping imports makes it easier to understand which packages and modules are required.
+
+Although I considered PEP 8 during development, I have not claimed that every Python file passes automated validation.
+
+Any actual validation results will be recorded in the Testing section.
+
+#### Naming Conventions
+
+I used descriptive naming conventions to make the code easier to understand.
+
+In Python, `snake_case` is normally used for variables and functions.
+
+Examples from UniNotes include:
+
+```python
+revision_notes
+revision_create
+revision_edit
+revision_delete
+create_checkout_session
+payment_success
+payment_cancel
+```
+
+These names describe the purpose of each view.
+
+For example, `revision_delete` clearly identifies the function responsible for deleting a personal revision note.
+
+I also used descriptive variable names.
+
+Examples include:
+
+```python
+session_id
+note_id
+user_matches
+amount_paid
+```
+
+These variable names make it easier to understand the information being processed.
+
+For Django model classes, I used `PascalCase`.
+
+Examples include:
+
+```python
+Subject
+StudyNote
+RevisionNote
+Purchase
+```
+
+Following consistent naming conventions helped make the code more readable.
+
+#### URL Organisation
+
+I organised the URL patterns using Django's routing system.
+
+The main URL configuration is stored in:
+
+```text
+uninotes/urls.py
+```
+
+This file connects the main project to the two applications.
+
+For example:
+
+```python
+path("checkout/", include("checkout.urls")),
+path("", include("notes.urls")),
+```
+
+Each application also contains its own URL configuration file.
+
+These are:
+
+```text
+notes/urls.py
+checkout/urls.py
+```
+
+The notes application handles routes for study resources and personal revision notes.
+
+The checkout application contains routes for Stripe payment processing.
+
+For example:
+
+```python
+urlpatterns = [
+    path(
+        "buy/<int:pk>/",
+        views.create_checkout_session,
+        name="buy",
+    ),
+    path(
+        "success/",
+        views.payment_success,
+        name="success",
+    ),
+    path(
+        "cancel/<int:pk>/",
+        views.payment_cancel,
+        name="cancel",
+    ),
+]
+```
+
+I also used named URL patterns to avoid hard-coding complete URLs throughout the project.
+
+For example:
+
+```python
+return redirect("notes:browse")
+```
+
+This redirects the user to the named Browse Notes route.
+
+Named routes make the application easier to maintain if a URL path changes.
+
+#### Separation of HTML, CSS and JavaScript
+
+I organised the frontend code into separate HTML, CSS and JavaScript files.
+
+Each technology has a different purpose.
+
+##### HTML
+
+HTML defines the structure and content of the website.
+
+I used Django templates to display information from the backend.
+
+The templates are organised inside:
+
+```text
+templates/
+```
+
+The project contains different folders for notes, checkout and registration pages.
+
+##### CSS
+
+The main stylesheet is located at:
+
+```text
+static/css/style.css
+```
+
+This file controls the visual appearance of UniNotes.
+
+It contains styling for:
+
+- Colours.
+- Typography.
+- Navigation.
+- Buttons.
+- Forms.
+- Study resource cards.
+- Layouts.
+- Spacing.
+- Responsive design.
+- Keyboard focus indicators.
+
+Keeping CSS separate from HTML makes it easier to update the visual design.
+
+For example, I can adjust the appearance of the navigation without changing the Python views.
+
+##### JavaScript
+
+The responsive navigation JavaScript is stored in:
+
+```text
+static/js/nav.js
+```
+
+This file manages the mobile navigation menu.
+
+It includes functionality for:
+
+- Opening the navigation menu.
+- Closing the navigation menu.
+- Updating accessibility attributes.
+- Closing the menu when a navigation link is selected.
+- Closing the menu when clicking outside it.
+- Supporting the Escape key.
+- Responding to changes in browser width.
+
+Keeping this JavaScript in a separate file makes the navigation functionality easier to maintain.
+
+#### Template Inheritance
+
+I used Django template inheritance to reduce repeated HTML and maintain a consistent page layout.
+
+The shared base template is located at:
+
+```text
+templates/base.html
+```
+
+This template contains common elements such as:
+
+- HTML document structure.
+- Navigation.
+- Authentication links.
+- Django messages.
+- Main content block.
+- Footer.
+- CSS reference.
+- JavaScript reference.
+
+Other pages extend this template.
+
+For example, the revision note form contains:
+
+```html
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | UniNotes{% endblock %}
+{% block content %}
+```
+
+This allows the page to reuse the common layout while providing its own content.
+
+Template inheritance helped me avoid repeating the navigation and footer in every HTML file.
+
+It also made the website easier to maintain.
+
+For example, updating the navigation in `base.html` can update the navigation across all templates that inherit from it.
+
+#### Reusable Code and the DRY Principle
+
+I considered the DRY principle when developing UniNotes.
+
+DRY stands for "Don't Repeat Yourself".
+
+The principle encourages developers to reuse existing functionality instead of unnecessarily repeating code.
+
+I used several Django features that support code reuse.
+
+##### Reusable Forms
+
+I used `RevisionNoteForm` for both creating and editing personal revision notes.
+
+This means both operations can use the same fields and validation rules.
+
+##### Authentication Decorators
+
+I used Django's `@login_required` decorator to protect views intended for registered users.
+
+For example:
+
+```python
+@login_required
+def revision_notes(request):
+    ...
+```
+
+This avoids manually repeating login checks in every protected view.
+
+##### Custom Decorator
+
+I created a custom decorator inside:
+
+```text
+notes/decorators.py
+```
+
+The decorator is called `anonymous_required`.
+
+```python
+def anonymous_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("notes:home")
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+```
+
+This decorator redirects authenticated users away from views intended for anonymous visitors.
+
+It allows the same behaviour to be reused where required.
+
+##### Database Helpers
+
+I used Django's `get_object_or_404()` function when retrieving database records.
+
+For example:
+
+```python
+note = get_object_or_404(
+    RevisionNote,
+    pk=pk,
+    owner=request.user,
+)
+```
+
+This provides a consistent way of retrieving records and handling missing objects.
+
+##### Template Inheritance
+
+Using `base.html` allowed me to reuse common HTML elements throughout the website.
+
+Overall, these features helped reduce repeated functionality and made the application easier to maintain.
+
+#### Static File Organisation
+
+I organised the website's static files inside:
+
+```text
+static/
+```
+
+The main directories include:
+
+```text
+static/
+├── css/
+│   └── style.css
+├── images/
+└── js/
+    └── nav.js
+```
+
+The CSS directory contains the website's stylesheet.
+
+The JavaScript directory contains the navigation functionality.
+
+The images directory contains the image assets used by the application.
+
+Keeping these assets separate from Python code helped make the project easier to manage.
+
+The Django settings file also contains the static file configuration.
+
+```python
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+```
+
+The `STATICFILES_DIRS` setting identifies the directory containing the source static files.
+
+The `STATIC_ROOT` setting identifies the location used when collecting static files for deployment.
+
+I also used WhiteNoise to support static file delivery in the deployed application.
+
+#### Configuration Organisation
+
+I kept the main Django configuration inside:
+
+```text
+uninotes/settings.py
+```
+
+This file contains settings for:
+
+- Installed applications.
+- Middleware.
+- Templates.
+- Database connections.
+- Static files.
+- Media files.
+- Authentication redirects.
+- Stripe configuration.
+- Environment variables.
+- Deployment security.
+
+For example, the project loads the secret key and debug setting from environment variables.
+
+```python
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-local-development-key-change-before-deployment",
+)
+
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
+```
+
+Using environment variables allows configuration values to be changed without modifying the application logic.
+
+The project also contains:
+
+```text
+.env.example
+.gitignore
+```
+
+The `.env.example` file helps document the environment variables required by the application.
+
+The `.gitignore` file is used to exclude selected files and directories from version control.
+
+Separating configuration from application functionality helped keep the project organised.
+
+However, a production deployment must supply a secure secret key and disable debugging.
+
+#### Code Comments and Readability
+
+I tried to make the Python code easy to understand by using descriptive function names, meaningful variable names and consistent formatting.
+
+Comments can be helpful when explaining code that may not be immediately obvious.
+
+However, I tried to avoid adding unnecessary comments that simply repeat what the code already says.
+
+For example:
+
+```python
+user_matches = (
+    session.metadata.get("user_id")
+    == str(request.user.pk)
+)
+```
+
+The variable name `user_matches` explains what the comparison is checking.
+
+Another example is:
+
+```python
+notes = RevisionNote.objects.filter(
+    owner=request.user
+)
+```
+
+This clearly shows that revision notes are filtered by their owner.
+
+I also included comments in parts of the project where additional explanation was useful.
+
+For example, the database configuration contains comments explaining why SQLite is used when a database URL has not been supplied.
+
+Using readable code and appropriate comments made it easier to return to the project and understand how different features work.
+
+#### Version Control and Commit Conventions
+
+I used Git and GitHub throughout the development of UniNotes to manage changes and track my progress.
+
+The GitHub repository is available at:
+
+https://github.com/thanushsutharsan/uni-notes
+
+I also used structured commit message prefixes to identify different types of changes made during development.
+
+For example, I used:
+
+- `docs:` for documentation updates, including changes to the README.
+- `chore:` for general project maintenance, organisation and supporting configuration tasks.
+
+This style of commit messaging made it easier to identify the purpose of a change by reading the commit message.
+
+For example, a documentation change would begin with `docs:`, followed by a short description of what was updated.
+
+A general maintenance change would begin with `chore:`.
+
+I found this approach useful because the project involved several different development activities, including adding functionality, updating the README, fixing problems and maintaining the project structure.
+
+Using structured commit messages helped me keep my development history more organised.
+
+I also tried to make commit descriptions meaningful rather than using vague messages that did not explain the changes.
+
+Version control was particularly useful when working on different parts of the project because it allowed me to review previous changes.
+
+GitHub provided a remote repository where the project files and commit history could be maintained.
+
+The `.gitignore` file also helped prevent selected local files from being included in the repository.
+
+The detailed Git history, including actual commit messages, commit references and changes made during development, will be documented separately in the Version Control section of this README.
+
+Overall, using Git alongside structured prefixes such as `docs:` and `chore:` helped me maintain a clearer and more organised development process.
+
+#### Code Quality Testing
+
+Code quality can also be assessed using automated validation tools.
+
+For UniNotes, relevant checks include:
+
+- Python PEP 8 validation.
+- HTML validation.
+- CSS validation.
+- JavaScript validation.
+- Django system checks.
+- Automated Django tests.
+
+These checks can help identify formatting problems, invalid markup, programming errors and unexpected behaviour.
+
+However, automated checks do not guarantee that an application is completely error-free.
+
+Manual testing is also important because it allows the application to be evaluated from the perspective of a user.
+
+The actual validation commands, evidence and results will be recorded in the Testing section of this README.
+
+I have not claimed that tests or validation checks passed without confirmed results.
+
+#### Code Quality Evaluation
+
+Overall, I aimed to keep UniNotes organised, readable and maintainable throughout development.
+
+Separating the project into the `notes` and `checkout` applications helped me keep the main study-related features separate from payment processing.
+
+Following Django's Model-View-Template architecture allowed database models, application logic and HTML templates to have different responsibilities.
+
+Using Django forms helped centralise validation and reduced the need to repeat the same checks in multiple views.
+
+Authentication decorators and database helpers also helped reduce duplicated functionality.
+
+Template inheritance allowed me to maintain a consistent layout throughout the application.
+
+Separating HTML, CSS and JavaScript made the frontend code easier to manage.
+
+Using descriptive Python naming conventions improved readability, particularly when working with revision note functionality and Stripe payments.
+
+I also used Git and GitHub to organise development progress.
+
+Structured commit prefixes such as `docs:` and `chore:` helped me identify different types of changes in the project history.
+
+However, there are areas where code quality could be improved.
+
+Future improvements include:
+
+- Running comprehensive Python linting across the project.
+- Reviewing imports and formatting more consistently.
+- Refactoring longer view functions where appropriate.
+- Introducing reusable service functions for more complicated Stripe operations.
+- Adding additional automated tests.
+- Improving error logging.
+- Adding more documentation for complex backend processes.
+- Reviewing duplicated code as additional features are developed.
+
+These improvements would help make UniNotes easier to maintain and extend.
+
+Overall, the current project structure demonstrates how separate Django applications, organised directories, reusable functionality, readable Python code and structured version control practices can improve the quality of a full-stack web application.
