@@ -10577,3 +10577,605 @@ The most important improvements include:
 These improvements would strengthen UniNotes and make it more suitable for use beyond the current development project.
 
 The implemented security measures demonstrate how Django's authentication, middleware, database and form features can be used together to protect a full-stack web application.
+
+
+
+### Defensive Programming
+
+#### Defensive Programming Overview
+
+Defensive programming involves writing code that anticipates errors, invalid information and unexpected user actions before they cause problems within an application.
+
+I considered defensive programming throughout the development of UniNotes because the application manages user accounts, personal revision notes, uploaded attachments and purchased study resources.
+
+I used Django's built-in functionality alongside Python validation, conditional statements and exception handling to help prevent invalid operations and unauthorised access.
+
+The main defensive programming techniques used in UniNotes include:
+
+- Form validation.
+- Model-level validators.
+- Authentication checks.
+- User permission checks.
+- Ownership protection.
+- Safe database retrieval.
+- Stripe payment verification.
+- API exception handling.
+- Missing file handling.
+- Delete confirmation pages.
+- User feedback messages.
+
+These measures help improve the reliability of the application and protect information associated with individual users.
+
+#### Form Validation
+
+I used Django forms to validate information submitted by users before allowing it to be saved to the database.
+
+The application contains two main forms in `notes/forms.py`:
+
+- `RegisterForm`
+- `RevisionNoteForm`
+
+The registration form validates user account information, while the revision note form validates personal notes and uploaded attachments.
+
+For example, the revision note creation view checks whether the submitted form is valid before saving it.
+
+```python
+if form.is_valid():
+    note = form.save(commit=False)
+    note.owner = request.user
+    note.save()
+```
+
+The `is_valid()` method checks the submitted information against the form's validation rules.
+
+If the form is invalid, the application displays the form again with error messages rather than saving the information.
+
+I also implemented custom attachment validation to restrict the size of uploaded files.
+
+```python
+def clean_attachment(self):
+    attachment = self.cleaned_data.get("attachment")
+
+    if attachment and attachment.size > 5 * 1024 * 1024:
+        raise forms.ValidationError(
+            "The uploaded file must be 5 MB or smaller."
+        )
+
+    return attachment
+```
+
+This method checks whether the uploaded attachment exceeds the maximum permitted file size of 5 MB.
+
+If the file is too large, Django raises a validation error and prevents the attachment from being accepted through the normal revision note form.
+
+This helps prevent users from uploading unnecessarily large files.
+
+##### Form Validation Screenshot
+
+![Defensive Form Validation](static/images/testing/defensive-testing/form-validation-error.png)
+
+*Picture 40: UniNotes displays validation feedback when a user submits invalid form information, preventing the record from being saved until the error is corrected.*
+
+#### Model Validation
+
+I used Django model validators to define restrictions on information stored in the database.
+
+For example, the `StudyNote` model contains a minimum price validator.
+
+```python
+price = models.DecimalField(
+    max_digits=6,
+    decimal_places=2,
+    validators=[
+        MinValueValidator(Decimal("0.50"))
+    ],
+)
+```
+
+This defines a minimum valid study resource price of £0.50 during model validation.
+
+I also used `FileExtensionValidator` to restrict the permitted extensions for uploaded resources.
+
+Study resources support PDF files, while personal revision notes support the following extensions:
+
+- PDF
+- DOC
+- DOCX
+- TXT
+
+For example:
+
+```python
+FileExtensionValidator(
+    allowed_extensions=[
+        "pdf",
+        "doc",
+        "docx",
+        "txt",
+    ]
+)
+```
+
+These validators help prevent unsuitable information from being submitted through the associated Django forms.
+
+However, Django does not automatically run every model validator whenever a record is saved directly through the ORM.
+
+This means that validation must also be considered when data is created or updated outside the normal form workflow.
+
+File extension validation also does not guarantee that the content of an uploaded file is safe.
+
+Additional file-content validation could improve this functionality in future development.
+
+#### Authentication Checks
+
+I used Django's `@login_required` decorator to restrict access to features intended for registered users.
+
+For example, the revision notes list view uses authentication protection.
+
+```python
+@login_required
+def revision_notes(request):
+    notes = RevisionNote.objects.filter(
+        owner=request.user
+    )
+
+    return render(
+        request,
+        "notes/revision_list.html",
+        {"revision_notes": notes},
+    )
+```
+
+The decorator checks whether the current user has an authenticated session.
+
+If the user is not logged in, Django redirects them to the login page.
+
+I used authentication protection for:
+
+- Viewing personal revision notes.
+- Creating revision notes.
+- Editing revision notes.
+- Deleting revision notes.
+- Viewing purchase history.
+- Downloading purchased resources.
+- Starting Stripe Checkout.
+- Accessing payment success and cancellation views.
+
+These checks help prevent anonymous visitors from directly accessing account-specific functionality.
+
+#### Permission Checks
+
+Authentication identifies the user, while authorisation determines which information and actions that user is allowed to access.
+
+In UniNotes, registered users can create and manage personal revision notes.
+
+However, users should not be allowed to access or modify revision notes belonging to another account.
+
+I implemented permission checks using Django view decorators and database queries.
+
+The application also checks whether a user has purchased a study resource before granting access through the protected download view.
+
+These restrictions help prevent unauthorised access through changes to URL parameters.
+
+The current application does not include a separate custom role-based permission system.
+
+#### Ownership Checks
+
+Ownership checks are particularly important because UniNotes stores personal revision notes belonging to individual users.
+
+Each `RevisionNote` record contains an `owner` field that links the note to a registered user.
+
+I implemented ownership protection in two ways.
+
+##### Filtering the Revision Notes List
+
+Firstly, I restricted the revision notes list to records belonging to the authenticated user.
+
+```python
+@login_required
+def revision_notes(request):
+    notes = RevisionNote.objects.filter(
+        owner=request.user
+    )
+
+    return render(
+        request,
+        "notes/revision_list.html",
+        {"revision_notes": notes},
+    )
+```
+
+The `filter()` method retrieves only revision notes where the owner matches the currently logged-in user.
+
+This means that when a user opens their revision notes page, they only receive records associated with their own account.
+
+For example, if User A and User B have both created revision notes, User A's list should only display User A's records.
+
+This prevents personal revision notes belonging to other users from appearing in the list returned by this view.
+
+##### Revision Notes Ownership Filtering Screenshot
+
+![Revision Notes Ownership Filtering](static/images/testing/defensive-testing/revision-notes-ownership.png)
+
+*Picture 41: The revision_notes() view uses owner=request.user to retrieve only the revision notes belonging to the authenticated user, preventing other users' notes from appearing in the personal revision notes list.*
+
+##### Protecting Individual Revision Notes
+
+Secondly, I implemented ownership checks when retrieving individual revision notes.
+
+This is important because users could attempt to access another person's revision note by manually changing the ID in the URL.
+
+For example, a URL might contain the primary key of an individual revision note.
+
+Changing this number should not allow someone to access information belonging to another account.
+
+To prevent this, I used Django's `get_object_or_404()` function.
+
+```python
+note = get_object_or_404(
+    RevisionNote,
+    pk=pk,
+    owner=request.user,
+)
+```
+
+This checks that:
+
+1. The requested revision note exists.
+2. The revision note belongs to the authenticated user.
+
+If either condition is not satisfied, Django raises an HTTP 404 response.
+
+I used this approach in the following views:
+
+- `revision_detail()`
+- `revision_edit()`
+- `revision_delete()`
+
+This helps prevent users from viewing, editing or deleting revision notes belonging to another account.
+
+I also assigned ownership through the backend when creating a revision note.
+
+```python
+note = form.save(commit=False)
+note.owner = request.user
+note.save()
+```
+
+This ensures that the owner is assigned using the authenticated Django user rather than information supplied by the form.
+
+##### Individual Revision Note Ownership Protection Screenshot
+
+![Individual Revision Note Ownership Protection](static/images/testing/defensive-testing/ownership-check-code.png)
+
+*Picture 42: The individual revision note views use get_object_or_404() with owner=request.user to verify that a requested record belongs to the logged-in user. Django returns a 404 response when no matching record exists.*
+
+#### Safe Database Retrieval
+
+I used Django's `get_object_or_404()` function to handle situations where requested database records do not exist.
+
+This function attempts to retrieve the requested record.
+
+If no matching record exists, Django raises an `Http404` exception rather than leaving an unhandled database lookup exception.
+
+For example, the study resource detail view contains:
+
+```python
+note = get_object_or_404(
+    StudyNote,
+    pk=pk,
+    is_active=True,
+)
+```
+
+This retrieves a study resource only when the requested record exists and its `is_active` field is set to `True`.
+
+If a resource does not exist or has been marked inactive, Django returns a 404 response.
+
+I also used a similar approach when checking whether a user has purchased a resource.
+
+```python
+purchase = get_object_or_404(
+    Purchase.objects.select_related("note"),
+    user=request.user,
+    note_id=pk,
+)
+```
+
+This query checks whether the authenticated user has a Purchase record matching the requested study resource.
+
+If no matching purchase exists, Django returns a 404 response.
+
+This helps prevent users from downloading paid resources through the protected download view without a matching purchase record.
+
+The query also uses `select_related()` to retrieve the related study resource together with the Purchase record.
+
+This can help reduce additional database queries when accessing information from related models.
+
+##### Protected Download Screenshot
+
+![Protected Study Resource Download](static/images/testing/defensive-testing/protected-download-code.png)
+
+*Picture 43: The download view uses get_object_or_404() to check that the authenticated user has a matching Purchase record before allowing access to a purchased study resource.*
+
+#### API Failure Handling
+
+UniNotes communicates with the Stripe API to create checkout sessions and retrieve payment information.
+
+Because external APIs can return errors, I included defensive checks during payment verification.
+
+The payment success view first checks whether a Stripe Checkout session identifier and Stripe secret key are available.
+
+```python
+session_id = request.GET.get("session_id", "")
+
+if not session_id or not settings.STRIPE_SECRET_KEY:
+    messages.error(
+        request,
+        "We could not verify this payment.",
+    )
+    return redirect("notes:browse")
+```
+
+If either value is missing, the application displays an error message and redirects the user to Browse Notes.
+
+This prevents the view from attempting payment verification without the required information.
+
+I also included exception handling when retrieving the Stripe Checkout session.
+
+```python
+try:
+    session = stripe.checkout.Session.retrieve(
+        session_id
+    )
+except stripe.error.StripeError:
+    messages.error(
+        request,
+        "Stripe could not verify this payment.",
+    )
+    return redirect("notes:browse")
+```
+
+The `try` block attempts to retrieve the session from Stripe.
+
+If Stripe raises an error covered by `StripeError`, the exception is handled.
+
+The application displays an error message instead of continuing with an unverified payment.
+
+However, the checkout session creation view in the previously reviewed implementation does not contain equivalent exception handling.
+
+An unexpected Stripe error during session creation could therefore produce an unhandled server error.
+
+This could be improved in future development.
+
+#### Payment Failure Handling
+
+I implemented checks to prevent the application from recording purchases when the returned Stripe session information does not meet the existing verification requirements.
+
+When a user returns from Stripe Checkout, the payment success view retrieves the session information.
+
+The application then checks the payment status and metadata.
+
+```python
+user_matches = (
+    session.metadata.get("user_id")
+    == str(request.user.pk)
+)
+
+note_id = session.metadata.get("note_id")
+
+if (
+    session.payment_status != "paid"
+    or not user_matches
+    or not note_id
+):
+    messages.error(
+        request,
+        "Payment has not been confirmed.",
+    )
+    return redirect("notes:browse")
+```
+
+These checks help prevent an unpaid session or a session associated with another account from being accepted.
+
+I also used `get_or_create()` when recording purchases.
+
+```python
+Purchase.objects.get_or_create(
+    user=request.user,
+    note=note,
+    defaults={
+        "stripe_session_id": session.id,
+        "amount_paid": amount_paid,
+    },
+)
+```
+
+This helps prevent duplicate purchase records for the same user and study resource.
+
+The Purchase model also contains a database uniqueness constraint covering the combination of user and study resource.
+
+However, the current implementation has limitations.
+
+It does not independently verify the returned payment amount and currency against the expected price of the resource.
+
+It also does not use verified Stripe webhooks to record purchases independently of the browser returning to the website.
+
+These areas should be improved before enabling live customer payments.
+
+##### Stripe Payment Verification Screenshot
+
+![Stripe Payment Verification Checks](static/images/testing/defensive-testing/stripe-defensive-checks.png)
+
+*Picture 44: The payment success view checks the Stripe payment status and user metadata before recording a purchase, helping prevent unverified transactions from being accepted.*
+
+#### Error Handling
+
+I used Django's exception handling and HTTP responses to manage situations where requested resources cannot be accessed.
+
+For example, the purchased resource download view attempts to open the requested study note file.
+
+```python
+if note.note_file:
+    try:
+        return FileResponse(
+            note.note_file.open("rb"),
+            as_attachment=True,
+            filename=note.note_file.name.rsplit(
+                "/", 1
+            )[-1],
+        )
+    except (FileNotFoundError, OSError):
+        raise Http404(
+            "The purchased note file is unavailable."
+        )
+```
+
+The `try` block attempts to open the file.
+
+If the file cannot be opened because of a handled filesystem error, Django raises an HTTP 404 response.
+
+The application also checks whether an external download URL exists.
+
+If neither an uploaded file nor a download URL is available, the view raises:
+
+```python
+raise Http404(
+    "No download is available for this note."
+)
+```
+
+This prevents the application from attempting to provide a resource when no download is available.
+
+I also used Django's messages framework to provide feedback after different operations.
+
+Examples include:
+
+- Revision note saved to your account.
+- Revision note updated.
+- Revision note deleted.
+- Payment has not been confirmed.
+- Stripe could not verify this payment.
+
+These messages help users understand whether an operation was successful or why it could not be completed.
+
+#### Custom Error Pages
+
+Django provides standard responses for common HTTP errors.
+
+I considered the following status codes when evaluating UniNotes:
+
+- 400 - Bad Request.
+- 403 - Forbidden.
+- 404 - Not Found.
+- 500 - Internal Server Error.
+
+The previously reviewed version of UniNotes does not contain dedicated custom templates for all four error codes.
+
+I have therefore documented the existing behaviour and identified custom error pages as a future improvement.
+
+##### 400 - Bad Request
+
+HTTP 400 indicates that the server cannot process a request because it is invalid.
+
+Django can generate this response for certain invalid requests.
+
+The previously reviewed project does not contain a dedicated `400.html` template.
+
+A future improvement would be to create a user-friendly error page explaining that the request could not be processed.
+
+##### 403 - Forbidden
+
+HTTP 403 indicates that access to a requested resource is forbidden.
+
+Django can return this response when CSRF validation fails or when a view raises a permission-related exception.
+
+In UniNotes, the main revision note views use ownership-filtered database queries.
+
+These return a 404 response when a revision note does not belong to the authenticated user.
+
+The previously reviewed project does not contain a dedicated `403.html` template.
+
+##### 404 - Not Found
+
+HTTP 404 is used when a requested resource cannot be found.
+
+I used `get_object_or_404()` throughout UniNotes to handle missing database records.
+
+Examples include:
+
+- Opening a study resource that does not exist.
+- Attempting to access an inactive study resource.
+- Attempting to view another user's revision note.
+- Attempting to download a resource without a matching purchase record.
+
+For example:
+
+```python
+note = get_object_or_404(
+    StudyNote,
+    pk=pk,
+    is_active=True,
+)
+```
+
+If no matching study resource exists, Django returns a 404 response.
+
+This helps prevent the application from attempting to display invalid database records.
+
+##### Missing Study Resource Screenshot
+
+![Missing Study Resource 404 Error](static/images/testing/defensive-testing/missing-resource-404.png)
+
+*Picture 45: UniNotes returns an HTTP 404 response when a user attempts to access a study resource that does not exist.*
+
+##### 500 - Internal Server Error
+
+HTTP 500 indicates that an unexpected server-side error has occurred.
+
+When `DEBUG=False`, Django normally displays a generic server error response rather than a detailed development traceback.
+
+The previously reviewed project does not contain a dedicated `500.html` template.
+
+A future improvement would be to introduce a custom 500 error page.
+
+This could display a simple message explaining that an unexpected problem occurred and provide navigation back to the home page.
+
+Additional production error logging would also help with identifying unexpected backend problems.
+
+#### Defensive Programming Evaluation
+
+Overall, defensive programming helped improve the reliability and security of UniNotes.
+
+Django form validation helped prevent incomplete or invalid information from being saved through the application's forms.
+
+Model validators provided additional restrictions on prices and uploaded file extensions.
+
+Authentication checks restricted personal functionality to registered users.
+
+Ownership checks prevented users from accessing another person's revision notes through the protected views.
+
+Filtering the revision notes list using `owner=request.user` ensured that users only retrieved records associated with their accounts.
+
+Using `get_object_or_404()` provided additional protection when users attempted to access individual revision notes or purchased resources.
+
+I also included exception handling for missing purchased files and selected Stripe API errors.
+
+The revision note deletion feature requires a POST request after displaying a confirmation page, reducing the risk of accidental deletion.
+
+However, there are areas that could be improved.
+
+Future improvements include:
+
+- More comprehensive Stripe API error handling.
+- Verified Stripe webhooks.
+- Payment amount and currency verification.
+- Additional uploaded file security checks.
+- Private persistent storage for purchased resources.
+- Custom 400, 403, 404 and 500 error pages.
+- More automated tests for invalid requests.
+- Additional tests for unauthorised editing and deletion.
+
+These improvements would make UniNotes more reliable and better prepared for handling unexpected situations.
+
+The current implementation demonstrates how Django's form validation, authentication, ownership checks, database queries and Python exception handling can work together to reduce errors and protect user information.
