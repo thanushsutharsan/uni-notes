@@ -1,11 +1,24 @@
 from decimal import Decimal
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .forms import RevisionNoteForm
 from .models import RevisionNote, StudyNote, Subject
+
+
+# use standard file storage during automated tests
+TEST_STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
+    },
+}
 
 
 class StudyNoteModelTests(TestCase):
@@ -44,6 +57,7 @@ class RevisionNoteFormTests(TestCase):
         self.assertTrue(form.is_valid())
 
 
+@override_settings(STORAGES=TEST_STORAGES)
 class AuthenticationAndAccessTests(TestCase):
     def setUp(self):
         self.subject = Subject.objects.create(
@@ -88,6 +102,7 @@ class AuthenticationAndAccessTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+@override_settings(STORAGES=TEST_STORAGES)
 class RevisionCrudTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
