@@ -34,4 +34,30 @@ UniNotes uses Django, Python, HTML, CSS and JavaScript together with a relationa
 
 ## Deployment notes
 
-[Heroku deployment and troubleshooting](docs/bug-fixes.md#jump-bugs-during-deployment)
+UniNotes is deployed on Heroku. The production application uses PostgreSQL, while local development uses SQLite by default.
+
+### Deploy to Heroku
+
+1. Connect the UniNotes GitHub repository to your Heroku app and select the branch you want to deploy.
+2. Attach a Heroku PostgreSQL database and confirm that `DATABASE_URL` is available in the app's Config Vars.
+3. Set `DEBUG=False`, add the Heroku hostname to `ALLOWED_HOSTS`, and configure `SECRET_KEY` and the Stripe test keys in Config Vars.
+4. Deploy the selected branch. The project's `Procfile` starts Django with Gunicorn.
+5. Apply the database migrations from your terminal. Replace `YOUR_HEROKU_APP_NAME` with the app name shown in your Heroku dashboard.
+
+   ```bash
+   heroku run python manage.py migrate --app YOUR_HEROKU_APP_NAME
+   ```
+
+6. For a fresh database, load the demo subjects and study notes.
+
+   ```bash
+   heroku run python manage.py loaddata subjects studynotes --app YOUR_HEROKU_APP_NAME
+   ```
+
+7. Open the deployed app and check the homepage, browsing, registration, login, revision notes, and Stripe Checkout in test mode. Record the results and compare them with the same checks on your local version.
+
+See [Heroku troubleshooting](docs/bug-fixes.md#jump-bugs-during-deployment) for the database, migration, and checkout issues encountered during deployment.
+
+### Testing
+
+The recorded full Django test run passed all 15 tests. See [Testing and evidence](docs/testing.md) for the automated results and manual checks.
