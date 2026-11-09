@@ -1042,3 +1042,21 @@ Heroku deployed commit `28d29e1e` in release `v50` at 10:01 pm UK time. My initi
 I captured the VS Code terminal output after running the Django verification command on Heroku release `v51`. The output showed `DEBUG: False` and `Database connected: postgresql`.
 
 ![Heroku terminal output confirming that DEBUG is false and PostgreSQL is connected](../static/images/testing/heroku-deployment-verification.png)
+
+## HTML Validation
+
+To validate my HTML, I opened the deployed UniNotes website on Heroku. For each page I checked, I right-clicked and selected **View Page Source**. I copied the HTML into the **Text Input** field of the [W3C Nu HTML Checker](https://validator.w3.org/nu/) and clicked **Check**. This let me validate the final HTML that Django generated for the browser.
+
+### Validation Setup
+
+| Item | Details |
+| --- | --- |
+| Application | [UniNotes on Heroku](https://uni-notes-09bbb519e883.herokuapp.com/) |
+| Validator | W3C Nu HTML Checker |
+
+
+### HTML Validation Results
+
+| ID | Django template | Page checked | Input method | Errors | Warnings | Result or action taken | Screenshot |
+| --- | --- | --- | --- | ---: | ---: | --- | --- |
+| HTML01 | `base.html` | Deployed homepage | Text Input (View Page Source) | 0 | Not recorded | No HTML errors reported | ![Base template HTML validation result](../static/images/testing/html-validation/base-html-validation.png) |
