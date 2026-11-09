@@ -794,6 +794,16 @@ The production WhiteNoise configuration remains separate.
 
 #### Automated Test Results
 
+##### Confirmed full-suite result
+
+I ran `python manage.py test -v 2` after correcting the checkout redirect and test static-file configuration.
+
+| Tests run | Passed | Failures | Errors | Overall result |
+| --- | --- | --- | --- | --- |
+| 15 | 15 | 0 | 0 | PASS |
+
+The terminal output is shown in Picture 49 under Full Django Test Suite.
+
 ##### Notes Application Test Results
 
 The initial notes application test run produced the following confirmed results:
