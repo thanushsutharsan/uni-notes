@@ -21,7 +21,7 @@
   - [Automated Testing Limitations](#automated-testing-limitations)
   - [Automated Testing Evaluation](#automated-testing-evaluation)
 - [Manual Testing Results](#manual-testing-results)
----
+- [Deployment Verification](#deployment-verification)
 ---
 
 ### Testing Strategy
@@ -1007,3 +1007,38 @@ All 18 user story acceptance tests and all 8 additional manual checks passed. Th
 | Blocked | 0 |
 | Pending | 0 |
 | Total | 26 |
+
+## Deployment Verification
+
+I verified UniNotes on Heroku on 9 November 2026. I checked the production database connection and debug setting from the Django shell, then tested the main user journeys on the live site. The full test cases are in [Manual Testing Results](docs/testing.md#manual-testing-results).
+
+### Release and Configuration
+
+| Item | Verified result |
+| --- | --- |
+| Live application | [UniNotes on Heroku](https://uni-notes-09bbb519e883.herokuapp.com/) |
+| Date verified | 9 November 2026 |
+| Heroku release verified | `v51` |
+| Git commit | `28d29e1e` |
+| Production database | PostgreSQL connection verified |
+| Production debug setting | `DEBUG=False` verified |
+
+Heroku deployed commit `28d29e1e` in release `v50` at 10:01 pm UK time. My initial check showed that PostgreSQL was connected and Django was running with `DEBUG=True`. I updated the Heroku config variable at 10:21 pm UK time, which created release `v51`. I reran the check and confirmed that Django was using `DEBUG=False` and could still connect to PostgreSQL.
+
+### Live Application Checks
+
+| Check | Actual result | Status |
+| --- | --- | --- |
+| Homepage and styling | The homepage loaded with its styling and images, and Browse opened the catalogue. | Pass |
+| Search and subject filtering | Searching returned the expected note, and filtering showed notes from the selected subject. | Pass |
+| Registration and sign-in | A new test account could register, sign out, and sign back in. | Pass |
+| Create, edit, and delete a revision note | The note saved, the edited title persisted after reopening, and the note disappeared from the revision list after deletion. | Pass |
+| Private revision note access | A second test account was denied access when opening the first account's private revision note URL. | Pass |
+| Stripe Checkout | A successful Stripe test payment added the study note to My Purchases. | Pass |
+| Purchased resource download | The purchaser downloaded the correct file from My Purchases and opened it successfully. | Pass |
+
+### Configuration Evidence
+
+I captured the VS Code terminal output after running the Django verification command on Heroku release `v51`. The output showed `DEBUG: False` and `Database connected: postgresql`.
+
+![Heroku terminal output confirming that DEBUG is false and PostgreSQL is connected](../static/images/testing/heroku-deployment-verification.png)
