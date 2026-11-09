@@ -2,7 +2,16 @@
 
 [Back to UniNotes README](../README.md#documentation)
 
-[Competitor Research](#jump-competitor-research) · [Research Findings](#jump-research-findings)
+## Contents
+
+- [User Research](#user-research)
+- [Competitor Research](#jump-competitor-research)
+  - [Studocu](#studocu)
+  - [StudySmarter](#studysmarter)
+  - [Quizlet](#quizlet)
+- [Research Findings](#jump-research-findings)
+- [How Research will Influence Development](#how-research-will-influence-development)
+- [Research Sources](#research-sources)
 
 ---
 

@@ -2,7 +2,34 @@
 
 [Back to UniNotes README](../README.md#documentation)
 
-[Defensive Programming](#jump-defensive-programming) · [Code Quality and Organisation](#jump-code-quality-and-organisation)
+## Contents
+
+- [Security](#security)
+  - [Environment Variables](#environment-variables)
+  - [Secret Keys](#secret-keys)
+  - [DEBUG Configuration](#debug-configuration)
+  - [HTTPS](#https)
+  - [CSRF Protection](#csrf-protection)
+  - [Ownership Protection](#ownership-protection)
+  - [Secure Payment Handling](#secure-payment-handling)
+  - [Production Security](#production-security)
+- [Defensive Programming](#jump-defensive-programming)
+  - [Form Validation](#form-validation)
+  - [Model Validation](#model-validation)
+  - [Authentication Checks](#authentication-checks)
+  - [Ownership Checks](#ownership-checks)
+  - [Safe Database Retrieval](#safe-database-retrieval)
+  - [API Failure Handling](#api-failure-handling)
+  - [Payment Failure Handling](#payment-failure-handling)
+  - [Custom Error Pages](#custom-error-pages)
+- [Code Quality and Organisation](#jump-code-quality-and-organisation)
+  - [Project Directory Structure](#project-directory-structure)
+  - [Separation of Django Applications](#separation-of-django-applications)
+  - [Python Coding Standards](#python-coding-standards)
+  - [Template Inheritance](#template-inheritance)
+  - [Reusable Code and the DRY Principle](#reusable-code-and-the-dry-principle)
+  - [Version Control and Commit Conventions](#version-control-and-commit-conventions)
+  - [Code Quality Testing](#code-quality-testing)
 
 ---
 

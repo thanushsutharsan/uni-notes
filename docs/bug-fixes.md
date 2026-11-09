@@ -2,7 +2,25 @@
 
 [Back to UniNotes README](../README.md#documentation)
 
-[Bugs During Deployment](#jump-bugs-during-deployment) · [Authentication Error](#jump-authentication-error)
+## Contents
+
+- [Bug Fix During Development](#bug-fix-during-development)
+  - [Note Card Image Fallback](#note-card-image-fallback)
+- [Bugs During Deployment](#jump-bugs-during-deployment)
+  - [DisallowedHost Error](#disallowedhost-error)
+  - [SQLite Being Used on Heroku](#sqlite-being-used-on-heroku)
+  - [Adding Heroku PostgreSQL](#adding-heroku-postgresql)
+  - [Running Migrations Against PostgreSQL](#running-migrations-against-postgresql)
+  - [Subjects Missing From the Website](#subjects-missing-from-the-website)
+  - [Duplicate Subject Fixture](#duplicate-subject-fixture)
+  - [Study Notes Still Missing](#study-notes-still-missing)
+  - [StudyNote Fixture Not Found](#studynote-fixture-not-found)
+  - [PDF Files](#pdf-files)
+  - [Media Configuration](#media-configuration)
+  - [Production Database Configuration](#production-database-configuration)
+  - [Deployment Debugging Summary](#deployment-debugging-summary)
+  - [Useful Deployment Commands](#useful-deployment-commands)
+  - [Authentication Error](#jump-authentication-error)
 
 ---
 

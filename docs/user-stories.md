@@ -2,7 +2,20 @@
 
 [Back to UniNotes README](../README.md#documentation)
 
-[User Stories](#jump-user-stories) · [User Story Acceptance Criteria](#jump-user-story-acceptance-criteria)
+## Contents
+
+- [User Experience Design (UX)](#user-experience-design-ux)
+  - [UX Goals](#ux-goals)
+  - [Target Audience](#target-audience)
+    - [Primary Users](#primary-users)
+    - [Secondary Users](#secondary-users)
+  - [User Needs](#user-needs)
+  - [Business Goals](#business-goals)
+- [User Stories](#jump-user-stories)
+  - [First-Time Visitor Goals](#first-time-visitor-goals)
+  - [Registered User Goals](#registered-user-goals)
+  - [Returning User Goals](#returning-user-goals)
+- [User Story Acceptance Criteria](#jump-user-story-acceptance-criteria)
 
 ---
 

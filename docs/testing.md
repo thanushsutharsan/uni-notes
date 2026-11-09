@@ -2,8 +2,26 @@
 
 [Back to UniNotes README](../README.md#documentation)
 
-[Automated Django Tests](#jump-automated-django-tests)
+## Contents
 
+- [Testing Strategy](#testing-strategy)
+  - [Automated Testing](#automated-testing)
+  - [Manual Testing](#manual-testing)
+  - [Test-Driven Development (TDD)](#test-driven-development-tdd)
+- [Automated Django Tests](#jump-automated-django-tests)
+  - [Automated Testing Overview](#automated-testing-overview)
+  - [Django Test Environment](#django-test-environment)
+  - [Model Tests](#model-tests)
+  - [Form Validation Tests](#form-validation-tests)
+  - [Authentication and Access Tests](#authentication-and-access-tests)
+  - [Revision Note CRUD Tests](#revision-note-crud-tests)
+  - [Stripe Checkout Tests](#stripe-checkout-tests)
+  - [Previously Identified Automated Test Problems](#previously-identified-automated-test-problems)
+  - [Automated Test Results](#automated-test-results)
+  - [Automated Testing Limitations](#automated-testing-limitations)
+  - [Automated Testing Evaluation](#automated-testing-evaluation)
+
+---
 ---
 
 ### Testing Strategy

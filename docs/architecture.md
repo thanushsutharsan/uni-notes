@@ -2,7 +2,27 @@
 
 [Back to UniNotes README](../README.md#documentation)
 
-[Django Apps](#jump-django-apps) · [Database Design](#jump-database-design)
+## Contents
+
+- [Django Application Architecture](#django-application-architecture)
+  - [Django Project Structure](#django-project-structure)
+  - [Django Apps](#jump-django-apps)
+  - [Django MVC / MVT Architecture](#django-mvc--mvt-architecture)
+  - [Separation of Responsibilities](#separation-of-responsibilities)
+  - [Django Template Syntax](#django-template-syntax)
+  - [URL Structure](#url-structure)
+  - [Custom Python Logic](#custom-python-logic)
+  - [Django Architecture Evaluation](#django-architecture-evaluation)
+- [Database Design](#jump-database-design)
+  - [Entity Relationship Diagram (ERD)](#entity-relationship-diagram-erd)
+  - [Data Schema](#data-schema)
+  - [Database Models](#database-models)
+  - [Primary Keys and Foreign Keys](#primary-keys-and-foreign-keys)
+  - [Database Relationships](#database-relationships)
+  - [Data Integrity](#data-integrity)
+  - [Database Configuration](#database-configuration)
+  - [Data Flow](#data-flow)
+  - [Data Model Evaluation](#data-model-evaluation)
 
 ---
 

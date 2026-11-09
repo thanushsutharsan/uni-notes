@@ -2,7 +2,16 @@
 
 [Back to UniNotes README](../README.md#documentation)
 
-[Technologies Used](#jump-technologies-used)
+## Contents
+
+- [Description](#description)
+- [Purpose](#purpose)
+- [Project Rationale](#project-rationale)
+  - [Problem Being Solved](#problem-being-solved)
+  - [Why This Project Was Chosen](#why-this-project-was-chosen)
+  - [Value to Users](#value-to-users)
+  - [Real-World Application](#real-world-application)
+- [Technologies Used](#jump-technologies-used)
 
 ---
 

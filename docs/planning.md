@@ -2,7 +2,27 @@
 
 [Back to UniNotes README](../README.md#documentation)
 
-[II. Scope](#jump-ii-scope) · [III. Structure](#jump-iii-structure)
+## Contents
+
+- [I. Strategy](#i-strategy)
+  - [Project Goals](#project-goals)
+  - [User Problems and Solutions](#user-problems-and-solutions)
+  - [Minimum Viable Product (MVP)](#minimum-viable-product-mvp)
+- [II. Scope](#jump-ii-scope)
+  - [Features Included](#features-included)
+  - [Features Outside the Current Scope](#features-outside-the-current-scope)
+  - [Functional Requirements](#functional-requirements)
+  - [Non-Functional Requirements](#non-functional-requirements)
+  - [Accessibility Requirements](#accessibility-requirements)
+  - [Security Requirements](#security-requirements)
+- [III. Structure](#jump-iii-structure)
+  - [Information Architecture](#information-architecture)
+  - [User Flow](#user-flow)
+  - [Navigation Structure](#navigation-structure)
+  - [Django Application Structure](#django-application-structure)
+  - [Entity Relationship Diagram (ERD)](#entity-relationship-diagram-erd)
+  - [Planned Database Models](#planned-database-models)
+  - [Data Flow](#data-flow)
 
 ---
 
