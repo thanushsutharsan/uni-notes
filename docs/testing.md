@@ -20,7 +20,7 @@
   - [Automated Test Results](#automated-test-results)
   - [Automated Testing Limitations](#automated-testing-limitations)
   - [Automated Testing Evaluation](#automated-testing-evaluation)
-
+- [Manual Testing Results](#manual-testing-results)
 ---
 ---
 
@@ -919,3 +919,91 @@ The suite does not cover every possible input or failure condition, and mocked S
 I would like to improve the automated test coverage in future development.
 
 Overall, the current automated tests provide a useful foundation for checking UniNotes functionality and identifying regressions when changes are made.
+
+## Manual Testing Results
+
+I manually tested UniNotes against its [user stories and acceptance criteria](user-stories.md#jump-user-story-acceptance-criteria). The tests covered browsing, account registration, revision notes, file uploads, Stripe Checkout, and access to purchased resources. I also checked form validation, keyboard navigation, mobile layout, and error handling.
+
+### Test Setup
+
+I used a private browser window for guest checks and two test accounts for signed-in checks. Account A owned the revision notes and purchased study resource. I used Account B to check whether a different user could access the same notes or download the purchased file. All payment checks used Stripe test mode.
+
+### How I Captured the Screenshots
+
+I took the screenshots on my Mac using **Command + Shift + 4**. After completing a test, I dragged around the part of the screen that showed the result, such as a saved note, a checkout message, or an access-denied page. For the mobile layout check, I used Chrome Developer Tools to set the viewport width and included the width in the screenshot.
+
+I saved each image as a PNG with the test ID in its filename. The images are stored in `static/images/testing/manual-testing/` and linked from the corresponding rows below.
+
+### Why I Included Screenshots for Selected Tests
+
+I included screenshots for seven tests where an image helps show a specific result: search results (MT03), a purchase in My Purchases (MT07), a saved revision note (MT09), denied access to a private note (MT12), an opened download (MT18), checkout cancellation feedback (MT21), and the mobile layout (MT24).
+
+A dash in the **Screenshot** column means I recorded the outcome in the **Actual result** column. I used written evidence for these checks:
+
+- **MT01 – Browse Study Notes:** The result covers both the Browse list and the detail page reached by selecting a note.
+- **MT02 – Explore Before Registering:** The result records which pages I could access while signed out.
+- **MT04 – Filter by Subject:** The result describes how the note list changed when I switched subjects.
+- **MT05 – View Study Note Information:** The result lists the four fields I checked: title, subject, description, and price.
+- **MT06 – Clear Navigation:** The result covers opening and closing the mobile menu and following links. MT24 shows the mobile layout separately.
+- **MT08 – Register for an Account:** The result records the rejected submission, successful registration, and sign-in in order.
+- **MT10 – Access Personalised Features:** The result compares access to two pages while signed in and signed out.
+- **MT11 – Upload a Supporting File:** The result compares two saved notes and identifies which note held the attachment.
+- **MT13 – View Previous Purchases:** MT07 shows the purchase in My Purchases. The written result records what happened after signing back in and switching accounts.
+- **MT14 – Return and Continue Browsing:** The result records a fresh guest session. MT03 already shows the search interface.
+- **MT15 – Edit a Revision Note:** The result records that the changes persisted after I saved and reopened the note.
+- **MT16 – Delete a Revision Note:** The result records what happened after cancelling deletion and after confirming it.
+- **MT17 – Consistent Experience for Returning Visitors:** The result compares navigation across pages and screen sizes. MT24 provides a mobile layout example.
+- **MT19 – Duplicate Email Validation:** The result records the rejection while keeping the test email address out of the evidence.
+- **MT20 – Revision Note Validation:** The result covers two separate checks, one for missing information and one for an unsupported attachment.
+- **MT22 – Declined Payment:** The result records the decline in Stripe and the absence of a purchase in UniNotes.
+- **MT23 – Keyboard Navigation:** The result records focus moving between controls and the controls responding to key presses.
+- **MT25 – Missing Resource:** The result records the 404 page and how I returned to a working page.
+- **MT26 – Browser Back and Forward:** The result records which page opened after each browser action.
+
+### User Story Acceptance Testing
+
+| Test | User story | Steps taken | Expected result | Actual result | Status | Screenshot |
+| --- | --- | --- | --- | --- | --- | --- |
+| MT01 | US1 – Browse Study Notes | Opened Browse, reviewed the available notes, and selected one. | The notes are easy to identify and can be opened individually. | The notes appeared in Browse, and selecting one opened its detail page. | Pass | — |
+| MT02 | US2 – Explore Before Registering | As a guest, opened the homepage, browsed subjects, and viewed a note. | Guests can explore the catalogue without registering. | The homepage, subjects, and note details were accessible while signed out. | Pass | — |
+| MT03 | US3 – Search for Study Notes | Searched for a known note, then entered a term with no matches. | A matching search returns relevant notes. A search with no matches shows an empty-state message. | The matching note appeared, and the second search displayed an empty-state message. | Pass | ![MT03 search results](../static/images/testing/manual-testing/mt03-search.png) |
+| MT04 | US4 – Filter by Subject | Selected one subject in Browse, checked the results, and switched to another subject. | Only notes from the selected subject are shown. | The results updated when I switched subjects and matched the selected subject. | Pass | — |
+| MT05 | US5 – View Study Note Information | Opened a study note from Browse and checked its details before checkout. | The title, subject, description, and price are visible. | All four details were displayed on the note page. | Pass | — |
+| MT06 | US6 – Clear Navigation | Followed the main navigation links on desktop and repeated the checks using the mobile menu. | The links go to the pages they describe, and the menu works at both widths. | The links opened the expected pages, and the mobile menu opened and closed correctly. | Pass | — |
+| MT07 | US7 – Purchase a Study Note | Tried starting a purchase as a guest. Signed in as Account A, checked the price, completed Stripe test checkout, and opened My Purchases. | A guest must sign in. A signed-in user can pay the displayed price in test mode and access the purchase from their account. | Guest checkout required sign-in. Account A completed the test payment at the displayed price, saw success feedback, and found the note in My Purchases. | Pass | ![MT07 purchased note in My Purchases](../static/images/testing/manual-testing/mt07-purchase.png) |
+| MT08 | US8 – Register for an Account | Submitted invalid registration details, then registered with valid details and signed in. | Invalid details are rejected with feedback. Valid details create an account that can sign in. | Invalid details triggered validation feedback. Registration and sign-in succeeded with valid details. | Pass | — |
+| MT09 | US9 – Create a Revision Note | Tried the creation page as a guest. Signed in as Account A and saved a note with a title, subject, and content. | Guests must sign in. A signed-in user can save and view their own note. | The guest was asked to sign in. Account A saved the note and found it in the revision list. | Pass | ![MT09 saved revision note](../static/images/testing/manual-testing/mt09-create-note.png) |
+| MT10 | US10 – Access Personalised Features | Opened Revision and My Purchases while signed in. Signed out and tried both URLs again. | Both areas are clearly labelled and require authentication. | Both pages opened while signed in. Opening either URL as a guest required sign-in. | Pass | — |
+| MT11 | US11 – Upload a Supporting File | Created one note with a valid attachment and another without one. Opened both notes. | Both notes save, and the attachment belongs only to the first note. | Both notes saved, and the attachment was linked to the correct note. | Pass | — |
+| MT12 | US12 – Protect Private Revision Notes | As Account B, opened the detail, edit, and delete URLs for Account A's note. Checked the original note as Account A. | Account B cannot view, edit, or delete the note. Account A retains access. | Account B was denied access on all three routes. Account A could still open the unchanged note. | Pass | ![MT12 denied access to another user's note](../static/images/testing/manual-testing/mt12-access-denied.png) |
+| MT13 | US13 – View Previous Purchases | Signed out after the test purchase, signed back in as Account A, and opened My Purchases. Repeated the check as Account B. | The purchase persists for Account A and is private to that account. | The purchase was still visible to Account A after signing back in. Account B could not see it. | Pass | — |
+| MT14 | US14 – Return and Continue Browsing | Started a fresh guest session, searched, filtered by subject, and opened a note. | A returning guest can use the catalogue without signing in or buying a note. | Searching, filtering, and viewing the note worked while signed out. | Pass | — |
+| MT15 | US15 – Edit a Revision Note | Opened a note as Account A, changed its title and content, saved it, and reopened it. | The edit form shows existing details and saves valid changes. | The form displayed the existing details. The updated title and content were still present after reopening the note. | Pass | — |
+| MT16 | US16 – Delete a Revision Note | Opened the delete confirmation for a test note. Cancelled once, then repeated the action and confirmed deletion. | Cancelling keeps the note. Confirming removes it and provides feedback. | The note remained after cancellation. After confirmation, it disappeared from the revision list and deletion feedback appeared. | Pass | — |
+| MT17 | US17 – Consistent Experience for Returning Visitors | Compared the homepage, Browse, and note detail pages at desktop and mobile widths. Returned to Browse from each page. | Navigation is consistent and Browse is easy to reach on both layouts. | The main labels stayed consistent, and Browse was accessible from each page at both widths. | Pass | — |
+| MT18 | US18 – Access a Previously Purchased Resource | Downloaded the purchased resource as Account A, then tried the same download URL as Account B. | Account A can download the file without buying it again. Account B is denied access. | Account A downloaded and opened the file without paying again. Account B could not download it. | Pass | ![MT18 purchased resource opened after download](../static/images/testing/manual-testing/mt18-download.png) |
+
+### Additional Validation, Accessibility, and Error Tests
+
+| Test | Area | Steps taken | Expected result | Actual result | Status | Screenshot |
+| --- | --- | --- | --- | --- | --- | --- |
+| MT19 | Duplicate email validation | Tried registering with an email address already used by Account A. | The form rejects the duplicate email with helpful feedback. | The form displayed a validation message and did not create a duplicate account. | Pass | — |
+| MT20 | Revision note validation | Submitted a note with a required field missing, then tried an unsupported attachment type. | The form identifies invalid input and prevents it from being saved. | Both submissions were rejected with validation feedback. | Pass | — |
+| MT21 | Cancelled checkout | Started Stripe test checkout for an unpurchased note, cancelled, and checked My Purchases. | The app provides cancellation feedback and records no purchase. | The cancellation message appeared, and the note did not appear in My Purchases. | Pass | ![MT21 checkout cancellation message](../static/images/testing/manual-testing/mt21-checkout-cancelled.png) |
+| MT22 | Declined payment | Used a Stripe test payment method configured to decline, then checked My Purchases. | Checkout reports the decline and records no purchase. | Stripe displayed a decline message, and no purchase appeared in My Purchases. | Pass | — |
+| MT23 | Keyboard navigation | Used Tab and Shift+Tab to move through links and form controls. Activated controls with Enter or Space where appropriate. | Focus is visible and the main controls can be operated without a mouse. | Focus was visible, and the controls I checked could be reached and operated with the keyboard. | Pass | — |
+| MT24 | Small-screen layout | Checked the homepage, Browse, note details, and revision form at the mobile width recorded above. | Text and controls remain readable and usable without horizontal scrolling. | The tested pages stayed readable and usable at the mobile width without horizontal scrolling. | Pass | ![MT24 Browse page at the tested mobile width](../static/images/testing/manual-testing/mt24-mobile-layout.png) |
+| MT25 | Missing resource | Opened a study-note URL using an ID that did not exist. | The app shows a 404 page with a way back to a working page. | A 404 page appeared, and I could return to a working page. | Pass | — |
+| MT26 | Browser back and forward | Opened a note from Browse, then used the browser Back and Forward buttons. | Both pages remain usable and load without an application error. | Back returned to Browse, and Forward reopened the note detail page without an error. | Pass | — |
+
+### Manual Testing Summary
+
+All 18 user story acceptance tests and all 8 additional manual checks passed. The two-account checks confirmed that each user could access their own revision notes and purchased resources. The Stripe checks covered a successful test purchase, a cancellation, and a declined payment.
+
+| Result | Count |
+| --- | ---: |
+| Passed | 26 |
+| Failed | 0 |
+| Blocked | 0 |
+| Pending | 0 |
+| Total | 26 |
