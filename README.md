@@ -61,3 +61,24 @@ See [Heroku troubleshooting](docs/bug-fixes.md#jump-bugs-during-deployment) for 
 ### Testing
 
 The recorded full Django test run passed all 15 tests. See [Testing and evidence](docs/testing.md) for the automated results and manual checks.
+
+From the project root, with the virtual environment activated, run:
+
+```bash
+python manage.py check
+python manage.py test
+```
+
+For manual testing, use two test accounts and a signed-out browser window.
+
+1. Check the homepage, navigation, search and subject filtering.
+2. Register, sign out and sign back in.
+3. Create, view, edit and delete a revision note.
+4. Upload an attachment and download it as the owner.
+5. Open the attachment URL using another account and confirm access is denied.
+6. Complete a Stripe test payment and download the purchased resource.
+7. Cancel a separate checkout and confirm that no purchase is added.
+8. Repeat these checks locally and on Heroku to compare their behaviour.
+
+Full test results, screenshots and deployment checks are documented in
+[Testing and evidence](docs/testing.md).
