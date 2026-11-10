@@ -1016,7 +1016,11 @@ All 18 user story acceptance tests and all 8 additional manual checks passed. Th
 
 ## Deployment Verification
 
-I verified UniNotes on Heroku on 9 November 2026. I checked the production database connection and debug setting from the Django shell, then tested the main user journeys on the live site. The full test cases are in [Manual Testing Results](docs/testing.md#manual-testing-results).
+I first verified UniNotes on Heroku on 9 November 2026 and recorded
+further checks on 10 November 2026 after fixing the revision attachment
+download. The checks covered production configuration and the main user
+journeys. Full test cases are recorded in
+[Manual Testing Results](#manual-testing-results).
 
 ### Release and Configuration
 
