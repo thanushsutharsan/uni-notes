@@ -2046,8 +2046,8 @@ downloads panel shows the completed PDF download.*
 | Check | Expected result | Actual result | Status |
 | --- | --- | --- | --- |
 | Owner downloads a freshly uploaded attachment on Heroku | The owner's PDF downloads successfully. | The PDF downloaded successfully. | Pass |
-| Another signed-in account opens the same attachment URL | Access is denied with a 404 response. | Pending retest. | Pending |
-| A signed-out visitor opens the attachment URL | The visitor is redirected to login. | Pending manual retest. | Pending |
+| Another signed-in account opens the same attachment URL | Access is denied with a 404 response. | Pass retest. | Pass |
+| A signed-out visitor opens the attachment URL | The visitor is redirected to login. | Pass manual retest. | Pass |
 
 ### Remaining Storage Limitation
 
