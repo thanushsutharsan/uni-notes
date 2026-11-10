@@ -22,6 +22,10 @@
   - [Automated Testing Evaluation](#automated-testing-evaluation)
 - [Manual Testing Results](#manual-testing-results)
 - [Deployment Verification](#deployment-verification)
+- [HTML Validation](#html-validation)
+  - [HTML Validation Results](#html-validation-results)
+  - [Issues and Retests](#issues-and-retests)
+  - [HTML Validation Summary](#html-validation-summary)
 ---
 
 ### Testing Strategy
@@ -1057,6 +1061,48 @@ To validate my HTML, I opened the deployed UniNotes website on Heroku. For each 
 
 ### HTML Validation Results
 
-| ID | Django template | Page checked | Input method | Errors | Warnings | Result or action taken | Screenshot |
-| --- | --- | --- | --- | ---: | ---: | --- | --- |
-| HTML01 | `base.html` | Deployed homepage | Text Input (View Page Source) | 0 | Not recorded | No HTML errors reported | ![Base template HTML validation result](../static/images/testing/html-validation/base-html-validation.png) |
+| ID | Django template | Page checked | Result or action taken | Screenshot |
+| --- | --- | --- | --- | --- |
+| HTML01 | `base.html` | Deployed homepage | Pass. The results page reported no HTML errors or warnings. | ![Base template HTML validation result](../static/images/testing/html-validation/base-html-validation.png) |
+| HTML02 | `browse.html` and `partials_note_card.html` | Deployed Browse page | Pass on retest. I restored the Browse page's `h1` and added an `h2` above the note cards, so their `h3` headings follow the correct order. | **Before:** ![Browse HTML validation showing the skipped heading level](../static/images/testing/html-validation/browse-html-validation-before.png) **After:** ![Browse HTML validation showing zero errors after the fix](../static/images/testing/html-validation/browse-html-validation.png) |
+| HTML03 | `browse.html` | Deployed Browse page with a subject selected | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for Browse with a subject selected](../static/images/testing/html-validation/subject-filter-html-validation.png) |
+| HTML04 | `detail.html` | Deployed study note detail page | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for the study note detail page](../static/images/testing/html-validation/note-detail-html-validation.png) |
+| HTML05 | `register.html` | Deployed registration page | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for the registration page](../static/images/testing/html-validation/registration-html-validation.png) |
+| HTML06 | `login.html` | Deployed sign-in page | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for the sign-in page](../static/images/testing/html-validation/sign-in-html-validation.png) |
+| HTML07 | `revision_list.html` | Deployed My revision notes page | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for My revision notes](../static/images/testing/html-validation/revision-list-html-validation.png) |
+| HTML08 | `revision_form.html` | Deployed create revision note page | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for the create revision note page](../static/images/testing/html-validation/revision-create-html-validation.png) |
+| HTML09 | `revision_detail.html` | Deployed revision note detail page | Pass on retest. The initial check reported two heading warnings, which cleared after the fix. | ![Revision detail HTML validation after the fix](../static/images/testing/html-validation/revision-detail-html-validation.png) |
+| HTML10 | `revision_form.html` | Deployed edit revision note page | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for the edit revision note page](../static/images/testing/html-validation/revision-edit-html-validation.png) |
+| HTML11 | `revision_confirm_delete.html` | Deployed delete revision note confirmation page | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for the delete revision note confirmation page](../static/images/testing/html-validation/revision-delete-html-validation.png) |
+| HTML12 | `my_purchases.html` | Deployed My Purchases page | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for My Purchases](../static/images/testing/html-validation/my-purchases-html-validation.png) |
+| HTML13 | Django 404 response | Deployed Page Not Found page | Pass. The results page reported no HTML errors or warnings. | ![HTML validation result for the 404 page](../static/images/testing/html-validation/404-html-validation.png) |
+### Issues and Re-Tests
+
+#### HTML02 – Browse Heading Hierarchy
+
+The W3C Nu HTML Checker reported that the Browse page skipped a heading level. The page title was an `h1`, and the note titles rendered by `partials_note_card.html` were `h3` headings. There was no `h2` between them.
+
+I first changed the Browse title to an `h2`. The next check warned that the page had no level-one heading, so I restored `Browse notes` to an `h1` in `browse.html`. I then added an `h2` labelled `Study note results` immediately above the note grid. I used the project's existing `sr-only` class so the heading is available to screen readers without changing the visible layout.
+
+The note titles stayed as `h3` headings because the shared card template is also used on the homepage, where the cards already sit under the `Latest study notes` heading. The Browse page now follows the order `h1` (Browse notes), `h2` (Study note results), then `h3` (individual note titles).
+
+After deploying the fix, I copied the live Browse page source again and reran the checker. The heading error cleared and the final check reported **0 HTML errors**.
+
+#### HTML09 – Revision Detail Heading Warnings
+
+I forgot to take a screenshot of the initial check, so I recorded the two warnings in writing:
+
+- The checker advised using `h1` as a top-level heading because the note title was inside nested `section` and `article` elements.
+- The checker reported that the outer `section` lacked a heading.
+
+I replaced both layout wrappers with `div` elements in `revision_detail.html`, keeping their CSS classes and the note title as the page's `h1`.
+
+After deploying the fix, I copied the live page source again and reran the checker. It reported **0 errors and 0 warnings**. The screenshot in the HTML09 row shows the retest result.
+
+### HTML Validation Summary
+
+I completed 13 HTML validation checks on the deployed UniNotes site using the W3C Nu HTML Checker. All 13 checks finished with no HTML errors.
+
+The initial checks identified heading issues on the Browse and revision note detail pages. I corrected the heading structure on both pages, deployed the changes, and validated their page source again. Both retests returned zero errors and zero warnings.
+
+The results table links to the screenshots for each check. I recorded the two initial revision detail warnings in writing because I only captured a screenshot of the retest.
