@@ -28,9 +28,9 @@
         {% if revision_note.attachment %}
             <div class="revision-attachment">
                 <strong>Uploaded file</strong>
-                <a href="{{ revision_note.attachment.url }}" target="_blank" rel="noopener">
-                    Open attachment
-                </a>
+               <a href="{% url 'notes:revision_attachment' revision_note.pk %}">
+                  Download attachment
+              </a>
             </div>
         {% endif %}
 

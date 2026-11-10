@@ -28,4 +28,9 @@ urlpatterns = [
     ),
     path("purchases/", views.my_purchases, name="purchases"),
     path("download/<int:pk>/", views.download_note, name="download"),
+    path(
+        "revision/<int:pk>/attachment/",
+        views.revision_attachment,
+        name="revision_attachment",
+    ),
 ]

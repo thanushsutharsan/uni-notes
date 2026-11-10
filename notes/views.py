@@ -142,6 +142,25 @@ def revision_detail(request, pk):
 
 
 @login_required
+def revision_attachment(request, pk):
+    note = get_object_or_404(RevisionNote, pk=pk, owner=request.user)
+
+    if not note.attachment:
+        raise Http404("This revision note has no attachment.")
+
+    try:
+        attachment = note.attachment.open("rb")
+    except OSError as error:
+        raise Http404("This attachment is unavailable.") from error
+
+    return FileResponse(
+        attachment,
+        as_attachment=True,
+        filename=note.attachment.name.rsplit("/", 1)[-1],
+    )
+
+
+@login_required
 def revision_create(request):
     if request.method == "POST":
         form = RevisionNoteForm(request.POST, request.FILES)
