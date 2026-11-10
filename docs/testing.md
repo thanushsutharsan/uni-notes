@@ -1049,6 +1049,11 @@ I captured the VS Code terminal output after running the Django verification com
 
 ![Heroku terminal output confirming that DEBUG is false and PostgreSQL is connected](../static/images/testing/heroku-deployment-verification.png)
 
+
+![Heroku verification showing DEBUG=False, PostgreSQL connected and SECRET_KEY configured](../static/images/testing/final-heroku-verification.png)
+
+The second image is the final verification after fixing bugs on the 10/11/2026 at 4.10 PM.
+
 ## HTML Validation
 
 To validate my HTML, I opened the deployed UniNotes website on Heroku. For each page I checked, I right-clicked and selected **View Page Source**. I copied the HTML into the **Text Input** field of the [W3C Nu HTML Checker](https://validator.w3.org/nu/) and clicked **Check**. This let me validate the final HTML that Django generated for the browser.
