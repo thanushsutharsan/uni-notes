@@ -21,6 +21,7 @@
   - [Deployment Debugging Summary](#deployment-debugging-summary)
   - [Useful Deployment Commands](#useful-deployment-commands)
   - [Authentication Error](#jump-authentication-error)
+  - [Attachment Error](#revision-attachment-returned-a-404-on-heroku)
 
 ---
 
@@ -1921,7 +1922,142 @@ The issue was resolved by:
 
 14. identifying that production should use `DEBUG = False`
 ```
+## Revision Attachment Returned a 404 on Heroku
 
+### Problem
+
+When I signed in and opened one of my own revision notes, clicking
+**Open attachment** displayed a **404 Not Found** page.
+
+The revision note itself loaded correctly, but I could not access the
+supporting file I had uploaded.
+
+### Screenshot of the Error
+
+![Revision attachment displaying a 404 Not Found page](../static/images/in-dep-bugs/revsion-attachment-404.png)
+
+*The original attachment link returned a 404 when I tried to open the
+uploaded file while signed in as the revision note's owner.*
+
+### Cause
+
+The revision detail template linked directly to the attachment's media URL:
+
+```html
+<a href="{{ revision_note.attachment.url }}" target="_blank" rel="noopener">
+    Open attachment
+</a>
+```
+
+The project's URL configuration served media files only when `DEBUG=True`.
+
+Heroku used `DEBUG=False`, so the application did not serve the direct
+media URL. Being signed in did not resolve this because the link was
+not handled by a Django download view.
+
+### Changes Made
+
+#### 1. Added an Attachment Download View
+
+I added the following view to `notes/views.py`:
+
+```python
+@login_required
+def revision_attachment(request, pk):
+    note = get_object_or_404(RevisionNote, pk=pk, owner=request.user)
+
+    if not note.attachment:
+        raise Http404("This revision note has no attachment.")
+
+    try:
+        attachment = note.attachment.open("rb")
+    except OSError as error:
+        raise Http404("This attachment is unavailable.") from error
+
+    return FileResponse(
+        attachment,
+        as_attachment=True,
+        filename=note.attachment.name.rsplit("/", 1)[-1],
+    )
+```
+
+The `@login_required` decorator requires the user to sign in.
+
+The lookup checks both the revision note's ID and its owner. This means
+the view returns a 404 if the signed-in user does not own that note.
+
+The view also checks whether an attachment exists and handles an
+unavailable file with a 404 response.
+
+`FileResponse` sends the file to the browser. Setting
+`as_attachment=True` makes the browser download it using its filename.
+
+#### 2. Added a Named URL
+
+I added this route to `notes/urls.py`:
+
+```python
+path(
+    "revision/<int:pk>/attachment/",
+    views.revision_attachment,
+    name="revision_attachment",
+),
+```
+
+This sends attachment requests through the view that checks ownership.
+
+#### 3. Updated the Attachment Link
+
+In `templates/notes/revision_detail.html`, I replaced the direct media
+link with:
+
+```html
+<a href="{% url 'notes:revision_attachment' revision_note.pk %}">
+    Download attachment
+</a>
+```
+
+I changed the label to **Download attachment** so it describes what
+happens when the user clicks it.
+
+The documented feature allows users to upload supporting files and
+access them from their revision notes. Downloading the attachment
+provides this access.
+
+### Deployment and Retest
+
+I committed the changes in `e222cdf` with the message
+`fix: protect revision attachment downloads` and deployed them to Heroku.
+
+After deployment, I uploaded a fresh PDF to a revision note. While
+signed in as its owner, I clicked **Download attachment**.
+
+The PDF downloaded successfully.
+
+### Screenshot After the Fix
+
+![Revision attachment successfully downloaded on Heroku](../static/images/in-dep-bugs/revision-attachment-download-success.png)
+
+*The revision note page now displays Download attachment. The browser's
+downloads panel shows the completed PDF download.*
+
+### Retest Results
+
+| Check | Expected result | Actual result | Status |
+| --- | --- | --- | --- |
+| Owner downloads a freshly uploaded attachment on Heroku | The owner's PDF downloads successfully. | The PDF downloaded successfully. | Pass |
+| Another signed-in account opens the same attachment URL | Access is denied with a 404 response. | Pending retest. | Pending |
+| A signed-out visitor opens the attachment URL | The visitor is redirected to login. | Pending manual retest. | Pending |
+
+### Remaining Storage Limitation
+
+The application currently stores uploaded files on Heroku's local
+filesystem. These files can be lost when the dyno restarts or the
+application is redeployed.
+
+The new download view serves available attachments after checking
+ownership. Persistent file storage is still needed to retain uploaded
+attachments across restarts and redeployments.
 ---
 
 ### What I Learned
