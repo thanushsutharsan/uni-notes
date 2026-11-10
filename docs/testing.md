@@ -1034,6 +1034,17 @@ deployed in release `v72`.
 
 *The screenshot records the deployed commit and its Heroku release number.*
 
+### Post-Deployment Verification
+
+On 10 November 2026, I checked the live application following deployment
+of release `v72`, commit `6c34cd94`.
+
+Signing in, creating, editing, reopening and deleting a revision note
+worked successfully. A freshly uploaded PDF downloaded correctly for
+its owner. A second account received a 404 when opening the same
+attachment URL.
+
+All five checks passed.
 
 ### Live Application Checks
 
