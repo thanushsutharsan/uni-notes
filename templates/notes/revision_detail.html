@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %}{{ revision_note.title }} | UniNotes{% endblock %}
 {% block content %}
-<section class="shell section revision-detail-shell">
-    <article class="revision-detail-card">
+<div class="shell section revision-detail-shell">
+    <div class="revision-detail-card">
         <div class="revision-detail-header">
             <div>
                 <span class="eyebrow">{{ revision_note.subject }}</span>
@@ -35,6 +35,6 @@
         {% endif %}
 
         <a href="{% url 'notes:revision_list' %}">← Back to revision notes</a>
-    </article>
-</section>
+        </div>
+    </div>
 {% endblock %}
