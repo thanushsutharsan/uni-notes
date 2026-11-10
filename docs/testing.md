@@ -24,7 +24,7 @@
 - [Deployment Verification](#deployment-verification)
 - [HTML Validation](#html-validation)
   - [HTML Validation Results](#html-validation-results)
-  - [Issues and Retests](#issues-and-retests)
+  - [Issues and Retests](#issues-and-re-tests)
   - [HTML Validation Summary](#html-validation-summary)
 - [CSS Validation](#css-validation)
   - [CSS Validation Results](#css-validation-results)

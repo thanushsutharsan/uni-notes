@@ -533,7 +533,15 @@ This prevents users from choosing another account as the owner through the norma
 
 These restrictions help protect the database records associated with each account.
 
-One limitation to consider is that direct media-file URLs require separate protection if uploaded attachments must remain private. The current ownership checks protect the revision note views, but they do not automatically provide private file storage.
+Revision attachments are downloaded through the `revision_attachment`
+view. This view requires the user to be logged in and checks that the
+revision note belongs to them before returning the file. A different
+user receives a 404 response when requesting the same download URL.
+
+A separate limitation remains with file storage. Uploaded attachments
+are stored on Heroku's temporary filesystem and can be lost after a
+restart or redeployment. Private persistent storage is needed to retain
+these files reliably.
 
 #### CRUD Testing
 

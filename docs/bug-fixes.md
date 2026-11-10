@@ -1922,6 +1922,40 @@ The issue was resolved by:
 
 14. identifying that production should use `DEBUG = False`
 ```
+
+
+### What I Learned
+
+This issue demonstrated the importance of separating application code from sensitive configuration.
+
+The Django checkout code itself was functioning correctly. The failure was caused by an incorrectly configured deployment environment variable.
+
+The debugging process also demonstrated how a traceback can be used to identify whether a problem originates from:
+
+```text
+Django application logic
+
+environment configuration
+
+a third-party API
+
+database configuration
+
+deployment configuration
+```
+
+In this case, the traceback showed that the request successfully reached:
+
+```text
+checkout.views.create_checkout_session
+```
+
+and failed only after Stripe attempted to authenticate the API request.
+
+This helped isolate the issue as a Stripe credential configuration problem rather than an error in the application's checkout logic.
+
+The issue also highlighted the importance of never exposing secret API keys and of rotating any key that may have been accidentally shared during development.
+---
 ## Revision Attachment Returned a 404 on Heroku
 
 ### Problem
@@ -2046,8 +2080,8 @@ downloads panel shows the completed PDF download.*
 | Check | Expected result | Actual result | Status |
 | --- | --- | --- | --- |
 | Owner downloads a freshly uploaded attachment on Heroku | The owner's PDF downloads successfully. | The PDF downloaded successfully. | Pass |
-| Another signed-in account opens the same attachment URL | Access is denied with a 404 response. | Pass retest. | Pass |
-| A signed-out visitor opens the attachment URL | The visitor is redirected to login. | Pass manual retest. | Pass |
+| Another signed-in account opens the same attachment URL | Access is denied with a 404 response. | The second account recieved a 404. | Pass |
+| A signed-out visitor opens the attachment URL | The visitor is redirected to login. | The signed-out visitor was redirected to login. | Pass |
 
 ### Remaining Storage Limitation
 
@@ -2058,36 +2092,3 @@ application is redeployed.
 The new download view serves available attachments after checking
 ownership. Persistent file storage is still needed to retain uploaded
 attachments across restarts and redeployments.
----
-
-### What I Learned
-
-This issue demonstrated the importance of separating application code from sensitive configuration.
-
-The Django checkout code itself was functioning correctly. The failure was caused by an incorrectly configured deployment environment variable.
-
-The debugging process also demonstrated how a traceback can be used to identify whether a problem originates from:
-
-```text
-Django application logic
-
-environment configuration
-
-a third-party API
-
-database configuration
-
-deployment configuration
-```
-
-In this case, the traceback showed that the request successfully reached:
-
-```text
-checkout.views.create_checkout_session
-```
-
-and failed only after Stripe attempted to authenticate the API request.
-
-This helped isolate the issue as a Stripe credential configuration problem rather than an error in the application's checkout logic.
-
-The issue also highlighted the importance of never exposing secret API keys and of rotating any key that may have been accidentally shared during development.
