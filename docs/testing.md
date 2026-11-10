@@ -26,6 +26,8 @@
   - [HTML Validation Results](#html-validation-results)
   - [Issues and Retests](#issues-and-retests)
   - [HTML Validation Summary](#html-validation-summary)
+- [CSS Validation](#css-validation)
+  - [CSS Validation Results](#css-validation-results)
 ---
 
 ### Testing Strategy
@@ -1106,3 +1108,13 @@ I completed 13 HTML validation checks on the deployed UniNotes site using the W3
 The initial checks identified heading issues on the Browse and revision note detail pages. I corrected the heading structure on both pages, deployed the changes, and validated their page source again. Both retests returned zero errors and zero warnings.
 
 The results table links to the screenshots for each check. I recorded the two initial revision detail warnings in writing because I only captured a screenshot of the retest.
+
+## CSS Validation
+
+I opened the main UniNotes stylesheet, `static/css/style.css`, in VS Code and copied the CSS directly into the **Direct Input** tab of the [W3C CSS Validation Service](https://jigsaw.w3.org/css-validator/). I clicked **Check** to validate the stylesheet. The validator reported no CSS errors.
+
+### CSS Validation Results
+
+| ID | File checked | Result | Screenshot |
+| --- | --- | --- | --- |
+| CSS01 | `static/css/style.css` | Pass. The results page reported no CSS errors. | ![W3C CSS validation result showing no errors](../static/images/testing/css-validation/style-css-validation.png) |
