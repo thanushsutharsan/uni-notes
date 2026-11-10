@@ -1043,6 +1043,81 @@ Heroku deployed commit `28d29e1e` in release `v50` at 10:01 pm UK time. My initi
 | Stripe Checkout | A successful Stripe test payment added the study note to My Purchases. | Pass |
 | Purchased resource download | The purchaser downloaded the correct file from My Purchases and opened it successfully. | Pass |
 
+### Local and Heroku Comparison
+
+I repeated the main user journeys locally and on Heroku to check that
+both versions behaved consistently.
+
+| Check | Local result | Heroku result | Status |
+| --- | --- | --- | --- |
+| Homepage and navigation | Pages loaded and navigation links worked. | Pages loaded and navigation links worked. | Pass |
+| Search and subject filtering | Results matched the search term or selected subject. | Results matched the search term or selected subject. | Pass |
+| Authentication | Signing in and signing out worked. | Signing in and signing out worked. | Pass |
+| Revision note CRUD | I could create, view, edit and delete my revision notes. | I could create, view, edit and delete my revision notes. | Pass |
+| Attachment download | I could upload and download an attachment as its owner. | I could upload and download an attachment as its owner. | Pass |
+| Attachment ownership | A different account was denied access to the attachment URL. | A different account was denied access to the attachment URL. | Pass |
+| Successful Stripe test payment | The purchase appeared in My Purchases and the PDF downloaded. | The purchase appeared in My Purchases and the PDF downloaded. | Pass |
+| Cancelled Stripe checkout | Cancellation feedback appeared and no new purchase was added. | Cancellation feedback appeared and no new purchase was added. | Pass |
+
+### Local Terminal Issue and Resolution
+
+#### Problem
+
+When preparing to run the local Django checks, I entered:
+
+```bash
+python manage.py check
+python manage.py test
+```
+
+The terminal returned:
+
+```text
+zsh: command not found: python
+```
+
+I repeated the commands several times, but the same error appeared.
+
+#### Cause
+
+The project's virtual environment was not active. The terminal could
+not find the `python` command in the current shell environment.
+
+#### Fix
+
+I opened the project folder and activated its virtual environment:
+
+```bash
+cd /Users/admin/vscode/uni-notes
+source venv/bin/activate
+```
+
+The `(venv)` prefix appeared in the terminal, confirming that the
+environment was active.
+
+I could then run the Django commands from the project folder:
+
+```bash
+python manage.py check
+python manage.py test
+```
+
+To start the local application, I used:
+
+```bash
+python manage.py runserver
+```
+
+#### Result
+
+Activating the virtual environment resolved the
+`zsh: command not found: python` error. The commands could run, and
+I could start the local application.
+
+For future local sessions, I activate the project's virtual environment
+before running Django commands.
+
+
 ### Configuration Evidence
 
 I captured the VS Code terminal output after running the Django verification command on Heroku release `v51`. The output showed `DEBUG: False` and `Database connected: postgresql`.
