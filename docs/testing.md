@@ -1020,16 +1020,20 @@ I verified UniNotes on Heroku on 9 November 2026. I checked the production datab
 
 ### Release and Configuration
 
-| Item | Verified result |
+| Item | Recorded value |
 | --- | --- |
 | Live application | [UniNotes on Heroku](https://uni-notes-09bbb519e883.herokuapp.com/) |
-| Date verified | 9 November 2026 |
-| Heroku release verified | `v51` |
-| Git commit | `28d29e1e` |
-| Production database | PostgreSQL connection verified |
-| Production debug setting | `DEBUG=False` verified |
+| Deployment date | 10 November 2026 |
+| Heroku release | `v72` |
+| Deployed Git commit | `6c34cd94` |
 
-Heroku deployed commit `28d29e1e` in release `v50` at 10:01 pm UK time. My initial check showed that PostgreSQL was connected and Django was running with `DEBUG=True`. I updated the Heroku config variable at 10:21 pm UK time, which created release `v51`. I reran the check and confirmed that Django was using `DEBUG=False` and could still connect to PostgreSQL.
+Heroku Activity confirmed that commit `6c34cd94` was successfully
+deployed in release `v72`.
+
+![Heroku Activity showing commit 6c34cd94 deployed in release v72](../static/images/testing/heroku-release-v72.png)
+
+*The screenshot records the deployed commit and its Heroku release number.*
+
 
 ### Live Application Checks
 
